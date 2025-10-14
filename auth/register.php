@@ -53,9 +53,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $user_id = $conn->insert_id;
 
                 if ($role === 'admin') {
+                    // Check if there are any approved admins
+                    $stmt_check_admins = $conn->prepare("SELECT id FROM admin WHERE status = 'approved'");
+                    $stmt_check_admins->execute();
+                    $stmt_check_admins->store_result();
+                    $admin_count = $stmt_check_admins->num_rows;
+                    $stmt_check_admins->close();
+
+                    $status = ($admin_count === 0) ? 'approved' : 'pending';
+
                     // Insert into admin table
-                    $stmt_admin = $conn->prepare("INSERT INTO admin (user_id, name, email) VALUES (?, ?, ?)");
-                    $stmt_admin->bind_param("iss", $user_id, $fullname, $email);
+                    $stmt_admin = $conn->prepare("INSERT INTO admin (user_id, name, email, status) VALUES (?, ?, ?, ?)");
+                    $stmt_admin->bind_param("isss", $user_id, $fullname, $email, $status);
                     if (!$stmt_admin->execute()) {
                         $error_message = "Error inserting admin details: " . $stmt_admin->error;
                     }
@@ -79,7 +88,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 if (empty($error_message)) {
-                    $success_message = ucfirst($role) . " registration successful. <a href=\"login.php\">Login here</a>.";
+                    if ($role === 'admin' && $status === 'pending') {
+                        $success_message = "Admin registration successful. Your account is pending approval from an existing admin.";
+                    } else {
+                        // Log in the user automatically and redirect to their dashboard
+                        $_SESSION['user_id'] = $user_id;
+                        $_SESSION['username'] = $username;
+                        $_SESSION['role'] = $role;
+
+                        if ($role === 'admin') {
+                            header("Location: ../admin/dashboard.php");
+                        } elseif ($role === 'doctor') {
+                            header("Location: ../doctor/dashboard.php");
+                        } elseif ($role === 'patient') {
+                            header("Location: ../patient/dashboard.php");
+                        }
+                        exit();
+                    }
                 }
 
             } else {
@@ -121,6 +146,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </script>
 </head>
 <body>
+  <div class="floating-bg">
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="geometric-shape"></div>
+    <div class="geometric-shape"></div>
+    <div class="geometric-shape"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
   <div class="form-container">
     <div class="form-box">
       <h2>Sign Up</h2>

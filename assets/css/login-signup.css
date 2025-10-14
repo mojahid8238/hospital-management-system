@@ -5,15 +5,16 @@
       font-family: 'Inter', sans-serif;
     }
 
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: linear-gradient(120deg, #4e54c8, #8f94fb);
-      overflow: hidden;
-      position: relative;
-    }
+body {
+  background: linear-gradient(120deg, #4e54c8, #8f94fb);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  overflow-y: auto;  /* ✅ enable vertical scroll */
+}
+
+
 
     /* Floating Background Elements */
     .floating-bg {
@@ -152,14 +153,18 @@
     }
 
     .form-container {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100vw;
-      height: 100vh;
-    }
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 40px 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
 
     .form-box {
       background: rgba(255, 255, 255, 0.95);
@@ -343,3 +348,4 @@
         opacity: 1;
       }
     }
+
