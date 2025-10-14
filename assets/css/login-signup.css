@@ -5,13 +5,15 @@
       font-family: 'Inter', sans-serif;
     }
 
+html {
+  overflow: auto;
+}
+
 body {
   background: linear-gradient(120deg, #4e54c8, #8f94fb);
-  min-height: 100vh;
   margin: 0;
   padding: 0;
   position: relative;
-  overflow-y: auto;  /* ✅ enable vertical scroll */
 }
 
 
@@ -162,7 +164,6 @@ body {
   min-height: 100vh;
   padding: 40px 20px;
   box-sizing: border-box;
-  overflow-y: auto;
 }
 
 
@@ -348,4 +349,3 @@ body {
         opacity: 1;
       }
     }
-

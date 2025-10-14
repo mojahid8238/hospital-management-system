@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 
   <div class="form-container">
-    <div class="form-box">
+    <div class="form-box signup-box">
       <h2>Sign Up</h2>
 
       <?php if (!empty($error_message)): ?>
