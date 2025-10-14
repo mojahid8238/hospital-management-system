@@ -2,21 +2,28 @@
 CREATE DATABASE IF NOT EXISTS hospital_db;
 USE hospital_db;
 
--- Table for Users (for login)
+-- Shared Users Table for Login/Auth
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role ENUM('admin', 'doctor', 'patient') NOT NULL,
-    full_name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table for Doctors
+-- Admin Table (linked to users)
+CREATE TABLE IF NOT EXISTS admin (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Doctors Table (linked to users)
 CREATE TABLE IF NOT EXISTS doctors (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id INT NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     specialization VARCHAR(100),
     phone VARCHAR(20),
@@ -24,10 +31,10 @@ CREATE TABLE IF NOT EXISTS doctors (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Table for Patients
+-- Patients Table (linked to users)
 CREATE TABLE IF NOT EXISTS patients (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id INT NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     date_of_birth DATE,
     gender ENUM('Male', 'Female', 'Other'),
@@ -37,7 +44,7 @@ CREATE TABLE IF NOT EXISTS patients (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Table for Appointments
+-- Appointments Table
 CREATE TABLE IF NOT EXISTS appointments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     patient_id INT NOT NULL,
@@ -48,15 +55,4 @@ CREATE TABLE IF NOT EXISTS appointments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
     FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
-);
-
-
---Create table for Admin
-CREATE TABLE IF NOT EXISTS admin (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
