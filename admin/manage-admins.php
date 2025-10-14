@@ -81,7 +81,7 @@ include '../includes/header.php';
                             </form>
                             <form method="POST" style="display: inline-block;">
                                 <input type="hidden" name="admin_id" value="<?= $admin['id'] ?>">
-                                <button type="submit" name="cancel_admin" onclick="return confirm('Are you sure you want to cancel this admin request?')">Cancel</button>
+                                <button type="submit" name="cancel_admin" style="background-color: red;" onclick="return confirm('Are you sure you want to cancel this admin request?')">Cancel</button>
                             </form>
                         </td>
                     </tr>
