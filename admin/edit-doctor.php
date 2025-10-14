@@ -1,0 +1,103 @@
+<?php
+require_once '../includes/header.php';
+require_once '../includes/db.php';
+redirect_if_not_admin();
+
+$doctor_id = $_GET['id'] ?? null;
+$doctor = null;
+$message = '';
+
+if (!$doctor_id) {
+    header("Location: manage-doctors.php");
+    exit();
+}
+
+// Fetch doctor details
+$stmt = $conn->prepare("SELECT d.id, d.name, d.specialization, d.phone, d.email, u.username, u.id as user_id FROM doctors d JOIN users u ON d.user_id = u.id WHERE d.id = ?");
+$stmt->bind_param("i", $doctor_id);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows === 1) {
+    $doctor = $result->fetch_assoc();
+} else {
+    $message = "<p style='color: red;'>Doctor not found.</p>";
+    $doctor_id = null; // Invalidate doctor_id if not found
+}
+$stmt->close();
+
+// Handle Update Doctor
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $doctor_id) {
+    $name = $_POST['name'] ?? '';
+    $specialization = $_POST['specialization'] ?? '';
+    $phone = $_POST['phone'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $username = $_POST['username'] ?? ''; // Allow updating username
+
+    if (empty($name) || empty($specialization) || empty($phone) || empty($email) || empty($username)) {
+        $message = "<p style='color: red;'>All fields are required.</p>";
+    } else {
+        $conn->begin_transaction();
+        try {
+            // Update doctor details
+            $stmt_doctor = $conn->prepare("UPDATE doctors SET name = ?, specialization = ?, phone = ?, email = ? WHERE id = ?");
+            $stmt_doctor->bind_param("ssssi", $name, $specialization, $phone, $email, $doctor_id);
+            $stmt_doctor->execute();
+            $stmt_doctor->close();
+
+            // Update associated user's username
+            $stmt_user = $conn->prepare("UPDATE users SET username = ? WHERE id = ?");
+            $stmt_user->bind_param("si", $username, $doctor['user_id']);
+            $stmt_user->execute();
+            $stmt_user->close();
+
+            $conn->commit();
+            $message = "<p style='color: green;'>Doctor updated successfully!</p>";
+            // Refresh doctor data after update
+            $stmt = $conn->prepare("SELECT d.id, d.name, d.specialization, d.phone, d.email, u.username, u.id as user_id FROM doctors d JOIN users u ON d.user_id = u.id WHERE d.id = ?");
+            $stmt->bind_param("i", $doctor_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $doctor = $result->fetch_assoc();
+            $stmt->close();
+
+        } catch (mysqli_sql_exception $exception) {
+            $conn->rollback();
+            $message = "<p style='color: red;'>Error updating doctor: " . $exception->getMessage() . "</p>";
+        }
+    }
+}
+?>
+
+<div class="container">
+    <h2>Edit Doctor</h2>
+    <?php echo $message; ?>
+
+    <?php if ($doctor): ?>
+        <form action="edit-doctor.php?id=<?php echo $doctor['id']; ?>" method="POST">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($doctor['name']); ?>" required>
+            <br>
+            <label for="specialization">Specialization:</label>
+            <input type="text" id="specialization" name="specialization" value="<?php echo htmlspecialchars($doctor['specialization']); ?>" required>
+            <br>
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($doctor['phone']); ?>" required>
+            <br>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($doctor['email']); ?>" required>
+            <br>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($doctor['username']); ?>" required>
+            <br>
+            <button type="submit">Update Doctor</button>
+            <a href="manage-doctors.php">Cancel</a>
+        </form>
+    <?php else: ?>
+        <p>Doctor details could not be loaded. <a href="manage-doctors.php">Go back to Manage Doctors</a></p>
+    <?php endif; ?>
+</div>
+
+<?php
+require_once '../includes/footer.php';
+$conn->close();
+?>
