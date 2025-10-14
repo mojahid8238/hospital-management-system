@@ -24,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username) || empty($password)) {
         $error_message = "Please enter both username and password.";
     } else {
-        // First check in users table (for doctors & patients)
         $stmt = $conn->prepare("SELECT id, password, role FROM users WHERE username = ?");
         $stmt->bind_param("s", $username);
         $stmt->execute();
@@ -35,49 +34,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->fetch();
 
             if (password_verify($password, $hashed_password)) {
-                $_SESSION['user_id'] = $user_id;
-                $_SESSION['username'] = $username;
-                $_SESSION['role'] = $role;
+                if ($role === 'admin') {
+                    $stmt_admin = $conn->prepare("SELECT status FROM admin WHERE user_id = ?");
+                    $stmt_admin->bind_param("i", $user_id);
+                    $stmt_admin->execute();
+                    $stmt_admin->bind_result($status);
+                    $stmt_admin->fetch();
+                    $stmt_admin->close();
 
-                if ($role === 'doctor') {
-                    header("Location: ../doctor/dashboard.php");
-                } elseif ($role === 'patient') {
-                    header("Location: ../patient/dashboard.php");
+                    if ($status === 'approved') {
+                        $_SESSION['user_id'] = $user_id;
+                        $_SESSION['username'] = $username;
+                        $_SESSION['role'] = $role;
+                        header("Location: ../admin/dashboard.php");
+                        exit();
+                    } else {
+                        $error_message = "Your admin account is pending approval.";
+                    }
                 } else {
-                    header("Location: ../index.php");
+                    $_SESSION['user_id'] = $user_id;
+                    $_SESSION['username'] = $username;
+                    $_SESSION['role'] = $role;
+
+                    if ($role === 'doctor') {
+                        header("Location: ../doctor/dashboard.php");
+                    } elseif ($role === 'patient') {
+                        header("Location: ../patient/dashboard.php");
+                    } else {
+                        header("Location: ../index.php");
+                    }
+                    exit();
                 }
-                exit();
             } else {
                 $error_message = "Invalid username or password.";
             }
         } else {
-            $stmt->close(); // Close first statement
-
-            // If not found in users, check admin table
-            $stmt = $conn->prepare("SELECT id, password FROM admin WHERE username = ?");
-            $stmt->bind_param("s", $username);
-            $stmt->execute();
-            $stmt->store_result();
-
-            if ($stmt->num_rows === 1) {
-                $stmt->bind_result($admin_id, $admin_password);
-                $stmt->fetch();
-
-                if (password_verify($password, $admin_password)) {
-                    $_SESSION['user_id'] = $admin_id;
-                    $_SESSION['username'] = $username;
-                    $_SESSION['role'] = 'admin'; // Set role manually
-
-                    header("Location: ../admin/dashboard.php");
-                    exit();
-                } else {
-                    $error_message = "Invalid username or password.";
-                }
-            } else {
-                $error_message = "Invalid username or password.";
-            }
+            $error_message = "Invalid username or password.";
         }
-
         $stmt->close();
     }
 }

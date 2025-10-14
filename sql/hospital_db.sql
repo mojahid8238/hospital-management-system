@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS admin (
     user_id INT NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('pending', 'approved') NOT NULL DEFAULT 'pending',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

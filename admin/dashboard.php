@@ -9,6 +9,7 @@ redirect_if_not_admin();
 
     <h3>Quick Actions</h3>
     <ul>
+        <li><a href="manage-admins.php">Manage Admins</a></li>
         <li><a href="manage-doctors.php">Manage Doctors</a></li>
         <li><a href="manage-patients.php">Manage Patients</a></li>
         <li><a href="reports.php">View Reports</a></li>
