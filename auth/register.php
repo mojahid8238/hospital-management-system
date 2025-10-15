@@ -59,13 +59,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($stmt_check_admin_email->num_rows > 0) {
                     $error_message = "An admin with this email already exists.";
                 } else {
+                    // Check if there are any approved admins
+                    $stmt_check_admins = $conn->prepare("SELECT id FROM admin WHERE status = 'approved'");
+                    $stmt_check_admins->execute();
+                    $stmt_check_admins->store_result();
+                    $admin_count = $stmt_check_admins->num_rows;
+                    $stmt_check_admins->close();
+
+                    $status = ($admin_count === 0) ? 'approved' : 'pending';
+
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                     $stmt_user = $conn->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
                     $stmt_user->bind_param("sss", $username, $hashed_password, $role);
 
                     if ($stmt_user->execute()) {
                         $user_id = $conn->insert_id;
-                        $status = 'approved'; // by default, new admin is approved
                         $stmt_admin = $conn->prepare("INSERT INTO admin (user_id, name, email, status) VALUES (?, ?, ?, ?)");
                         $stmt_admin->bind_param("isss", $user_id, $fullname, $email, $status);
 
@@ -73,11 +81,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $error_message = "Error inserting admin details: " . $stmt_admin->error;
                             $conn->query("DELETE FROM users WHERE id = $user_id");
                         } else {
-                            $_SESSION['user_id'] = $user_id;
-                            $_SESSION['username'] = $username;
-                            $_SESSION['role'] = $role;
-                            header("Location: ../admin/dashboard.php");
-                            exit();
+                            if ($status === 'approved') {
+                                $_SESSION['user_id'] = $user_id;
+                                $_SESSION['username'] = $username;
+                                $_SESSION['role'] = $role;
+                                header("Location: ../admin/dashboard.php");
+                                exit();
+                            } else {
+                                $success_message = "Admin registration successful. Your account is pending approval from an existing admin.";
+                            }
                         }
                         $stmt_admin->close();
                     } else {
