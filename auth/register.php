@@ -50,7 +50,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error_message = "Username already exists. Please choose a different one.";
         } else {
             if ($role === 'admin') {
-                // ... (admin logic remains the same)
+                // Check for existing admin email
+                $stmt_check_admin_email = $conn->prepare("SELECT id FROM admin WHERE email = ?");
+                $stmt_check_admin_email->bind_param("s", $email);
+                $stmt_check_admin_email->execute();
+                $stmt_check_admin_email->store_result();
+
+                if ($stmt_check_admin_email->num_rows > 0) {
+                    $error_message = "An admin with this email already exists.";
+                } else {
+                    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                    $stmt_user = $conn->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
+                    $stmt_user->bind_param("sss", $username, $hashed_password, $role);
+
+                    if ($stmt_user->execute()) {
+                        $user_id = $conn->insert_id;
+                        $status = 'approved'; // by default, new admin is approved
+                        $stmt_admin = $conn->prepare("INSERT INTO admin (user_id, name, email, status) VALUES (?, ?, ?, ?)");
+                        $stmt_admin->bind_param("isss", $user_id, $fullname, $email, $status);
+
+                        if (!$stmt_admin->execute()) {
+                            $error_message = "Error inserting admin details: " . $stmt_admin->error;
+                            $conn->query("DELETE FROM users WHERE id = $user_id");
+                        } else {
+                            $_SESSION['user_id'] = $user_id;
+                            $_SESSION['username'] = $username;
+                            $_SESSION['role'] = $role;
+                            header("Location: ../admin/dashboard.php");
+                            exit();
+                        }
+                        $stmt_admin->close();
+                    } else {
+                        $error_message = "Error creating user: " . $stmt_user->error;
+                    }
+                    $stmt_user->close();
+                }
+                $stmt_check_admin_email->close();
             } elseif ($role === 'doctor') {
                 // Check for existing doctor's email and phone
                 $stmt_check_doctor = $conn->prepare("SELECT id FROM doctors WHERE email = ? OR phone = ?");
@@ -75,6 +110,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $error_message = "Error inserting doctor details: " . $stmt_doc->error;
                             // Rollback user creation
                             $conn->query("DELETE FROM users WHERE id = $user_id");
+                        } else {
+                            $_SESSION['user_id'] = $user_id;
+                            $_SESSION['username'] = $username;
+                            $_SESSION['role'] = $role;
+                            header("Location: ../doctor/dashboard.php");
+                            exit();
                         }
                         $stmt_doc->close();
                     } else {
@@ -107,6 +148,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $error_message = "Error inserting patient details: " . $stmt_pat->error;
                             // Rollback user creation
                             $conn->query("DELETE FROM users WHERE id = $user_id");
+                        } else {
+                            $_SESSION['user_id'] = $user_id;
+                            $_SESSION['username'] = $username;
+                            $_SESSION['role'] = $role;
+                            header("Location: ../patient/dashboard.php");
+                            exit();
                         }
                         $stmt_pat->close();
                     } else {
