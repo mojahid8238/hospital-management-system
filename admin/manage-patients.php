@@ -109,35 +109,8 @@ if ($result) {
     <h2>Manage Patients</h2>
     <?php echo $message; ?>
 
-    <h3>Add New Patient</h3>
-    <form action="manage-patients.php" method="POST">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-        <br>
-        <label for="date_of_birth">Date of Birth:</label>
-        <input type="date" id="date_of_birth" name="date_of_birth" required>
-        <br>
-        <label for="gender">Gender:</label>
-        <select id="gender" name="gender" required>
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-        </select>
-        <br>
-        <label for="address">Address:</label>
-        <input type="text" id="address" name="address" required>
-        <br>
-        <label for="phone">Phone:</label>
-        <input type="text" id="phone" name="phone" required>
-        <br>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        <br>
-        <button type="submit">Add Patient</button>
-    </form>
+   
 
-    <h3>Existing Patients</h3>
     <?php if (empty($patients)): ?>
         <p>No patients found.</p>
     <?php else: ?>
@@ -166,9 +139,44 @@ if ($result) {
                         <td><?php echo $patient['phone']; ?></td>
                         <td><?php echo $patient['email']; ?></td>
                         <td><?php echo $patient['username']; ?></td>
-                        <td>
-                            <a href="edit-patient.php?id=<?php echo $patient['id']; ?>">Edit</a> |
-                            <a href="manage-patients.php?action=delete&id=<?php echo $patient['id']; ?>" onclick="return confirm('Are you sure you want to delete this patient and their associated user account?');">Delete</a>
+                        <td><a 
+    href="edit-patient.php?id=<?php echo $patient['id']; ?>" 
+    style="
+        background-color: #27ae60;
+        color: white;
+        padding: 8px 16px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+        margin-right: 8px;
+        display: inline-block;
+        transition: background-color 0.3s ease;
+    "
+    onmouseover="this.style.backgroundColor='#1e8449';"
+    onmouseout="this.style.backgroundColor='#27ae60';"
+>
+    Edit
+</a>
+
+<a 
+    href="manage-patients.php?action=delete&id=<?php echo $patient['id']; ?>" 
+    onclick="return confirm('Are you sure you want to delete this patient and their associated user account?');"
+    style="
+        background-color: #e74c3c;
+        color: white;
+        padding: 8px 16px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+        display: inline-block;
+        transition: background-color 0.3s ease;
+    "
+    onmouseover="this.style.backgroundColor='#c0392b';"
+    onmouseout="this.style.backgroundColor='#e74c3c';"
+>
+    Delete
+</a>
+
                         </td>
                     </tr>
                 <?php endforeach; ?>

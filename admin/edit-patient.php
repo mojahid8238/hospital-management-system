@@ -103,7 +103,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $patient_id) {
             <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($patient['username']); ?>" required>
             <br>
             <button type="submit">Update Patient</button>
-            <a href="manage-patients.php">Cancel</a>
+<a 
+    href="manage-patients.php" 
+    style="
+        background-color: #ce4e1bff;
+        color: white;
+        padding: 10px 16px;
+        text-decoration: none;
+        border-radius: 4px;
+        margin-left: 5px;
+        font-size: 16px;
+        display: inline-block;
+        transition: background-color 0.3s ease;
+    "
+    onmouseover="this.style.backgroundColor='#e65f11ff';"
+    onmouseout="this.style.backgroundColor='#df3c13ff';"
+>
+    Cancel
+</a>
         </form>
     <?php else: ?>
         <p>Patient details could not be loaded. <a href="manage-patients.php">Go back to Manage Patients</a></p>
