@@ -71,20 +71,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt_admin->close();
 
                 } elseif ($role === 'doctor') {
+
+
+                  //check for exixting doctors emails
+                    $stmt_check_doctors_email = $conn->prepare("SELECT id FROM doctors WHERE email = ?");
+                    $stmt_check_doctors_email->bind_param("s", $email);
+                    $stmt_check_doctors_email->execute();
+                    $stmt_check_doctors_email->store_result();
+
+                    // Check for existing doctors phone 
+                    $stmt_check_doctors_phone = $conn->prepare("SELECT id FROM doctors WHERE phone = ?");
+                    $stmt_check_doctors_phone->bind_param("s", $phone);
+                    $stmt_check_doctors_phone->execute();
+                    $stmt_check_doctors_phone->store_result();
+
+                   if($stmt_check_doctors_email->num_rows>0){
+                    $error_message = "A Doctor with this email already exists.";
+                   }elseif($stmt_check_doctors_phone->num_rows > 0){
+                    $error_message = "A Doctor with this Phone number already exists.";
+                   }else{
                     $stmt_doc = $conn->prepare("INSERT INTO doctors (user_id, name, specialization, phone, email) VALUES (?, ?, ?, ?, ?)");
-                    $stmt_doc->bind_param("issss", $user_id, $fullname, $specialization, $phone, $email);
-                    if (!$stmt_doc->execute()) {
+                    $stmt_doc->bind_param("issss", $user_id, $fullname, $specialization, $phone, $email); 
+                     if (!$stmt_doc->execute()) {
                         $error_message = "Error inserting doctor details: " . $stmt_doc->error;
                     }
-                    $stmt_doc->close();
 
+                    $stmt_doc->close();
+                   }
+                   $stmt_check_doctors_email->close();
+                   $stmt_check_doctors_phone->close();
+                   
                 } elseif ($role === 'patient') {
+                   //check for exixting Patients emails
+                    $stmt_check_patients_email = $conn->prepare("SELECT id FROM patients WHERE email = ?");
+                    $stmt_check_patients_email->bind_param("s", $email);
+                    $stmt_check_patients_email->execute();
+                    $stmt_check_patients_email->store_result();
+
+                    // Check for existing Patients phone 
+                    $stmt_check_patients_phone = $conn->prepare("SELECT id FROM patients WHERE phone = ?");
+                    $stmt_check_patients_phone->bind_param("s", $phone);
+                    $stmt_check_patients_phone->execute();
+                    $stmt_check_patients_phone->store_result();
+
+                   if($stmt_check_patients_email->num_rows>0){
+                    $error_message = "A Patient with this email already exists.";
+                   }elseif($stmt_check_patients_phone->num_rows > 0){
+                    $error_message = "A Patient with this Phone number already exists.";
+                   }else{
                     $stmt_pat = $conn->prepare("INSERT INTO patients (user_id, name, date_of_birth, gender, address, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)");
                     $stmt_pat->bind_param("issssss", $user_id, $fullname, $date_of_birth, $gender, $address, $phone, $email);
                     if (!$stmt_pat->execute()) {
                         $error_message = "Error inserting patient details: " . $stmt_pat->error;
                     }
                     $stmt_pat->close();
+                   }
+                   $stmt_check_patients_email->close();
+                   $stmt_check_patients_phone->close();
+                    
                 }
 
                 if (empty($error_message)) {
@@ -166,6 +210,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="form-box signup-box">
       <h2>Sign Up</h2>
 
+      
+
       <?php if (!empty($error_message)): ?>
         <div class="error-message" style="color: red;"><?= $error_message ?></div>
       <?php endif; ?>
@@ -174,8 +220,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="success-message" style="color: green;"><?= $success_message ?></div>
       <?php endif; ?>
 
+      
 
+      <form method="POST" novalidate>
         <div class="input-group">
+
+      <div class="input-group">
           <label for="role">Role</label>
           <select id="role" name="role" required>
             <option value="">Select Role</option>
@@ -185,8 +235,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </select>
         </div>
 
-      <form method="POST" novalidate>
-        <div class="input-group">
           <label for="fullname">Full Name</label>
           <input type="text" id="fullname" name="fullname" required value="<?= htmlspecialchars($_POST['fullname'] ?? '') ?>" />
         </div>
@@ -210,8 +258,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <label for="confirm-password">Confirm Password</label>
           <input type="password" id="confirm-password" name="confirm_password" required />
         </div>
-
-      
 
         <!-- Doctor-specific -->
         <div id="doctor-fields" class="role-fields">
