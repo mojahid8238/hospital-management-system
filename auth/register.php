@@ -174,6 +174,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="success-message" style="color: green;"><?= $success_message ?></div>
       <?php endif; ?>
 
+
+        <div class="input-group">
+          <label for="role">Role</label>
+          <select id="role" name="role" required>
+            <option value="">Select Role</option>
+            <option value="patient" <?= (($_POST['role'] ?? '') === 'patient') ? 'selected' : '' ?>>Patient</option>
+            <option value="doctor" <?= (($_POST['role'] ?? '') === 'doctor') ? 'selected' : '' ?>>Doctor</option>
+            <option value="admin" <?= (($_POST['role'] ?? '') === 'admin') ? 'selected' : '' ?>>Admin</option>
+          </select>
+        </div>
+
       <form method="POST" novalidate>
         <div class="input-group">
           <label for="fullname">Full Name</label>
@@ -200,15 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <input type="password" id="confirm-password" name="confirm_password" required />
         </div>
 
-        <div class="input-group">
-          <label for="role">Role</label>
-          <select id="role" name="role" required>
-            <option value="">Select Role</option>
-            <option value="patient" <?= (($_POST['role'] ?? '') === 'patient') ? 'selected' : '' ?>>Patient</option>
-            <option value="doctor" <?= (($_POST['role'] ?? '') === 'doctor') ? 'selected' : '' ?>>Doctor</option>
-            <option value="admin" <?= (($_POST['role'] ?? '') === 'admin') ? 'selected' : '' ?>>Admin</option>
-          </select>
-        </div>
+      
 
         <!-- Doctor-specific -->
         <div id="doctor-fields" class="role-fields">
