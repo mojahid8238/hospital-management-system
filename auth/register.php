@@ -20,7 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Role-specific fields
     $specialization = htmlspecialchars(trim($_POST['specialization'] ?? ''));
-    $phone = htmlspecialchars(trim($_POST['phone'] ?? ''));
+    $phone = '';
+    if ($role === 'doctor') {
+        $phone = htmlspecialchars(trim($_POST['phone_doc'] ?? ''));
+    } elseif ($role === 'patient') {
+        $phone = htmlspecialchars(trim($_POST['phone_pat'] ?? ''));
+    }
     $date_of_birth = $_POST['date_of_birth'] ?? null;  // YYYY-MM-DD or null
     $gender = $_POST['gender'] ?? null;
     $address = htmlspecialchars(trim($_POST['address'] ?? ''));
@@ -222,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
           <div class="input-group">
             <label for="phone_doc">Phone</label>
-            <input type="text" id="phone_doc" name="phone" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>" />
+            <input type="text" id="phone_doc" name="phone_doc" value="<?= htmlspecialchars($_POST['phone_doc'] ?? '') ?>" />
           </div>
         </div>
 
@@ -247,7 +252,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
           <div class="input-group">
             <label for="phone_pat">Phone</label>
-            <input type="text" id="phone_pat" name="phone" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>" />
+            <input type="text" id="phone_pat" name="phone_pat" value="<?= htmlspecialchars($_POST['phone_pat'] ?? '') ?>" />
           </div>
         </div>
 
