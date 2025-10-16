@@ -1,4 +1,5 @@
 <?php
+
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 
@@ -9,6 +10,19 @@ if (is_logged_in()) {
 
 $error_message = '';
 $success_message = '';
+
+// Fetch all specializations
+$specializations = [];
+$result_spec = $conn->query("SELECT id, name FROM specializations");
+if ($result_spec) {
+    while ($row_spec = $result_spec->fetch_assoc()) {
+        $specializations[] = $row_spec;
+    }
+}
+
+if (empty($specializations)) {
+    $error_message = "Could not fetch specializations. Please run the latest sql/hospital_db.sql file.";
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = htmlspecialchars(trim($_POST['username'] ?? ''));
@@ -69,8 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $status = ($admin_count === 0) ? 'approved' : 'pending';
 
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                    $stmt_user = $conn->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
-                    $stmt_user->bind_param("sss", $username, $hashed_password, $role);
+                    $stmt_user = $conn->prepare("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)");
+                    $stmt_user->bind_param("ssss", $username, $hashed_password, $role, $fullname);
 
                     if ($stmt_user->execute()) {
                         $user_id = $conn->insert_id;
@@ -97,8 +111,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     $stmt_user->close();
                 }
-                $stmt_check_admin_email->close();
-            } elseif ($role === 'doctor') {
+                $stmt_check_admin_email->close();            } elseif ($role === 'doctor') {
+                // Get specialization_id from name
+                $specialization_id = null;
+                if (!empty($specialization)) {
+                    $stmt_spec = $conn->prepare("SELECT id FROM specializations WHERE name = ?");
+                    $stmt_spec->bind_param("s", $specialization);
+                    $stmt_spec->execute();
+                    $stmt_spec->bind_result($specialization_id);
+                    $stmt_spec->fetch();
+                    $stmt_spec->close();
+                }
+
                 // Check for existing doctor's email and phone
                 $stmt_check_doctor = $conn->prepare("SELECT id FROM doctors WHERE email = ? OR phone = ?");
                 $stmt_check_doctor->bind_param("ss", $email, $phone);
@@ -110,13 +134,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     // All checks passed, now insert the user and then the doctor details
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                    $stmt_user = $conn->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
-                    $stmt_user->bind_param("sss", $username, $hashed_password, $role);
+                    $stmt_user = $conn->prepare("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)");
+                    $stmt_user->bind_param("ssss", $username, $hashed_password, $role, $fullname);
 
                     if ($stmt_user->execute()) {
                         $user_id = $conn->insert_id;
-                        $stmt_doc = $conn->prepare("INSERT INTO doctors (user_id, name, specialization, phone, email) VALUES (?, ?, ?, ?, ?)");
-                        $stmt_doc->bind_param("issss", $user_id, $fullname, $specialization, $phone, $email);
+                        $stmt_doc = $conn->prepare("INSERT INTO doctors (user_id, name, specialization_id, phone, email) VALUES (?, ?, ?, ?, ?)");
+                        $stmt_doc->bind_param("isiss", $user_id, $fullname, $specialization_id, $phone, $email);
 
                         if (!$stmt_doc->execute()) {
                             $error_message = "Error inserting doctor details: " . $stmt_doc->error;
@@ -148,8 +172,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     // All checks passed, now insert the user and then the patient details
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                    $stmt_user = $conn->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
-                    $stmt_user->bind_param("sss", $username, $hashed_password, $role);
+                    $stmt_user = $conn->prepare("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)");
+                    $stmt_user->bind_param("ssss", $username, $hashed_password, $role, $fullname);
 
                     if ($stmt_user->execute()) {
                         $user_id = $conn->insert_id;
@@ -200,6 +224,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.getElementById('doctor-fields').style.display = 'block';
       } else if (role === 'patient') {
         document.getElementById('patient-fields').style.display = 'block';
+      } else if (role === 'admin') {
+        document.getElementById('admin-fields').style.display = 'block';
       }
     }
     window.onload = () => {
@@ -282,7 +308,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div id="doctor-fields" class="role-fields">
           <div class="input-group">
             <label for="specialization">Specialization</label>
-            <input type="text" id="specialization" name="specialization" value="<?= htmlspecialchars($_POST['specialization'] ?? '') ?>" />
+            <input list="specialization-list" id="specialization" name="specialization" value="<?= htmlspecialchars($_POST['specialization'] ?? '') ?>" />
+            <datalist id="specialization-list">
+                <?php foreach ($specializations as $spec): ?>
+                    <option value="<?php echo $spec['name']; ?>">
+                <?php endforeach; ?>
+            </datalist>
           </div>
           <div class="input-group">
             <label for="phone_doc">Phone</label>
@@ -314,6 +345,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="text" id="phone_pat" name="phone_pat" value="<?= htmlspecialchars($_POST['phone_pat'] ?? '') ?>" />
           </div>
         </div>
+
+
 
         <button type="submit" class="form-btn">Sign Up</button>
         <p>Already have an account? <a href="login.php">Log in</a></p>

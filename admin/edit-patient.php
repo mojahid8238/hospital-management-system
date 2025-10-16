@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 redirect_if_not_admin();
@@ -41,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $patient_id) {
         $conn->begin_transaction();
         try {
             // Update patient details
-            $stmt_patient = $conn->prepare("UPDATE patients SET name = ?, date_of_birth = ?, gender = ?, address = ?, phone = ?, email = ? WHERE id = ?");
-            $stmt_patient->bind_param("ssssssi", $name, $date_of_birth, $gender, $address, $phone, $email, $patient_id);
+            $stmt_patient = $conn->prepare("UPDATE patients SET name = ?, date_of_birth = ?, gender = ?, address = ?, phone = ?, email = ?, username = ? WHERE id = ?");
+            $stmt_patient->bind_param("sssssssi", $name, $date_of_birth, $gender, $address, $phone, $email, $username, $patient_id);
             $stmt_patient->execute();
             $stmt_patient->close();
 

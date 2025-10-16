@@ -6,7 +6,17 @@ if (!is_logged_in()) {
     exit();
 }
 
-$profilePic = $_SESSION['profile_pic'] ?? 'default-avatar.png';
+// -------------------------------------------------------------------------
+// FIX 1: Clean the path stored in the database/session by 
+//        removing the leading '../' if it exists.
+// -------------------------------------------------------------------------
+// Use a default path that is relative to the project root (no ../)
+$rawProfilePic = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
+// Use ltrim to safely remove the leading "../" if it exists.
+$profilePic = ltrim($rawProfilePic, '../'); 
+// Now $profilePic contains: 'assets/images/profile_pics/patient_2.png' or 'assets/images/default-avatar.png'
+// -------------------------------------------------------------------------
+
 $username = $_SESSION['username'] ?? 'User'; // Use username from session
 $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
 ?>
@@ -54,14 +64,11 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
             align-items: center;
         }
         .navbar .nav-right .user-icon {
-            font-size: 1.5rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             cursor: pointer;
-            margin-right: 15px;
-        }
-        .navbar .nav-right a {
-            color: #fff;
-            text-decoration: none;
-            margin-left: 10px;
+            object-fit: cover;
         }
 
         /* Slider styles */
@@ -110,13 +117,15 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
         <a href="#">Patient Homepage</a>
     </div>
     <div class="nav-right">
-      <span class="user-icon" id="profileToggle">👤</span>
+      <!-- FIX 2: Prepend the ONLY necessary '../' to the CLEAN path ($profilePic) -->
+      <img src="../<?php echo htmlspecialchars($profilePic); ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
       <a href="../auth/logout.php">Logout</a>
     </div>
   </header>
 
     <div class="main-wrapper">
         <main class="content-area" id="mainContent">
+            <!-- Asset paths are already correctly using '../' from /includes/ -->
             <div class="slider-container" id="mainSlider">
                 <img src="../assets/images/slider1.png" alt="Slider Image 1" class="active">
                 <img src="../assets/images/slider2.png" alt="Slider Image 2">
@@ -147,9 +156,9 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
   <!-- Profile side overlay - kept for consistency, but can be removed if not needed -->
   <div class="profile-overlay" id="profileOverlay">
     <div class="profile-content">
-      <img src="<?php echo htmlspecialchars($profilePic); ?>" alt="Profile Picture" id="profileImageDisplay">
+      <!-- FIX 3: Prepend the ONLY necessary '../' to the CLEAN path ($profilePic) -->
+      <img src="../<?php echo htmlspecialchars($profilePic); ?>" alt="Profile Picture" id="profileImageDisplay">
       <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
-        <label for="profilePicInput" class="upload-btn">Change Picture</label>
         <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
         <button type="submit" style="display: none;">Upload</button>
       </form>
@@ -170,76 +179,106 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
   </div>
 
   <script>
-    const profileToggle = document.getElementById('profileToggle');
-    const profileOverlay = document.getElementById('profileOverlay');
-    const closeProfile = document.getElementById('closeProfile');
-    const profilePicInput = document.getElementById('profilePicInput');
-    const profilePicUploadForm = document.getElementById('profilePicUploadForm');
-    const profileImageDisplay = document.getElementById('profileImageDisplay');
-    const uploadMessage = document.getElementById('uploadMessage');
+    document.addEventListener('DOMContentLoaded', function() {
+        const profileToggle = document.getElementById('profileToggle');
+        const profileOverlay = document.getElementById('profileOverlay');
+        const closeProfile = document.getElementById('closeProfile');
+        const profilePicInput = document.getElementById('profilePicInput');
+        const profilePicUploadForm = document.getElementById('profilePicUploadForm');
+        const profileImageDisplay = document.getElementById('profileImageDisplay');
+        const uploadMessage = document.getElementById('uploadMessage');
 
-    profileToggle.addEventListener('click', () => {
-      profileOverlay.classList.add('open');
-    });
-
-    closeProfile.addEventListener('click', () => {
-      profileOverlay.classList.remove('open');
-    });
-
-    profilePicInput.addEventListener('change', function() {
-      if (this.files && this.files[0]) {
-        const formData = new FormData(profilePicUploadForm);
-        fetch(profilePicUploadForm.action, {
-          method: 'POST',
-          body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            profileImageDisplay.src = data.profile_pic_path + '?t=' + new Date().getTime();
-            uploadMessage.textContent = 'Profile picture updated!';
-            uploadMessage.style.color = 'green';
-          } else {
-            uploadMessage.textContent = data.message || 'Upload failed.';
-            uploadMessage.style.color = 'red';
-          }
-        })
-        .catch(() => {
-          uploadMessage.textContent = 'Error during upload.';
-          uploadMessage.style.color = 'red';
+        profileToggle.addEventListener('click', () => {
+            profileOverlay.classList.add('open');
         });
-      }
-    });
 
-    // Slider functionality
-    let slideIndex = { 'mainSlider': 0, 'promoSlider': 0 };
-    showSlides(0, 'mainSlider');
-    showSlides(0, 'promoSlider');
+        closeProfile.addEventListener('click', () => {
+            profileOverlay.classList.remove('open');
+        });
 
-    // Automatic slideshow
-    setInterval(() => {
-        plusSlides(1, 'mainSlider');
-    }, 3000);
+        profileImageDisplay.addEventListener('click', function() {
+            profilePicInput.click();
+        });
 
-    setInterval(() => {
-        plusSlides(1, 'promoSlider');
-    }, 3000);
+        profilePicInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const formData = new FormData(profilePicUploadForm);
+                fetch(profilePicUploadForm.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            console.error("Server returned non-OK status. Raw response:", text);
+                            throw new Error(`Server returned status ${response.status}: See console for raw response.`);
+                        });
+                    }
+                    return response.json().catch(e => {
+                        console.error("Failed to parse JSON response. Server output may contain errors/warnings:", e);
+                        throw new Error("Server output non-JSON (likely PHP error/warning). Check console for details.");
+                    });
+                })
+                .then(data => {
+                    if (data.success) {
+                        let cleanPath = data.profile_pic_path;
+                                         
+                        // --- FIX ---
+                        // The path from the server is clean (e.g., 'assets/images/pic.png').
+                        // Since this page is one directory deep, we MUST prepend '../' to go up
+                        // one level before finding the assets folder.
+                        const newImagePath = '../' + cleanPath + '?t=' + new Date().getTime();
+                        
+                        // This part is already correct and will now work as expected
+                        profileImageDisplay.src = newImagePath; // Update overlay image
+                        document.getElementById('profileToggle').src = newImagePath; // Update header icon
+                        
+                        uploadMessage.textContent = 'Profile picture updated successfully!';
+                        uploadMessage.style.color = 'green';
+                    } else {
+                        uploadMessage.textContent = data.message || 'Upload failed.';
+                        uploadMessage.style.color = 'red';
+                        console.error("Server-reported upload failure:", data.message);
+                    }
+                })
+                .catch(error => {
+                    uploadMessage.textContent = 'Upload failed: ' + error.message;
+                    uploadMessage.style.color = 'red';
+                    console.error("AJAX Upload Error (Client-side Catch):", error);
+                });
+            }
+        });
 
-    function plusSlides(n, sliderId) {
-        showSlides(slideIndex[sliderId] += n, sliderId);
-    }
+        // Slider functionality
+        let slideIndex = { 'mainSlider': 0, 'promoSlider': 0 };
+        showSlides(0, 'mainSlider');
+        showSlides(0, 'promoSlider');
 
-    function showSlides(n, sliderId) {
-        let i;
-        let slider = document.getElementById(sliderId);
-        let slides = slider.getElementsByTagName('img');
-        if (n >= slides.length) { slideIndex[sliderId] = 0 }
-        if (n < 0) { slideIndex[sliderId] = slides.length - 1 }
-        for (i = 0; i < slides.length; i++) {
-            slides[i].classList.remove('active');
+        // Automatic slideshow
+        setInterval(() => {
+            plusSlides(1, 'mainSlider');
+        }, 3000);
+
+        setInterval(() => {
+            plusSlides(1, 'promoSlider');
+        }, 3000);
+
+        function plusSlides(n, sliderId) {
+            showSlides(slideIndex[sliderId] += n, sliderId);
         }
-        slides[slideIndex[sliderId]].classList.add('active');
-    }
+
+        function showSlides(n, sliderId) {
+            let i;
+            let slider = document.getElementById(sliderId);
+            let slides = slider.getElementsByTagName('img');
+            if (n >= slides.length) { slideIndex[sliderId] = 0 }
+            if (n < 0) { slideIndex[sliderId] = slides.length - 1 }
+            for (i = 0; i < slides.length; i++) {
+                slides[i].classList.remove('active');
+            }
+            slides[slideIndex[sliderId]].classList.add('active');
+        }
+    });
   </script>
 
 </body>

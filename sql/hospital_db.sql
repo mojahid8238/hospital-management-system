@@ -57,3 +57,54 @@ CREATE TABLE IF NOT EXISTS appointments (
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
     FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
 );
+
+-- Schema Updates
+-- The following ALTER TABLE statements might fail if the columns already exist.
+-- This is not an error, and you can safely ignore these errors if the columns are already in your tables.
+
+ALTER TABLE `doctors` ADD `schedule` TIME;
+ALTER TABLE `doctors` ADD `image` VARCHAR(255);
+ALTER TABLE `doctors` ADD `phone` VARCHAR(20);
+ALTER TABLE `patients` ADD `image` VARCHAR(255);
+ALTER TABLE `patients` ADD `username` VARCHAR(255);
+ALTER TABLE `patients` ADD `phone` VARCHAR(20);
+ALTER TABLE `appointments` ADD `image` VARCHAR(255);
+ALTER TABLE `appointments` DROP COLUMN IF EXISTS `time`;
+ALTER TABLE `users` ADD `name` VARCHAR(255);
+ALTER TABLE `admin` ADD `image` VARCHAR(255);
+
+-- Create specializations table
+CREATE TABLE IF NOT EXISTS specializations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- Populate specializations table
+-- Using INSERT IGNORE to avoid errors if the specializations already exist.
+INSERT IGNORE INTO specializations (name) VALUES
+('Cardiology'),
+('Dermatology'),
+('Neurology'),
+('Oncology'),
+('Pediatrics'),
+('Psychiatry'),
+('Radiology'),
+('Urology'),
+('Gastroenterology'),
+('Endocrinology'),
+('Nephrology'),
+('Pulmonology'),
+('Rheumatology'),
+('Ophthalmology'),
+('Otolaryngology (ENT)'),
+('Gynecology'),
+('Orthopedics');
+
+-- Modify doctors table
+ALTER TABLE `doctors` ADD `specialization_id` INT;
+ALTER TABLE `doctors` ADD FOREIGN KEY (`specialization_id`) REFERENCES `specializations`(`id`);
+ALTER TABLE `doctors` DROP COLUMN IF EXISTS `specialization`;
+ALTER TABLE `doctors` ADD `degrees` VARCHAR(255);
+
+-- Modify appointments table to include 'Online' and 'Offline' status
+ALTER TABLE `appointments` MODIFY COLUMN `status` ENUM('Scheduled', 'Completed', 'Cancelled', 'Online', 'Offline') DEFAULT 'Scheduled';

@@ -1,7 +1,23 @@
 <?php
+session_start();
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 redirect_if_not_admin();
+
+// Define the base URL for asset loading, which includes the project subdirectory
+// This is the FIX for the persistent 404 errors.
+$base_url = '/hospital-management-system/';
+
+// Ensure profile_pic session is initialized for display
+if (!isset($_SESSION['profile_pic'])) {
+    // Setting a safe default path
+    $_SESSION['profile_pic'] = 'assets/images/default-avatar.png'; 
+}
+
+// FIX: Construct the path using the defined $base_url
+$image_relative_path = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
+$profile_pic_path = htmlspecialchars($base_url . $image_relative_path); 
+
 ?>
 
 <!DOCTYPE html>
@@ -10,6 +26,7 @@ redirect_if_not_admin();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
+    <!-- Assets are also fixed to use relative paths as before, they work -->
     <link rel="stylesheet" href="../assets/css/style.css"> <!-- General styles -->
     <link rel="stylesheet" href="../assets/css/homepage.css"> <!-- For navbar and overlay styles -->
     <style>
@@ -69,12 +86,11 @@ redirect_if_not_admin();
         font-weight: 600;
     }
     .user-icon {
-        font-size: 1.6rem;
-        cursor: pointer;
-        background-color: rgba(255 255 255 / 0.3);
-        padding: 6px 10px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
-        transition: background-color 0.3s ease;
+        cursor: pointer;
+        object-fit: cover;
     }
     .user-icon:hover {
         background-color: rgba(255 255 255 / 0.5);
@@ -207,25 +223,10 @@ redirect_if_not_admin();
         object-fit: cover;
         border: 3px solid #3366ff;
         box-shadow: 0 0 12px #3366ffaa;
+        /* Make the profile picture clickable/pointer */
+        cursor: pointer; 
     }
-    .upload-btn {
-        cursor: pointer;
-        color: #3366ff;
-        font-weight: 600;
-        padding: 8px 16px;
-        border: 2px solid #3366ff;
-        border-radius: 8px;
-        transition: background-color 0.3s ease, color 0.3s ease;
-    }
-    .upload-btn:hover {
-        background-color: #3366ff;
-        color: #fff;
-    }
-    #uploadMessage {
-        font-size: 0.95rem;
-        text-align: center;
-        margin-top: 5px;
-    }
+    
     .profile-content h3 {
         font-weight: 700;
         font-size: 1.4rem;
@@ -282,12 +283,12 @@ redirect_if_not_admin();
 <body>
     <header class="navbar">
         <div class="nav-left">
-        <a href="#">Admin Panel</a>
-          
         <button class="sidebar-toggle-btn" id="sidebarToggle">☰ Toggle Menu</button>
+
+        <a href="#">Admin Panel</a>          
         </div>
         <div class="nav-right">
-            <span class="user-icon" id="profileToggle">👤</span>
+            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
             <a href="../auth/logout.php">Logout</a>
         </div>
     </header>
@@ -309,16 +310,17 @@ redirect_if_not_admin();
         </main>
     </div>
 
-    <!-- Profile side overlay - kept for consistency, but can be removed if not needed -->
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'default-avatar.png'); ?>" alt="Profile Picture" id="profileImageDisplay">
-            <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
-                <label for="profilePicInput" class="upload-btn">Change Picture</label>
-                <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
-                <button type="submit" style="display: none;">Upload</button>
+            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" id="profileImageDisplay">
+           
+            <!-- Hidden form and input for file selection -->
+            <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data" style="display: none;">
+                <input type="file" name="profile_pic" id="profilePicInput" accept="image/*">
             </form>
-            <div id="uploadMessage" style="margin-top: 10px; color: green;"></div>
+            <!-- Upload message container -->
+            <div id="uploadMessage" style="font-size: 0.95rem; text-align: center; margin-top: 5px;"></div>
+            
             <h3><?php echo htmlspecialchars($_SESSION['username']); ?></h3>
             <p>Role: Admin</p>
             <hr>
@@ -333,6 +335,9 @@ redirect_if_not_admin();
     </div>
 
     <script>
+        // Pass the base URL from PHP to JavaScript
+        const BASE_URL = '<?php echo $base_url; ?>'; 
+
         const sidebarToggle = document.getElementById('sidebarToggle');
         const adminSidebar = document.getElementById('adminSidebar');
         const mainContent = document.getElementById('mainContent');
@@ -349,10 +354,10 @@ redirect_if_not_admin();
                 fetch(targetPage)
                     .then(response => response.text())
                     .then(html => {
-                        // Extract only the content within the <body> tags of the fetched page
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(html, 'text/html');
-                        const bodyContent = doc.querySelector('.container').innerHTML; // Assuming content is in a .container div
+                        const container = doc.querySelector('.container');
+                        const bodyContent = container ? container.innerHTML : html; 
                         mainContent.innerHTML = '<div class="container">' + bodyContent + '</div>';
                     })
                     .catch(error => {
@@ -362,10 +367,11 @@ redirect_if_not_admin();
             });
         });
 
-        // Profile overlay functionality (copied from homepage.php)
+        // Profile overlay functionality
         const profileToggle = document.getElementById('profileToggle');
         const profileOverlay = document.getElementById('profileOverlay');
         const closeProfile = document.getElementById('closeProfile');
+        
         const profilePicInput = document.getElementById('profilePicInput');
         const profilePicUploadForm = document.getElementById('profilePicUploadForm');
         const profileImageDisplay = document.getElementById('profileImageDisplay');
@@ -378,6 +384,14 @@ redirect_if_not_admin();
             profileOverlay.classList.remove('open');
         });
 
+        // Click listener on the large profile picture to trigger file selection
+        profileImageDisplay.addEventListener('click', function() {
+            if(profilePicInput) {
+                profilePicInput.click();
+            }
+        });
+
+        // Change listener to handle upload via AJAX
         profilePicInput.addEventListener('change', function() {
             if (this.files && this.files[0]) {
                 const formData = new FormData(profilePicUploadForm);
@@ -388,7 +402,11 @@ redirect_if_not_admin();
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        profileImageDisplay.src = data.profile_pic_path + '?t=' + new Date().getTime(); // Add timestamp to bust cache
+                        // FIX: Use the BASE_URL variable for dynamic image updates
+                        const newImagePath = BASE_URL + data.profile_pic_path + '?t=' + new Date().getTime(); 
+                        
+                        profileImageDisplay.src = newImagePath;
+                        document.getElementById('profileToggle').src = newImagePath;
                         uploadMessage.textContent = 'Profile picture updated successfully!';
                         uploadMessage.style.color = 'green';
                     } else {

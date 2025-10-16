@@ -69,12 +69,11 @@ redirect_if_not_patient();
         font-weight: 600;
     }
     .user-icon {
-        font-size: 1.6rem;
-        cursor: pointer;
-        background-color: rgba(255 255 255 / 0.3);
-        padding: 6px 10px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
-        transition: background-color 0.3s ease;
+        cursor: pointer;
+        object-fit: cover;
     }
     .user-icon:hover {
         background-color: rgba(255 255 255 / 0.5);
@@ -286,7 +285,7 @@ redirect_if_not_patient();
             <a href="#">Patient Panel</a>
         </div>
         <div class="nav-right">
-            <span class="user-icon" id="profileToggle">👤</span>
+            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
             <a href="../auth/logout.php">Logout</a>
         </div>
     </header>
@@ -310,9 +309,8 @@ redirect_if_not_patient();
     <!-- Profile side overlay - kept for consistency, but can be removed if not needed -->
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'default-avatar.png'); ?>" alt="Profile Picture" id="profileImageDisplay">
+            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" alt="Profile Picture" id="profileImageDisplay">
             <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
-                <label for="profilePicInput" class="upload-btn">Change Picture</label>
                 <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
                 <button type="submit" style="display: none;">Upload</button>
             </form>
@@ -332,75 +330,83 @@ redirect_if_not_patient();
     </div>
 
     <script>
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const patientSidebar = document.getElementById('patientSidebar');
-        const mainContent = document.getElementById('mainContent');
-        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const patientSidebar = document.getElementById('patientSidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
 
-        sidebarToggle.addEventListener('click', () => {
-            patientSidebar.classList.toggle('closed');
-        });
+            sidebarToggle.addEventListener('click', () => {
+                patientSidebar.classList.toggle('closed');
+            });
 
-        sidebarLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetPage = this.dataset.target;
-                fetch(targetPage)
-                    .then(response => response.text())
-                    .then(html => {
-                        // Extract only the content within the <body> tags of the fetched page
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const bodyContent = doc.querySelector('.container').innerHTML; // Assuming content is in a .container div
-                        mainContent.innerHTML = '<div class="container">' + bodyContent + '</div>';
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetPage = this.dataset.target;
+                    fetch(targetPage)
+                        .then(response => response.text())
+                        .then(html => {
+                            // Extract only the content within the <body> tags of the fetched page
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const bodyContent = doc.querySelector('.container').innerHTML; // Assuming content is in a .container div
+                            mainContent.innerHTML = '<div class="container">' + bodyContent + '</div>';
+                        })
+                        .catch(error => {
+                            console.error('Error loading page:', error);
+                            mainContent.innerHTML = '<p style="color: red;">Error loading content.</p>';
+                        });
+                });
+            });
+
+            // Profile overlay functionality (copied from homepage.php)
+            const profileToggle = document.getElementById('profileToggle');
+            const profileOverlay = document.getElementById('profileOverlay');
+            const closeProfile = document.getElementById('closeProfile');
+            const profilePicInput = document.getElementById('profilePicInput');
+            const profilePicUploadForm = document.getElementById('profilePicUploadForm');
+            const profileImageDisplay = document.getElementById('profileImageDisplay');
+            const uploadMessage = document.getElementById('uploadMessage');
+
+            profileToggle.addEventListener('click', () => {
+                profileOverlay.classList.add('open');
+            });
+            closeProfile.addEventListener('click', () => {
+                profileOverlay.classList.remove('open');
+            });
+
+            profileImageDisplay.addEventListener('click', function() {
+                profilePicInput.click();
+            });
+
+            profilePicInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const formData = new FormData(profilePicUploadForm);
+                    fetch(profilePicUploadForm.action, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const newImagePath = '/hospital-management-system/' + data.profile_pic_path + '?t=' + new Date().getTime();
+                            profileImageDisplay.src = newImagePath;
+                            document.getElementById('profileToggle').src = newImagePath;
+                            uploadMessage.textContent = 'Profile picture updated successfully!';
+                            uploadMessage.style.color = 'green';
+                        } else {
+                            uploadMessage.textContent = data.message || 'Error uploading profile picture.';
+                            uploadMessage.style.color = 'red';
+                        }
                     })
                     .catch(error => {
-                        console.error('Error loading page:', error);
-                        mainContent.innerHTML = '<p style="color: red;">Error loading content.</p>';
-                    });
-            });
-        });
-
-        // Profile overlay functionality (copied from homepage.php)
-        const profileToggle = document.getElementById('profileToggle');
-        const profileOverlay = document.getElementById('profileOverlay');
-        const closeProfile = document.getElementById('closeProfile');
-        const profilePicInput = document.getElementById('profilePicInput');
-        const profilePicUploadForm = document.getElementById('profilePicUploadForm');
-        const profileImageDisplay = document.getElementById('profileImageDisplay');
-        const uploadMessage = document.getElementById('uploadMessage');
-
-        profileToggle.addEventListener('click', () => {
-            profileOverlay.classList.add('open');
-        });
-        closeProfile.addEventListener('click', () => {
-            profileOverlay.classList.remove('open');
-        });
-
-        profilePicInput.addEventListener('change', function() {
-            if (this.files && this.files[0]) {
-                const formData = new FormData(profilePicUploadForm);
-                fetch(profilePicUploadForm.action, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        profileImageDisplay.src = data.profile_pic_path + '?t=' + new Date().getTime(); // Add timestamp to bust cache
-                        uploadMessage.textContent = 'Profile picture updated successfully!';
-                        uploadMessage.style.color = 'green';
-                    } else {
-                        uploadMessage.textContent = data.message || 'Error uploading profile picture.';
+                        console.error('Error:', error);
+                        uploadMessage.textContent = 'An error occurred during upload.';
                         uploadMessage.style.color = 'red';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    uploadMessage.textContent = 'An error occurred during upload.';
-                    uploadMessage.style.color = 'red';
-                });
-            }
+                    });
+                }
+            });
         });
     </script>
 </body>

@@ -5,22 +5,44 @@ redirect_if_not_admin();
 
 $message = '';
 
+// Fetch all specializations
+$specializations = [];
+$result_spec = $conn->query("SELECT id, name FROM specializations");
+if ($result_spec) {
+    while ($row_spec = $result_spec->fetch_assoc()) {
+        $specializations[] = $row_spec;
+    }
+}
+
 // Handle Add/Edit Doctor
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'] ?? '';
-    $specialization = $_POST['specialization'] ?? '';
+    $specialization_name = $_POST['specialization'] ?? '';
+    $degrees = $_POST['degrees'] ?? '';
+    $schedule = $_POST['schedule'] ?? '';
     $phone = $_POST['phone'] ?? '';
     $email = $_POST['email'] ?? '';
     $user_id = $_POST['user_id'] ?? null; // For editing existing doctor linked to a user
     $doctor_id = $_POST['doctor_id'] ?? null; // For editing existing doctor
 
-    if (empty($name) || empty($specialization) || empty($phone) || empty($email)) {
+    // Get specialization_id from name
+    $specialization_id = null;
+    if (!empty($specialization_name)) {
+        $stmt_spec = $conn->prepare("SELECT id FROM specializations WHERE name = ?");
+        $stmt_spec->bind_param("s", $specialization_name);
+        $stmt_spec->execute();
+        $stmt_spec->bind_result($specialization_id);
+        $stmt_spec->fetch();
+        $stmt_spec->close();
+    }
+
+    if (empty($name) || empty($specialization_id) || empty($degrees) || empty($schedule) || empty($phone) || empty($email)) {
         $message = "<p style='color: red;'>All fields are required.</p>";
     } else {
         if ($doctor_id) {
             // Update existing doctor
-            $stmt = $conn->prepare("UPDATE doctors SET name = ?, specialization = ?, phone = ?, email = ? WHERE id = ?");
-            $stmt->bind_param("ssssi", $name, $specialization, $phone, $email, $doctor_id);
+            $stmt = $conn->prepare("UPDATE doctors SET name = ?, specialization_id = ?, degrees = ?, schedule = ?, phone = ?, email = ? WHERE id = ?");
+            $stmt->bind_param("sissssi", $name, $specialization_id, $degrees, $schedule, $phone, $email, $doctor_id);
             if ($stmt->execute()) {
                 $message = "<p style='color: green;'>Doctor updated successfully!</p>";
             } else {
@@ -29,20 +51,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->close();
         } else {
             // Add new doctor - first create a user account for the doctor
-            // For simplicity, let's assume a default password and role 'doctor' for new doctors
             $username = strtolower(str_replace(' ', '', $name)) . rand(100, 999); // Generate unique username
             $password = password_hash("password123", PASSWORD_DEFAULT); // Default password
             $role = 'doctor';
 
-            $stmt_user = $conn->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
-            $stmt_user->bind_param("sss", $username, $password, $role);
+            $stmt_user = $conn->prepare("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)");
+            $stmt_user->bind_param("ssss", $username, $password, $role, $name);
 
             if ($stmt_user->execute()) {
                 $new_user_id = $stmt_user->insert_id;
                 $stmt_user->close();
 
-                $stmt_doctor = $conn->prepare("INSERT INTO doctors (user_id, name, specialization, phone, email) VALUES (?, ?, ?, ?, ?)");
-                $stmt_doctor->bind_param("issss", $new_user_id, $name, $specialization, $phone, $email);
+                $stmt_doctor = $conn->prepare("INSERT INTO doctors (user_id, name, specialization_id, degrees, schedule, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt_doctor->bind_param("isissss", $new_user_id, $name, $specialization_id, $degrees, $schedule, $phone, $email);
 
                 if ($stmt_doctor->execute()) {
                     $message = "<p style='color: green;'>Doctor added successfully with username: <strong>{$username}</strong> and default password: <strong>password123</strong></p>";
@@ -99,7 +120,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 
 // Fetch all doctors
 $doctors = [];
-$result = $conn->query("SELECT d.id, d.name, d.specialization, d.phone, d.email, u.username FROM doctors d JOIN users u ON d.user_id = u.id");
+$result = $conn->query("SELECT d.id, d.name, s.name as specialization, d.degrees, d.schedule, d.phone, d.email, u.username FROM doctors d JOIN users u ON d.user_id = u.id JOIN specializations s ON d.specialization_id = s.id");
 if ($result) {
     while ($row = $result->fetch_assoc()) {
         $doctors[] = $row;
@@ -117,7 +138,18 @@ if ($result) {
         <input type="text" id="name" name="name" required>
         <br>
         <label for="specialization">Specialization:</label>
-        <input type="text" id="specialization" name="specialization" required>
+        <input list="specialization-list" id="specialization" name="specialization" required>
+        <datalist id="specialization-list">
+            <?php foreach ($specializations as $spec): ?>
+                <option value="<?php echo $spec['name']; ?>">
+            <?php endforeach; ?>
+        </datalist>
+        <br>
+        <label for="degrees">Degrees:</label>
+        <input type="text" id="degrees" name="degrees" required>
+        <br>
+        <label for="schedule">Schedule:</label>
+        <input type="text" id="schedule" name="schedule" required>
         <br>
         <label for="phone">Phone:</label>
         <input type="text" id="phone" name="phone" required>
@@ -138,6 +170,8 @@ if ($result) {
                     <th>ID</th>
                     <th>Name</th>
                     <th>Specialization</th>
+                    <th>Degrees</th>
+                    <th>Schedule</th>
                     <th>Phone</th>
                     <th>Email</th>
                     <th>Username</th>
@@ -150,6 +184,8 @@ if ($result) {
                         <td><?php echo $doctor['id']; ?></td>
                         <td><?php echo $doctor['name']; ?></td>
                         <td><?php echo $doctor['specialization']; ?></td>
+                        <td><?php echo $doctor['degrees']; ?></td>
+                        <td><?php echo $doctor['schedule']; ?></td>
                         <td><?php echo $doctor['phone']; ?></td>
                         <td><?php echo $doctor['email']; ?></td>
                         <td><?php echo $doctor['username']; ?></td>
@@ -160,6 +196,6 @@ if ($result) {
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
-            </table>
+        </table>
         <?php endif; ?>
     </div>

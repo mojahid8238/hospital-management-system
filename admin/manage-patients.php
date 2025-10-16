@@ -43,7 +43,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 
 // Fetch all patients
 $patients = [];
-$result = $conn->query("SELECT p.id, p.name, p.date_of_birth, p.gender, p.address, p.phone, p.email, u.username FROM patients p JOIN users u ON p.user_id = u.id");
+$result = $conn->query("SELECT id, name, date_of_birth, gender, address, phone, email, username, image FROM patients");
 if ($result) {
     while ($row = $result->fetch_assoc()) {
         $patients[] = $row;
@@ -59,38 +59,39 @@ if ($result) {
     <?php if (empty($patients)): ?>
         <p>No patients found.</p>
     <?php else: ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Date of Birth</th>
-                    <th>Gender</th>
-                    <th>Address</th>
-                    <th>Phone</th>
-                    <th>Email</th>
-                    <th>Username</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($patients as $patient): ?>
-                    <tr>
-                        <td><?php echo $patient['id']; ?></td>
-                        <td><?php echo $patient['name']; ?></td>
-                        <td><?php echo $patient['date_of_birth']; ?></td>
-                        <td><?php echo $patient['gender']; ?></td>
-                        <td><?php echo $patient['address']; ?></td>
-                        <td><?php echo $patient['phone']; ?></td>
-                        <td><?php echo $patient['email']; ?></td>
-                        <td><?php echo $patient['username']; ?></td>
-                            <td class="action-links">
-                                <a href="edit-patient.php?id=<?php echo $patient['id']; ?>">Edit</a> |
-                                <a href="manage-patients.php?action=delete&id=<?php echo $patient['id']; ?>" onclick="return confirm('Are you sure you want to delete this patient and their associated user account?');">Delete</a>
-                            </td>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Date of Birth</th>
+                            <th>Gender</th>
+                            <th>Address</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Username</th>
+                            <th>Image</th>
+                            <th>Actions</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php endif; ?>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($patients as $patient): ?>
+                            <tr>
+                                <td><?php echo $patient['id']; ?></td>
+                                <td><?php echo $patient['name']; ?></td>
+                                <td><?php echo $patient['date_of_birth']; ?></td>
+                                <td><?php echo $patient['gender']; ?></td>
+                                <td><?php echo $patient['address']; ?></td>
+                                <td><?php echo $patient['phone']; ?></td>
+                                <td><?php echo $patient['email']; ?></td>
+                                <td><?php echo $patient['username']; ?></td>
+                                <td><img src="../assets/images/<?php echo $patient['image']; ?>" alt="<?php echo $patient['name']; ?>" width="50"></td>
+                                <td class="action-links">
+                                    <a href="edit-patient.php?id=<?php echo $patient['id']; ?>">Edit</a> |
+                                    <a href="manage-patients.php?action=delete&id=<?php echo $patient['id']; ?>" onclick="return confirm('Are you sure you want to delete this patient and their associated user account?');">Delete</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>        <?php endif; ?>
     </div>
