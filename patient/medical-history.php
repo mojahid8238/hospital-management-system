@@ -16,7 +16,8 @@ $stmt->close();
 $medical_history = [];
 if ($patient_id) {
     // Fetch past appointments for the patient
-    $stmt = $conn->prepare("SELECT a.id, d.name as doctor_name, d.specialization, a.appointment_date, a.reason, a.status FROM appointments a JOIN doctors d ON a.doctor_id = d.id WHERE a.patient_id = ? ORDER BY a.appointment_date DESC");
+    // FIXED: Join with specializations table (s) to get the specialization name
+    $stmt = $conn->prepare("SELECT a.id, d.name as doctor_name, s.name as specialization, a.appointment_date, a.reason, a.status FROM appointments a JOIN doctors d ON a.doctor_id = d.id JOIN specializations s ON d.specialization_id = s.id WHERE a.patient_id = ? ORDER BY a.appointment_date DESC");
     $stmt->bind_param("i", $patient_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -27,7 +28,17 @@ if ($patient_id) {
 }
 ?>
 
-<div class="container">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+   <link rel="stylesheet" href="../assets/css/medical-history.css" />
+
+</head>
+<body>
+    <div class="container">
     <h2>Your Medical History</h2>
     <p>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>! Here is a summary of your medical history:</p>
 
@@ -61,3 +72,7 @@ if ($patient_id) {
         </table>
     <?php endif; ?>
 </div>
+    
+</body>
+</html>
+

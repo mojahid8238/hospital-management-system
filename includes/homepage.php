@@ -27,89 +27,28 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
   <meta charset="UTF-8" />
   <title>Patient Homepage</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="../assets/css/homepage.css" />
-  <style>
-        /* Specific styles for this page */
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            margin: 0;
-        }
-        .main-wrapper {
-            display: flex;
-            flex: 1;
-        }
-        .content-area {
-            flex-grow: 1;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-        .navbar {
-            background-color: #1976d2;
-            color: #fff;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .navbar .nav-left a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-        .navbar .nav-right {
-            display: flex;
-            align-items: center;
-        }
-        .navbar .nav-right .user-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            object-fit: cover;
-        }
+  <link rel="stylesheet" href="../assets/css/login-signup.css">
+  <link rel="stylesheet" href="../assets/css/home.css" />
+  <link rel="stylesheet" href="../assets/css/medical-history.css" />
 
-        /* Slider styles */
-        .slider-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px; /* Adjust as needed */
-            margin: 20px auto;
-            overflow: hidden;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .slider-container img {
-            width: 100%;
-            display: none;
-        }
-        .slider-container img.active {
-            display: block;
-        }
-        .slider-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            font-size: 1.5rem;
-            z-index: 10;
-        }
-        .slider-btn.prev {
-            left: 0;
-            border-radius: 0 5px 5px 0;
-        }
-        .slider-btn.next {
-            right: 0;
-            border-radius: 5px 0 0 5px;
-        }
-    </style>
+ 
 </head>
+<body>
+  <div class="floating-bg">
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="geometric-shape"></div>
+    <div class="geometric-shape"></div>
+    <div class="geometric-shape"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
 <body>
 
   <header class="navbar">
@@ -119,7 +58,6 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
     <div class="nav-right">
       <!-- FIX 2: Prepend the ONLY necessary '../' to the CLEAN path ($profilePic) -->
       <img src="../<?php echo htmlspecialchars($profilePic); ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
-      <a href="../auth/logout.php">Logout</a>
     </div>
   </header>
 
@@ -141,15 +79,7 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
                 <button class="slider-btn next" onclick="plusSlides(1, 'promoSlider')">&#10095;</button>
             </div>
 
-            <section class="doctor-slider" id="doctors">
-                <h3>Doctor Slider</h3>
-                <p>Showcase featured doctors or specialties here.</p>
-            </section>
-
-            <section class="about" id="services">
-                <h3>About Our Services</h3>
-                <p>Information about the platform, services provided, or health guidance.</p>
-            </section>
+           
         </main>
     </div>
 
@@ -257,11 +187,11 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
         // Automatic slideshow
         setInterval(() => {
             plusSlides(1, 'mainSlider');
-        }, 3000);
+        }, 10000);
 
         setInterval(() => {
             plusSlides(1, 'promoSlider');
-        }, 3000);
+        }, 10000);
 
         function plusSlides(n, sliderId) {
             showSlides(slideIndex[sliderId] += n, sliderId);

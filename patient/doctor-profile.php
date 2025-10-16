@@ -82,89 +82,14 @@ if (!$name) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Profile</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-        }
-        .navbar {
-            background-color: #1976d2;
-            color: #fff;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .navbar .nav-left a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-        .navbar .nav-right a {
-            color: #fff;
-            text-decoration: none;
-            margin-left: 10px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .profile-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .profile-header img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            margin-right: 20px;
-        }
-        .profile-info h2 {
-            margin: 0;
-        }
-        .profile-info p {
-            margin: 5px 0 0 0;
-            color: #666;
-        }
-        .ratings {
-            margin-bottom: 20px;
-        }
-        .description, .reviews {
-            margin-bottom: 20px;
-        }
-        .booking-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .book-btn {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .book-offline-btn {
-            background-color: #6c757d;
-        }
-    </style>
+   <link rel="stylesheet" href="../assets/css/doctor-profile.css">
 </head>
 <body>
     <header class="navbar">
         <div class="nav-left">
             <a href="../includes/homepage.php">Patient Panel</a>
         </div>
-        <div class="nav-right">
-            <a href="../auth/logout.php">Logout</a>
-        </div>
+       
     </header>
 
     <div class="container">
