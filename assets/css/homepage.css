@@ -9,7 +9,22 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: #f5f7fa;
   color: #333;
+  display: flex; /* Enable flexbox for overall layout */
+  flex-direction: column;
+  min-height: 100vh;
 }
+.user-icon {
+          font-size: 1.6rem;
+        cursor: pointer;
+        background-color: rgba(255 255 255 / 0.3);
+        padding: 6px 10px;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+}
+.user-icon:hover {
+          background-color: rgba(255 255 255 / 0.5);
+}
+
 
 /* NAVBAR */
 .navbar {
@@ -19,6 +34,7 @@ body {
   background-color: #1976d2;
   padding: 1rem 2rem;
   color: #fff;
+  flex-shrink: 0; /* Prevent navbar from shrinking */
 }
 
 .navbar a {
@@ -33,12 +49,82 @@ body {
   color: #ffeb3b;
 }
 
-.user-icon {
-  font-size: 1.5rem;
-  cursor: pointer;
+
+
+/* MAIN LAYOUT FOR DASHBOARDS WITH SIDEBAR */
+.main-wrapper {
+  display: flex;
+  flex: 1; /* Allow main-wrapper to grow and take available space */
 }
 
-/* DASHBOARD SECTION */
+.sidebar {
+  width: 250px;
+  background-color: #343a40;
+  color: #fff;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  transition: width 0.3s ease;
+  flex-shrink: 0; /* Prevent sidebar from shrinking */
+  overflow-y: auto; /* Enable scrolling for long content */
+}
+
+.sidebar.closed {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.sidebar h3 {
+  color: #fff;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin-bottom: 10px;
+}
+
+.sidebar ul li a {
+  display: block;
+  color: #e9ecef;
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar ul li a:hover {
+  background-color: #495057;
+}
+
+.content-area {
+  flex-grow: 1; /* Allow content area to take remaining space */
+  padding: 20px;
+  background-color: #f8f9fa;
+  overflow-y: auto; /* Enable scrolling for long content */
+}
+
+.sidebar-toggle-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-right: 15px; /* Space between button and title */
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-toggle-btn:hover {
+  background-color: #0056b3;
+}
+
+/* DASHBOARD SECTION (for content loaded into mainContent) */
 .dashboard {
   padding: 40px 60px;
   background-color: #fff;
@@ -148,6 +234,7 @@ body {
   padding: 8px 14px;
   background-color: #007bff;
   color: white;
+  border: none;
   border-radius: 5px;
   cursor: pointer;
   margin-top: 10px;
@@ -156,6 +243,21 @@ body {
 
 .upload-btn:hover {
   background-color: #0056b3;
+}
+
+.logout-btn {
+  display: block;
+  padding: 10px 15px;
+  background-color: #dc3545; /* Red color for logout */
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+  margin-top: 20px; /* Space above logout button */
+}
+
+.logout-btn:hover {
+  background-color: #c82333;
 }
 
 /* Responsive tweaks */
@@ -172,6 +274,19 @@ body {
 
   .nav-right {
     margin-top: 10px;
+  }
+  .sidebar {
+    position: fixed;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 100;
+  }
+  .sidebar.closed {
+    width: 0;
+  }
+  .main-wrapper {
+    flex-direction: column;
   }
 }
 
@@ -222,119 +337,3 @@ body {
 .dashboard-card .card-link:hover {
   background-color: #218838;
 }
-
-
- body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f9f9f9;
-    }
-
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: #007bff;
-      padding: 10px 20px;
-      color: white;
-    }
-
-    .navbar a {
-      color: white;
-      margin-right: 20px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .nav-left a:hover {
-      text-decoration: underline;
-    }
-
-    .dashboard {
-      padding: 40px 20px;
-    }
-
-    .slider, .doctor-slider, .about {
-      margin: 20px auto;
-      max-width: 900px;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    }
-
-    .slider {
-      background: linear-gradient(135deg, #dbe9ff, #ffffff);
-    }
-
-    .user-icon {
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-
-    .profile-overlay {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 0;
-      height: 100%;
-      background: #fff;
-      overflow: hidden;
-      transition: width 0.3s ease;
-      box-shadow: -2px 0 8px rgba(0,0,0,0.2);
-      z-index: 1000;
-    }
-
-    .profile-overlay.open {
-      width: 300px;
-    }
-
-    .profile-content {
-      padding: 30px 20px;
-    }
-
-    .profile-content img {
-      width: 120px;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 50%;
-      border: 2px solid #ccc;
-    }
-
-    .upload-btn {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 8px 14px;
-      background-color: #007bff;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .profile-content h3 {
-      margin-top: 15px;
-    }
-
-    .profile-content ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .profile-content ul li {
-      margin: 10px 0;
-    }
-
-    .profile-content ul li a {
-      color: #007bff;
-      text-decoration: none;
-    }
-
-    .close-btn {
-      margin-top: 20px;
-      padding: 8px 12px;
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
-    }

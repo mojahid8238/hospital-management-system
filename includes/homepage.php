@@ -17,13 +17,13 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
   <meta charset="UTF-8" />
   <title>Patient Homepage</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="../assets/css/homepage.css" />
+ <link rel="stylesheet" href="../assets/css/homepage.css">
 </head>
 <body>
 
   <header class="navbar">
     <div class="nav-left">
-      <a href="#">Dashboard</a>
+      <a href="homepage.php">HMS</a>
     </div>
     <div class="nav-right">
       <span class="user-icon" id="profileToggle">👤</span>
@@ -63,7 +63,8 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
         <li><a href="#">Settings</a></li>
         <li><a href="../patient/book-appointment.php">Book New Appointment</a></li>
         <li><a href="../patient/medical-history.php">View History</a></li>
-        <li><a href="../auth/logout.php">Logout</a></li>
+        <li><a href="../patient/dashboard.php">Dashboard</a></li>
+        <li><a href="../auth/logout.php" class="logout-btn">Logout</a></li>
       </ul>
       <button class="close-btn" id="closeProfile">Close</button>
     </div>
