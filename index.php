@@ -3,8 +3,14 @@ session_start();
 require_once 'includes/auth.php';
 
 if (is_logged_in()) {
-     header("Location: includes/homepage.php");
-        exit();
+    if (is_admin()) {
+        header("Location: admin/dashboard.php");
+    } elseif (is_doctor()) {
+        header("Location: doctor/dashboard.php");
+    } else {
+        header("Location: includes/homepage.php");
+    }
+    exit();
 }
 ?>
 

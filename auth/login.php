@@ -3,7 +3,13 @@ require_once '../includes/db.php';
 require_once '../includes/auth.php';
 
 if (is_logged_in()) {
-    header("Location: ../includes/homepage.php");
+    if (is_admin()) {
+        header("Location: ../admin/dashboard.php");
+    } elseif (is_doctor()) {
+        header("Location: ../doctor/dashboard.php");
+    } else {
+        header("Location: ../includes/homepage.php");
+    }
     exit();
 }
 
@@ -38,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['user_id'] = $user_id;
                         $_SESSION['username'] = $username;
                         $_SESSION['role'] = $role;
-                        header("Location: ../includes/homepage.php");
+                        header("Location: ../admin/dashboard.php");
                         exit();
                     } else {
                         $error_message = "Your admin account is pending approval.";
@@ -49,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['role'] = $role;
 
                     if ($role === 'doctor') {
-                        header("Location: ../includes/homepage.php");
+                        header("Location: ../doctor/dashboard.php");
                     } elseif ($role === 'patient') {
                         header("Location: ../includes/homepage.php");
                     } else {

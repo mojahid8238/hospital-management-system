@@ -7,33 +7,28 @@ if (!is_logged_in()) {
 }
 
 $profilePic = $_SESSION['profile_pic'] ?? 'default-avatar.png';
-$username = $_SESSION['name'] ?? 'User';
-$role = 'Patient';
+$username = $_SESSION['username'] ?? 'User'; // Use username from session
+$role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Patient Dashboard</title>
+  <title>Patient Homepage</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../assets/css/homepage.css" />
-
 </head>
 <body>
 
   <header class="navbar">
     <div class="nav-left">
       <a href="#">Dashboard</a>
-      <a href="#doctors">Doctors</a>
-      <a href="#services">Services</a>
     </div>
     <div class="nav-right">
       <span class="user-icon" id="profileToggle">👤</span>
     </div>
   </header>
-
-
 
   <section class="slider">
     <h3>Main Slider</h3>
@@ -67,7 +62,7 @@ $role = 'Patient';
       <ul>
         <li><a href="#">Settings</a></li>
         <li><a href="../patient/book-appointment.php">Book New Appointment</a></li>
-        <li><a href="/patient/medical-history.php">View History</a></li>
+        <li><a href="../patient/medical-history.php">View History</a></li>
         <li><a href="../auth/logout.php">Logout</a></li>
       </ul>
       <button class="close-btn" id="closeProfile">Close</button>
