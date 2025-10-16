@@ -1,23 +1,38 @@
 <?php
+session_start();
 require_once 'includes/auth.php';
 
-if (!is_logged_in()) {
-    header("Location: auth/login.php");
-    exit();
+if (is_logged_in()) {
+     header("Location: includes/homepage.php");
+        exit();
 }
-
-// Redirect based on user role
-if (is_admin()) {
-    header("Location: admin/dashboard.php");
-} elseif (is_doctor()) {
-    header("Location: doctor/dashboard.php");
-} elseif (is_patient()) {
-    header("Location: patient/dashboard.php");
-} else {
-    // Fallback for unknown roles or if role is not set
-    echo "<h1>Welcome to the Hospital Management System!</h1>";
-    echo "<p>Your role is not recognized or set. Please contact support.</p>";
-    echo "<p><a href=\"auth/logout.php\">Logout</a></p>";
-}
-exit();
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome - Hospital Management System</title>
+  <link rel="stylesheet" href="assets/css/index.css" />
+</head>
+<body>
+
+  <!-- PUBLIC LANDING PAGE -->
+  <header class="navbar">
+    <div class="nav-left">
+      <a href="#services">Services</a>
+      <a href="#doctors">Doctors</a>
+    </div>
+    <div class="nav-right">
+      <a href="auth/register.php">Sign Up</a>
+      <a href="auth/login.php">Log In</a>
+    </div>
+  </header>
+
+  <section class="slider">
+    <h2>Welcome</h2>
+    <p>This is the landing page for guests and new visitors.</p>
+  </section>
+
+</body>
+</html>

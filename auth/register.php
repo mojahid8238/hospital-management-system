@@ -3,7 +3,7 @@ require_once '../includes/db.php';
 require_once '../includes/auth.php';
 
 if (is_logged_in()) {
-    header("Location: ../index.php");
+    header("Location: ../includes/homepage.php");
     exit();
 }
 
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $_SESSION['user_id'] = $user_id;
                                 $_SESSION['username'] = $username;
                                 $_SESSION['role'] = $role;
-                                header("Location: ../admin/dashboard.php");
+                                header("Location: ../includes/homepage.php");
                                 exit();
                             } else {
                                 $success_message = "Admin registration successful. Your account is pending approval from an existing admin.";
@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $_SESSION['user_id'] = $user_id;
                             $_SESSION['username'] = $username;
                             $_SESSION['role'] = $role;
-                            header("Location: ../doctor/dashboard.php");
+                            header("Location: ../includes/homepage.php");
                             exit();
                         }
                         $stmt_doc->close();
@@ -164,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $_SESSION['user_id'] = $user_id;
                             $_SESSION['username'] = $username;
                             $_SESSION['role'] = $role;
-                            header("Location: ../patient/dashboard.php");
+                            header("Location: ../includes/homepage.php");
                             exit();
                         }
                         $stmt_pat->close();

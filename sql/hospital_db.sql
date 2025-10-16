@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS admin (
     user_id INT NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
+    profile_pic VARCHAR(255) DEFAULT 'default-avatar.png',
     status ENUM('pending', 'approved') NOT NULL DEFAULT 'pending',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -26,9 +27,8 @@ CREATE TABLE IF NOT EXISTS doctors (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
-    specialization VARCHAR(100),
-    phone VARCHAR(20),
     email VARCHAR(100) UNIQUE,
+    profile_pic VARCHAR(255) DEFAULT 'default-avatar.png',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS patients (
     date_of_birth DATE,
     gender ENUM('Male', 'Female', 'Other'),
     address VARCHAR(255),
-    phone VARCHAR(20),
     email VARCHAR(100) UNIQUE,
+    profile_pic VARCHAR(255) DEFAULT 'default-avatar.png',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
