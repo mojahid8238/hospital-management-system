@@ -311,7 +311,7 @@ redirect_if_not_doctor();
             <img src="<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'default-avatar.png'); ?>" alt="Profile Picture" id="profileImageDisplay">
             <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
                 <label for="profilePicInput" class="upload-btn">Change Picture</label>
-                <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
+         123456       <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
                 <button type="submit" style="display: none;">Upload</button>
             </form>
             <div id="uploadMessage" style="margin-top: 10px; color: green;"></div>
@@ -321,7 +321,6 @@ redirect_if_not_doctor();
             <h4>Dashboards</h4>
             <ul>
                 <li><a href="dashboard.php">Doctor Dashboard</a></li>
-                <li><a href="../includes/homepage.php">Patient Homepage</a></li>
                 <li><a href="#">Settings</a></li>
                 <li><a href="../auth/logout.php">Logout</a></li>
             </ul>

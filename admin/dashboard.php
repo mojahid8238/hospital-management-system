@@ -325,7 +325,6 @@ redirect_if_not_admin();
             <h4>Dashboards</h4>
             <ul>
                 <li><a href="dashboard.php">Admin Dashboard</a></li>
-                <li><a href="../includes/homepage.php">Patient Homepage</a></li>
                 <li><a href="#">Settings</a></li>
                 <li><a href="../auth/logout.php">Logout</a></li>
             </ul>
