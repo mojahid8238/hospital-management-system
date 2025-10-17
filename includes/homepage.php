@@ -166,6 +166,9 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
                         
                         uploadMessage.textContent = 'Profile picture updated successfully!';
                         uploadMessage.style.color = 'green';
+                        setTimeout(() => {
+                            uploadMessage.textContent = '';
+                        }, 1000);
                     } else {
                         uploadMessage.textContent = data.message || 'Upload failed.';
                         uploadMessage.style.color = 'red';

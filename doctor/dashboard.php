@@ -143,6 +143,9 @@ $profilePicPath = $base_path . $relative_pic_path;
 
                             uploadMessage.textContent = 'Profile picture updated successfully!';
                             uploadMessage.style.color = 'green';
+                            setTimeout(() => {
+                                uploadMessage.textContent = '';
+                            }, 1000);
                         } else {
                             uploadMessage.textContent = data.message || 'Error uploading profile picture.';
                             uploadMessage.style.color = 'red';

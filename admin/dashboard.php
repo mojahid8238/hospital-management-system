@@ -161,6 +161,9 @@ $profile_pic_path = htmlspecialchars($base_url . $image_relative_path);
                         document.getElementById('profileToggle').src = newImagePath;
                         uploadMessage.textContent = 'Profile picture updated successfully!';
                         uploadMessage.style.color = 'green';
+                        setTimeout(() => {
+                            uploadMessage.textContent = '';
+                        }, 1000);
                     } else {
                         uploadMessage.textContent = data.message || 'Error uploading profile picture.';
                         uploadMessage.style.color = 'red';

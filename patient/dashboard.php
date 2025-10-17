@@ -24,7 +24,7 @@ redirect_if_not_patient();
             <a href="#">Patient Panel</a>
         </div>
         <div class="nav-right">
-            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
         </div>
     </header>
 
@@ -47,7 +47,7 @@ redirect_if_not_patient();
     <!-- Profile side overlay - kept for consistency, but can be removed if not needed -->
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" alt="Profile Picture" id="profileImageDisplay">
+            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay">
             <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
                 <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
                 <button type="submit" style="display: none;">Upload</button>
@@ -133,6 +133,9 @@ redirect_if_not_patient();
                             document.getElementById('profileToggle').src = newImagePath;
                             uploadMessage.textContent = 'Profile picture updated successfully!';
                             uploadMessage.style.color = 'green';
+                            setTimeout(() => {
+                                uploadMessage.textContent = '';
+                            }, 1000);
                         } else {
                             uploadMessage.textContent = data.message || 'Error uploading profile picture.';
                             uploadMessage.style.color = 'red';
