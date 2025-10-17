@@ -119,9 +119,7 @@ if (isset($_SESSION['user_id'])) {
             <div id="uploadMessage" style="margin-top: 10px; color: green;"></div>
             <!-- Display the initialized doctor name here -->
             <h3><?php echo htmlspecialchars($doctor_name); ?></h3>
-            <p>Role: Doctor</p>
             <hr>
-            <h4>Dashboards</h4>
             <ul>
                 <li><a href="dashboard.php">Doctor Dashboard</a></li>
                 <li><a href="#">Settings</a></li>

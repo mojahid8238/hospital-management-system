@@ -79,9 +79,7 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
             <h3><?php echo htmlspecialchars($_SESSION['name']); ?></h3>
       <hr>
       <ul>
-        <li><a href="#">Settings</a></li>
-        <li><a href="../patient/book-appointment.php">Book New Appointment</a></li>
-        
+        <li><a href="#">Settings</a></li>        
         <li><a href="../patient/dashboard.php">Dashboard</a></li>
         <li><a href="../auth/logout.php" class="logout-btn">Logout</a></li>
       </ul>

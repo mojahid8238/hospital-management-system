@@ -125,7 +125,6 @@ if ($result) {
             <div id="uploadMessage" style="margin-top: 10px; color: green;"></div>
             <h3><?php echo htmlspecialchars($_SESSION['name']); ?></h3>
             <hr>
-            <h4>Dashboards</h4>
             <ul>
                 <li><a href="dashboard.php">Patient Dashboard</a></li>
                 <li><a href="../includes/homepage.php">Patient Homepage</a></li>

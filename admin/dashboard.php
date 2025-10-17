@@ -72,10 +72,8 @@ $profile_pic_path = htmlspecialchars($base_url . $image_relative_path);
             <!-- Upload message container -->
             <div id="uploadMessage" style="font-size: 0.95rem; text-align: center; margin-top: 5px;"></div>
             
-            <h3><?php echo htmlspecialchars($_SESSION['username']); ?></h3>
-            <p>Role: Admin</p>
+            <h3><?php echo htmlspecialchars($_SESSION['name']); ?></h3>
             <hr>
-            <h4>Dashboards</h4>
             <ul>
                 <li><a href="dashboard.php">Admin Dashboard</a></li>
                 <li><a href="#">Settings</a></li>
