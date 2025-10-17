@@ -16,9 +16,8 @@ $profilePicPath = $base_path . $relative_pic_path;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Dashboard</title>
-    <link rel="stylesheet" href="../assets/css/medical-history.css"> 
-    <link rel="stylesheet" href="../assets/css/home.css"> 
     <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/shared-table.css">
 
 <body>
     <header class="navbar">

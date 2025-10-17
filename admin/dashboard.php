@@ -27,8 +27,7 @@ $profile_pic_path = htmlspecialchars($base_url . $image_relative_path);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <!-- Assets are also fixed to use relative paths as before, they work -->
-    <link rel="stylesheet" href="../assets/css/style.css"> <!-- General styles -->
-    <link rel="stylesheet" href="../assets/css/home.css"> <!-- For navbar and overlay styles -->
+    <link rel="stylesheet" href="../assets/css/style.css"> 
     <link rel="stylesheet" href="../assets/css/dashboard.css">
    
 

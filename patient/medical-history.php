@@ -33,46 +33,52 @@ if ($patient_id) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <title>Medical History</title>
+   <link rel="stylesheet" href="../assets/css/shared-table.css" />
+   
 </head>
 <body>
     <div class="container">
-    <h2>Your Medical History</h2>
-    <p>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>! Here is a summary of your medical history:</p>
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Your Medical History</h2>
+                <p class="text-muted">Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>! Here is a summary of your medical history:</p>
 
-    <h3>Past Appointments</h3>
-    <?php if (empty($medical_history)): ?>
-        <p>You have no past appointments recorded.</p>
-    <?php else: ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>Appointment ID</th>
-                    <th>Doctor Name</th>
-                    <th>Specialization</th>
-                    <th>Date & Time</th>
-                    <th>Reason</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($medical_history as $record): ?>
-                    <tr>
-                        <td><?php echo $record['id']; ?></td>
-                        <td><?php echo htmlspecialchars($record['doctor_name']); ?></td>
-                        <td><?php echo htmlspecialchars($record['specialization']); ?></td>
-                        <td><?php echo date('Y-m-d H:i', strtotime($record['appointment_date'])); ?></td>
-                        <td><?php echo htmlspecialchars($record['reason']); ?></td>
-                        <td><?php echo htmlspecialchars($record['status']); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php endif; ?>
-</div>
-    
+                <?php if (empty($medical_history)): ?>
+                    <p>You have no past appointments recorded.</p>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Appointment ID</th>
+                                    <th>Doctor Image</th>
+                                    <th>Doctor Name</th>
+                                    <th>Specialization</th>
+                                    <th>Date & Time</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($medical_history as $record): ?>
+                                    <tr>
+                                        <td data-label="Appointment ID"><?php echo $record['id']; ?></td>
+                                        <td data-label="Doctor Image"><img src="../<?php echo htmlspecialchars($record['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" alt="Dr. <?php echo htmlspecialchars($record['doctor_name']); ?>" class="rounded-circle"></td>
+                                        <td data-label="Doctor Name"><?php echo htmlspecialchars($record['doctor_name']); ?></td>
+                                        <td data-label="Specialization"><?php echo htmlspecialchars($record['specialization']); ?></td>
+                                        <td data-label="Date & Time"><?php echo date('Y-m-d H:i', strtotime($record['appointment_date'])); ?></td>
+                                        <td data-label="Reason"><?php echo htmlspecialchars($record['reason']); ?></td>
+                                        <td data-label="Status"><span class="badge bg-<?php echo strtolower(htmlspecialchars($record['status'])); ?>"><?php echo htmlspecialchars($record['status']); ?></span></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 

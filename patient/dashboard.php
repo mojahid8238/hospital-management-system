@@ -10,10 +10,8 @@ redirect_if_not_patient();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Dashboard</title>
-    <link rel="stylesheet" href="/hospital-management-system/assets/css/home.css"> <!-- For navbar and overlay styles -->
     <link rel="stylesheet" href="../assets/css/dashboard.css">
-    <link rel="stylesheet" href="../assets/css/medical-history.css"> 
-   <link rel="stylesheet" href="../assets/css/doctor-profile.css">
+    <link rel="stylesheet" href="../assets/css/shared-table.css">
 
 
 </head>
@@ -32,8 +30,9 @@ redirect_if_not_patient();
         <aside class="sidebar" id="patientSidebar">
             <h3>Patient Options</h3>
             <ul>
-                <li><a href="book-appointment.php" class="sidebar-link" data-target="book-appointment.php">Book New Appointment</a></li>
+                <li><a href="book-appointment.php">Book New Appointment</a></li>
                 <li><a href="medical-history.php" class="sidebar-link" data-target="medical-history.php">View Medical History</a></li>
+                
                 <!-- Add more patient-specific actions here -->
             </ul>
         </aside>
@@ -97,6 +96,25 @@ redirect_if_not_patient();
                         });
                 });
             });
+
+            // Load content based on URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const page = urlParams.get('page');
+            if (page) {
+                const targetPage = page + '.php';
+                fetch(targetPage)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const bodyContent = doc.querySelector('.container').innerHTML;
+                        mainContent.innerHTML = '<div class="container">' + bodyContent + '</div>';
+                    })
+                    .catch(error => {
+                        console.error('Error loading page:', error);
+                        mainContent.innerHTML = '<p style="color: red;">Error loading content.</p>';
+                    });
+            }
 
             // Profile overlay functionality (copied from homepage.php)
             const profileToggle = document.getElementById('profileToggle');
