@@ -364,6 +364,117 @@
         background-color: #0b5ed7;
     }
 
+    /* Doctor Profile Page Styles */
+    .doctor-profile-container {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .doctor-details-card, .booking-form-card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 30px;
+        margin-bottom: 20px;
+    }
+
+    .doctor-details-card {
+        flex: 2;
+        min-width: 300px;
+    }
+
+    .booking-form-card {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        border-bottom: 2px solid #e0e7ff;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+
+    .large-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin-right: 25px;
+    }
+
+    .large-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-header h3 {
+        margin: 0 0 5px 0;
+        font-size: 1.8rem;
+    }
+
+    .profile-header p {
+        margin: 0;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+        margin-top: 25px;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #f0f4f8;
+        padding-bottom: 5px;
+    }
+
+    .review-item {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .booking-form-card h4 {
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .booking-form-card label {
+        display: block;
+        margin-bottom: 5px;
+        margin-top: 15px;
+        font-weight: 600;
+    }
+
+    .booking-form-card input[type="file"],
+    .booking-form-card select,
+    .booking-form-card textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
+
+    .radio-group {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .booking-form-card .book-btn {
+        width: 100%;
+        margin-top: 20px;
+        font-size: 1.1rem;
+        padding: 12px;
+    }
+
     /* Profile overlay list styles */
     .profile-content ul {
         list-style: none;

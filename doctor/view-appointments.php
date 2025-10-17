@@ -194,6 +194,73 @@ if ($doctor_id) {
 
             searchPatient.addEventListener('input', filterAppointments);
             statusFilter.addEventListener('change', filterAppointments);
+
+            // Short polling for real-time updates
+            let currentAppointments = [];
+            function fetchAppointments() {
+                fetch('get_appointments.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (JSON.stringify(data) !== JSON.stringify(currentAppointments)) {
+                            currentAppointments = data;
+                            renderAppointments(data);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching appointments:', error));
+            }
+
+            function renderAppointments(appointments) {
+                const appointmentList = document.getElementById('appointmentList');
+                appointmentList.innerHTML = ''; // Clear the list
+
+                if (appointments.length === 0) {
+                    appointmentList.innerHTML = '<div class="alert alert-info mt-4">You have no upcoming appointments scheduled.</div>';
+                    return;
+                }
+
+                let serial = 1;
+                appointments.forEach(appointment => {
+                    const appointment_time = new Date(appointment.appointment_date + 'Z'); // Assume UTC
+                    const now = new Date();
+                    const interval = appointment_time - now;
+                    const days = Math.floor(interval / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((interval % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((interval % (1000 * 60 * 60)) / (1000 * 60));
+                    const remaining_time = `${days} Days ${hours} Hours ${minutes} Minutes`;
+
+                    const listItem = document.createElement('li');
+                    listItem.className = 'doctor-item';
+                    listItem.dataset.name = appointment.patient_name.toLowerCase();
+                    listItem.dataset.status = appointment.status.toLowerCase();
+
+                    listItem.innerHTML = `
+                        <div class="doctor-avatar">
+                            <img src="/hospital-management-system/${appointment.patient_profile_pic ?? 'assets/images/default-avatar.png'}" 
+                                alt="${appointment.patient_name}" 
+                                class="rounded-circle">
+                        </div>
+                        <div class="doctor-info">
+                            <h4>${appointment.patient_name}</h4>
+                            <p>Appointment: ${appointment.appointment_date.replace('T', ' ')}</p>
+                            <p>Remaining: ${remaining_time}</p>
+                        </div>
+                        <div class="doctor-info">
+                            <p>Reason: ${appointment.reason}</p>
+                            <p>Status: <span class="badge bg-${appointment.status.toLowerCase()}">${appointment.status}</span></p>
+                        </div>
+                        <div class="doctor-info">
+                            <a href="#" class="btn btn-sm btn-outline-primary">Attend</a>
+                            <a href="#" class="btn btn-sm btn-outline-success">Message</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger">Cancel</a>
+                        </div>
+                    `;
+                    appointmentList.appendChild(listItem);
+                });
+            }
+
+            // Initial fetch and then poll every 5 seconds
+            fetchAppointments();
+            setInterval(fetchAppointments, 5000);
         });
     </script>
 </body>

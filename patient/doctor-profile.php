@@ -1,8 +1,9 @@
 <?php
-date_default_timezone_set('UTC');
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 redirect_if_not_patient();
+
+date_default_timezone_set('UTC');
 
 $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -16,12 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($patient_id) {
         $doctor_id = $_GET['id'];
-        $appointment_date = $_POST['appointment_date'] ?? '';
+        $appointment_date_str = $_POST['appointment_date'] ?? '';
+        $appointment_time_str = $_POST['appointment_time'] ?? '';
+        $appointment_date = $appointment_date_str . ' ' . $appointment_time_str;
         $reason = $_POST['reason'] ?? '';
         $document = $_FILES['document'] ?? null;
 
-        if (empty($appointment_date) || empty($reason)) {
-            $message = "<p style='color: red;'>Appointment date and reason are required.</p>";
+        if (empty($appointment_date_str) || empty($appointment_time_str) || empty($reason)) {
+            $message = "<p style='color: red;'>All fields are required.</p>";
         } else {
             $document_name = '';
             if ($document && $document['error'] === UPLOAD_ERR_OK) {
@@ -38,13 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            $appointment_type = trim($_POST['appointment_type'] ?? 'Scheduled'); // Default to Scheduled if not set
+            $appointment_type = trim($_POST['appointment_type'] ?? 'Scheduled');
 
             $stmt = $conn->prepare("INSERT INTO appointments (patient_id, doctor_id, appointment_date, reason, image, status) VALUES (?, ?, ?, ?, ?, ?)");
             $stmt->bind_param("iissss", $patient_id, $doctor_id, $appointment_date, $reason, $document_name, $appointment_type);
 
             if ($stmt->execute()) {
-                $message = "<p style='color: green;'>Appointment booked successfully!</p>";
+                header('Location: medical-history.php');
+                exit();
             } else {
                 $message = "<p style='color: red;'>Error booking appointment: " . $stmt->error . "</p>";
             }
@@ -62,7 +66,6 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $doctor_id = $_GET['id'];
 
-// Fetch doctor details
 $stmt = $conn->prepare("SELECT name, image FROM doctors WHERE id = ?");
 $stmt->bind_param("i", $doctor_id);
 $stmt->execute();
@@ -82,67 +85,105 @@ if (!$name) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Profile</title>
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-   <link rel="stylesheet" href="../assets/css/doctor-profile.css">
 </head>
 <body>
     <header class="navbar">
         <div class="nav-left">
-            <a href="../includes/homepage.php">Patient Panel</a>
+            <button class="sidebar-toggle-btn" id="sidebarToggle">☰ Toggle Menu</button>
+            <a href="#">Patient Panel</a>
         </div>
-       
+        <div class="nav-right">
+            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+        </div>
     </header>
 
-    <div class="container">
-        <div class="profile-header">
-            <img src="../assets/images/<?php echo htmlspecialchars($image ?? 'default-avatar.png'); ?>" alt="Doctor Profile Picture">
-            <div class="profile-info">
-                <h2><?php echo htmlspecialchars($name); ?></h2>
+    <div class="main-wrapper">
+        <aside class="sidebar" id="patientSidebar">
+            <h3>Patient Options</h3>
+            <ul>
+                <li><a href="book-appointment.php">Book New Appointment</a></li>
+                <li><a href="dashboard.php?page=medical-history">View Medical History</a></li>
+            </ul>
+        </aside>
+
+        <main class="content-area" id="mainContent">
+            <div class="doctor-profile-container">
+                <div class="doctor-details-card">
+                    <div class="profile-summary">
+                        <div class="large-avatar">
+                            <img src="../assets/images/<?php echo htmlspecialchars($image ?? 'default-avatar.png'); ?>" alt="Doctor Profile Picture">
+                        </div>
+                        <div class="profile-header">
+                            <h3><?php echo htmlspecialchars($name); ?></h3>
+                            <p>★★★★☆ (4.5)</p>
+                        </div>
+                    </div>
+                    <div class="section-title">Description</div>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    <div class="section-title">Reviews</div>
+                    <div class="review-item">
+                        <p><strong>Patient A:</strong> "Great doctor, very professional."</p>
+                    </div>
+                    <div class="review-item">
+                        <p><strong>Patient B:</strong> "Highly recommended."</p>
+                    </div>
+                </div>
+                <div class="booking-form-card">
+                    <h4>Book an Appointment</h4>
+                    <?php if (!empty($message)) echo $message; ?>
+                    <form action="doctor-profile.php?id=<?php echo $doctor_id; ?>" method="POST" enctype="multipart/form-data">
+                        <label for="appointment_date">Appointment Date:</label>
+                        <select id="appointment_date" name="appointment_date" required>
+                            <?php
+                                for ($i = 0; $i < 7; $i++) {
+                                    $date = date('Y-m-d', strtotime("+" . $i . " days"));
+                                    echo "<option value='" . htmlspecialchars($date) . "'>" . htmlspecialchars($date) . "</option>";
+                                }
+                            ?>
+                        </select>
+                        
+                        <label for="appointment_time">Appointment Time:</label>
+                        <select id="appointment_time" name="appointment_time" required>
+                            <?php
+                                for ($h = 9; $h < 17; $h++) {
+                                    for ($m = 0; $m < 60; $m += 30) {
+                                        $time = sprintf('%02d:%02d', $h, $m);
+                                        echo "<option value='" . htmlspecialchars($time) . "'>" . htmlspecialchars($time) . "</option>";
+                                    }
+                                }
+                            ?>
+                        </select>
+
+                        <label for="reason">Reason for Appointment:</label>
+                        <textarea id="reason" name="reason" rows="4" required></textarea>
+
+                        <label for="document">Upload Document (optional):</label>
+                        <input type="file" id="document" name="document">
+
+                        <label>Appointment Type:</label>
+                        <div class="radio-group">
+                            <input type="radio" id="online" name="appointment_type" value="Online" required>
+                            <label for="online">Online</label>
+                            <input type="radio" id="offline" name="appointment_type" value="Offline" required>
+                            <label for="offline">Offline</label>
+                        </div>
+
+                        <button type="submit" class="book-btn">Book Appointment</button>
+                    </form>
+                </div>
             </div>
-        </div>
-
-        <div class="ratings">
-            <h4>Ratings</h4>
-            <p>★★★★☆ (4.5)</p>
-        </div>
-
-        <div class="description">
-            <h4>Description</h4>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-        </div>
-
-        <div class="reviews">
-            <h4>Reviews</h4>
-            <div class="review-item">
-                <p><strong>Patient A:</strong> "Great doctor, very professional."</p>
-            </div>
-            <div class="review-item">
-                <p><strong>Patient B:</strong> "Highly recommended."</p>
-            </div>
-        </div>
-
-        <div class="booking-form">
-            <h4>Book an Appointment</h4>
-            <?php if (!empty($message)) echo $message; ?>
-            <form action="doctor-profile.php?id=<?php echo $doctor_id; ?>" method="POST" enctype="multipart/form-data">
-                <label for="appointment_date">Appointment Date:</label>
-                <input type="datetime-local" id="appointment_date" name="appointment_date" required>
-                <br>
-                <label for="reason">Reason for Appointment:</label>
-                <textarea id="reason" name="reason" rows="4" required></textarea>
-                <br>
-                <label for="document">Upload Document (optional):</label>
-                <input type="file" id="document" name="document">
-                <br>
-                <label>Appointment Type:</label><br>
-                <input type="radio" id="online" name="appointment_type" value="Online" required>
-                <label for="online">Online</label><br>
-                <input type="radio" id="offline" name="appointment_type" value="Offline" required>
-                <label for="offline">Offline</label><br>
-                <br>
-                <button type="submit" class="book-btn">Book Appointment</button>
-            </form>
-        </div>
+        </main>
     </div>
+
+    <!-- Profile side overlay -->
+    <div class="profile-overlay" id="profileOverlay">
+        <!-- ... content from dashboard ... -->
+    </div>
+
+    <script>
+        // Script from dashboard
+    </script>
 </body>
 </html>
