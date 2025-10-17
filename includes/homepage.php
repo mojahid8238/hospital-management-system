@@ -86,7 +86,6 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
         <li><a href="../patient/dashboard.php">Dashboard</a></li>
         <li><a href="../auth/logout.php" class="logout-btn">Logout</a></li>
       </ul>
-      <button class="close-btn" id="closeProfile">Close</button>
     </div>
   </div>
 
@@ -113,18 +112,23 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
     document.addEventListener('DOMContentLoaded', function() {
         const profileToggle = document.getElementById('profileToggle');
         const profileOverlay = document.getElementById('profileOverlay');
-        const closeProfile = document.getElementById('closeProfile');
         const profilePicInput = document.getElementById('profilePicInput');
         const profilePicUploadForm = document.getElementById('profilePicUploadForm');
         const profileImageDisplay = document.getElementById('profileImageDisplay');
         const uploadMessage = document.getElementById('uploadMessage');
 
-        profileToggle.addEventListener('click', () => {
+        profileToggle.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent this click from immediately closing the overlay
             profileOverlay.classList.add('open');
         });
 
-        closeProfile.addEventListener('click', () => {
-            profileOverlay.classList.remove('open');
+        // Close overlay when clicking outside profile-content or profileToggle
+        document.addEventListener('click', function(event) {
+            if (profileOverlay.classList.contains('open') &&
+                !event.target.closest('.profile-content') &&
+                !event.target.closest('#profileToggle')) {
+                profileOverlay.classList.remove('open');
+            }
         });
 
         profileImageDisplay.addEventListener('click', function() {

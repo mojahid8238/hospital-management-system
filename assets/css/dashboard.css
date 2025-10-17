@@ -156,32 +156,55 @@
         line-height: 1.6;
     }
 
-    /* Profile overlay */
-    .profile-overlay {
-        position: fixed;
-        top: 0;
-        right: 0;
-        width: 320px;
-        max-width: 90vw;
-        height: 100%;
-        background-color: #fff;
-        box-shadow: -3px 0 18px rgba(0, 0, 0, 0.15);
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-        z-index: 1200;
-        display: flex;
-        flex-direction: column;
-        padding: 30px 25px;
-        overflow-y: auto;
-    }
-    .profile-overlay.open {
-        transform: translateX(0);
-    }
-    .profile-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
+/* PROFILE OVERLAY PANEL */
+.profile-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 100%;
+  background-color: #ffffff;
+  overflow: hidden;
+  /* Updated transition for a professional slide effect */
+  transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease-in-out; 
+  box-shadow: none; /* Start with no shadow when closed */
+  z-index: 1000;
+  /* Add border-radius to the visible (top-right, bottom-right) corners */
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+  /* Ensure this radius is hidden when width is 0 */
+  transform: translateX(100%); 
+}
+
+.profile-overlay.open {
+  width: 320px; /* Use the width of the profile-content for full visibility */
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.25); /* More pronounced shadow when open */
+  transform: translateX(0); /* Slide into view */
+}
+
+/* * The profile-content positioning needs to be removed or adjusted 
+ * because the animation is now handled by the parent .profile-overlay.
+ * The original code had conflicting animations.
+ * I am commenting out the original left-based animation block 
+ * and replacing it with direct content styling within the overlay.
+*/
+.profile-content {
+    /* Removed redundant box-shadow from here */
+    width: 100%; /* Take full width of the overlay */
+    max-width: none; 
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 25px;
+    position: relative; /* Make it relative */
+    left: auto;
+    top: auto;
+    transition: none; /* Remove conflicting transition */
+}
+/* Removed: .profile-overlay.open .profile-content { left: 0; } */
+    .profile-overlay.open .profile-content {
+        left: 0; /* Slides into view */
     }
     .profile-content img {
         width: 120px;

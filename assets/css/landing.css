@@ -15,10 +15,9 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 60px 20px;
+  padding: 120px 20px;
 }
 
 .landing-container h1 {
@@ -45,6 +44,8 @@ body {
   justify-content: center;
   gap: 20px;
   animation: fadeIn 2s ease-in;
+  margin-top: 8%;
+
 }
 
 .landing-container .buttons a {

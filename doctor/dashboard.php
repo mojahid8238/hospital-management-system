@@ -64,7 +64,7 @@ $profilePicPath = $base_path . $relative_pic_path;
                 <li><a href="#">Settings</a></li>
                 <li><a href="../auth/logout.php">Logout</a></li>
             </ul>
-            <button class="close-btn" id="closeProfile">Close</button>
+            
         </div>
     </div>
 
@@ -105,17 +105,26 @@ $profilePicPath = $base_path . $relative_pic_path;
             // Profile overlay functionality
             const profileToggle = document.getElementById('profileToggle');
             const profileOverlay = document.getElementById('profileOverlay');
-            const closeProfile = document.getElementById('closeProfile');
             const profilePicInput = document.getElementById('profilePicInput');
             // --- FIX 2: This now correctly finds a <form> element ---
             const profilePicUploadForm = document.getElementById('profilePicUploadForm'); 
             const profileImageDisplay = document.getElementById('profileImageDisplay');
             const uploadMessage = document.getElementById('uploadMessage');
 
-            profileToggle.addEventListener('click', () => {
+            profileToggle.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent this click from immediately closing the overlay
                 profileOverlay.classList.add('open');
             });
-            closeProfile.addEventListener('click', () => {
+
+            // Close overlay when clicking directly on the overlay background
+            profileOverlay.addEventListener('click', function(event) {
+                if (event.target === profileOverlay) {
+                    profileOverlay.classList.remove('open');
+                }
+            });
+
+            // Close overlay when clicking on the main content area
+            mainContent.addEventListener('click', () => {
                 profileOverlay.classList.remove('open');
             });
 

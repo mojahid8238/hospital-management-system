@@ -63,7 +63,7 @@ redirect_if_not_patient();
                 <li><a href="#">Settings</a></li>
                 <li><a href="../auth/logout.php">Logout</a></li>
             </ul>
-            <button class="close-btn" id="closeProfile">Close</button>
+            
         </div>
     </div>
 
@@ -101,16 +101,25 @@ redirect_if_not_patient();
             // Profile overlay functionality (copied from homepage.php)
             const profileToggle = document.getElementById('profileToggle');
             const profileOverlay = document.getElementById('profileOverlay');
-            const closeProfile = document.getElementById('closeProfile');
             const profilePicInput = document.getElementById('profilePicInput');
             const profilePicUploadForm = document.getElementById('profilePicUploadForm');
             const profileImageDisplay = document.getElementById('profileImageDisplay');
             const uploadMessage = document.getElementById('uploadMessage');
 
-            profileToggle.addEventListener('click', () => {
+            profileToggle.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent this click from immediately closing the overlay
                 profileOverlay.classList.add('open');
             });
-            closeProfile.addEventListener('click', () => {
+
+            // Close overlay when clicking directly on the overlay background
+            profileOverlay.addEventListener('click', function(event) {
+                if (event.target === profileOverlay) {
+                    profileOverlay.classList.remove('open');
+                }
+            });
+
+            // Close overlay when clicking on the main content area
+            mainContent.addEventListener('click', () => {
                 profileOverlay.classList.remove('open');
             });
 
