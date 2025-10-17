@@ -43,7 +43,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 
 // Fetch all patients
 $patients = [];
-$result = $conn->query("SELECT id, name, date_of_birth, gender, address, phone, email, username, image FROM patients");
+$result = $conn->query("SELECT id, name, date_of_birth, gender, address, phone, email, username, profile_pic FROM patients");
 if ($result) {
     while ($row = $result->fetch_assoc()) {
         $patients[] = $row;
@@ -70,7 +70,7 @@ if ($result) {
                             <th>Phone</th>
                             <th>Email</th>
                             <th>Username</th>
-                            <th>Image</th>
+                            <th>Picture</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -85,7 +85,7 @@ if ($result) {
                                 <td><?php echo $patient['phone']; ?></td>
                                 <td><?php echo $patient['email']; ?></td>
                                 <td><?php echo $patient['username']; ?></td>
-                                <td><img src="../assets/images/<?php echo $patient['image']; ?>" alt="<?php echo $patient['name']; ?>" width="50"></td>
+                                <td><img src="/hospital-management-system/<?php echo htmlspecialchars($patient['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" alt="Profile Pic" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"></td>
                                 <td class="action-links">
                                     <a href="edit-patient.php?id=<?php echo $patient['id']; ?>">Edit</a> |
                                     <a href="manage-patients.php?action=delete&id=<?php echo $patient['id']; ?>" onclick="return confirm('Are you sure you want to delete this patient and their associated user account?');">Delete</a>

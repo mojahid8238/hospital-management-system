@@ -33,10 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (password_verify($password, $hashed_password)) {
                 if ($role === 'admin') {
-                    $stmt_admin = $conn->prepare("SELECT status, profile_pic FROM admin WHERE user_id = ?");
+                    $stmt_admin = $conn->prepare("SELECT status, profile_pic, name FROM admin WHERE user_id = ?");
                     $stmt_admin->bind_param("i", $user_id);
                     $stmt_admin->execute();
-                    $stmt_admin->bind_result($status, $profile_pic);
+                    $stmt_admin->bind_result($status, $profile_pic, $name);
                     $stmt_admin->fetch();
                     $stmt_admin->close();
 
@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['username'] = $username;
                         $_SESSION['role'] = $role;
                         $_SESSION['profile_pic'] = $profile_pic;
+                        $_SESSION['name'] = $name;
                         header("Location: ../admin/dashboard.php");
                         exit();
                     } else {
@@ -56,22 +57,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['role'] = $role;
 
                     if ($role === 'doctor') {
-                        $stmt_doctor = $conn->prepare("SELECT profile_pic FROM doctors WHERE user_id = ?");
+                        $stmt_doctor = $conn->prepare("SELECT profile_pic, name FROM doctors WHERE user_id = ?");
                         $stmt_doctor->bind_param("i", $user_id);
                         $stmt_doctor->execute();
-                        $stmt_doctor->bind_result($profile_pic);
+                        $stmt_doctor->bind_result($profile_pic, $name);
                         $stmt_doctor->fetch();
                         $stmt_doctor->close();
                         $_SESSION['profile_pic'] = $profile_pic;
+                        $_SESSION['name'] = $name;
                         header("Location: ../doctor/dashboard.php");
                     } elseif ($role === 'patient') {
-                        $stmt_patient = $conn->prepare("SELECT profile_pic FROM patients WHERE user_id = ?");
+                        $stmt_patient = $conn->prepare("SELECT profile_pic, name FROM patients WHERE user_id = ?");
                         $stmt_patient->bind_param("i", $user_id);
                         $stmt_patient->execute();
-                        $stmt_patient->bind_result($profile_pic);
+                        $stmt_patient->bind_result($profile_pic, $name);
                         $stmt_patient->fetch();
                         $stmt_patient->close();
                         $_SESSION['profile_pic'] = $profile_pic;
+                        $_SESSION['name'] = $name;
                         header("Location: ../includes/homepage.php");
                     } else {
                         header("Location: ../includes/homepage.php");

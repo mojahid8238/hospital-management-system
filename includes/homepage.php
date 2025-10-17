@@ -17,7 +17,7 @@ $profilePic = ltrim($rawProfilePic, '../');
 // Now $profilePic contains: 'assets/images/profile_pics/patient_2.png' or 'assets/images/default-avatar.png'
 // -------------------------------------------------------------------------
 
-$username = $_SESSION['username'] ?? 'User'; // Use username from session
+$username = $_SESSION['name'] ?? 'User'; // Use name from session
 $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
 ?>
 
@@ -76,13 +76,12 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
       </form>
       <div id="uploadMessage" style="margin-top: 10px; color: green;"></div>
 
-      <h3><?php echo htmlspecialchars($username); ?></h3>
-      <p>Role: <?php echo htmlspecialchars($role); ?></p>
+            <h3><?php echo htmlspecialchars($_SESSION['name']); ?></h3>
       <hr>
       <ul>
         <li><a href="#">Settings</a></li>
         <li><a href="../patient/book-appointment.php">Book New Appointment</a></li>
-        <li><a href="../patient/medical-history.php">View History</a></li>
+        
         <li><a href="../patient/dashboard.php">Dashboard</a></li>
         <li><a href="../auth/logout.php" class="logout-btn">Logout</a></li>
       </ul>

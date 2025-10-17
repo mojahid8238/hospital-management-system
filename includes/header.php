@@ -28,9 +28,9 @@ require_once 'auth.php';
                     <?php elseif (is_patient()): ?>
                         <li><a href="/hospital-management-system/patient/dashboard.php">Patient Dashboard</a></li>
                         <li><a href="/hospital-management-system/patient/book-appointment.php">Book Appointment</a></li>
-                        <li><a href="/hospital-management-system/patient/medical-history.php">Medical History</a></li>
+                        
                     <?php endif; ?>
-                    <li><a href="/hospital-management-system/auth/logout.php">Logout (<?php echo $_SESSION['username']; ?>)</a></li>
+                    <li><a href="/hospital-management-system/auth/logout.php">Logout (<?php echo $_SESSION['name']; ?>)</a></li>
                 <?php else: ?>
                     <li><a href="/hospital-management-system/auth/login.php">Login</a></li>
                     <li><a href="/hospital-management-system/auth/register.php">Register</a></li>

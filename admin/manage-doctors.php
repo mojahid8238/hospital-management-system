@@ -1,4 +1,7 @@
 <?php
+$page_title = 'Manage Doctors';
+include 'base_admin.php';
+
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 redirect_if_not_admin();
@@ -120,7 +123,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 
 // Fetch all doctors
 $doctors = [];
-$result = $conn->query("SELECT d.id, d.name, s.name as specialization, d.degrees, d.schedule, d.phone, d.email, u.username FROM doctors d JOIN users u ON d.user_id = u.id JOIN specializations s ON d.specialization_id = s.id");
+$result = $conn->query("SELECT d.id, d.name, s.name as specialization, d.degrees, d.schedule, d.phone, d.email, u.username, d.profile_pic FROM doctors d JOIN users u ON d.user_id = u.id JOIN specializations s ON d.specialization_id = s.id");
 if ($result) {
     while ($row = $result->fetch_assoc()) {
         $doctors[] = $row;
@@ -168,6 +171,7 @@ if ($result) {
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Picture</th>
                     <th>Name</th>
                     <th>Specialization</th>
                     <th>Degrees</th>
@@ -182,6 +186,7 @@ if ($result) {
                 <?php foreach ($doctors as $doctor): ?>
                     <tr>
                         <td><?php echo $doctor['id']; ?></td>
+                        <td><img src="/hospital-management-system/<?php echo htmlspecialchars($doctor['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" alt="Profile Pic" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"></td>
                         <td><?php echo $doctor['name']; ?></td>
                         <td><?php echo $doctor['specialization']; ?></td>
                         <td><?php echo $doctor['degrees']; ?></td>

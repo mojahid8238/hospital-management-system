@@ -42,12 +42,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $appointment_type = trim($_POST['appointment_type'] ?? 'Scheduled');
+            $status = 'Pending'; // Default status for new appointments
 
-            $stmt = $conn->prepare("INSERT INTO appointments (patient_id, doctor_id, appointment_date, reason, image, status) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("iissss", $patient_id, $doctor_id, $appointment_date, $reason, $document_name, $appointment_type);
+            $stmt = $conn->prepare("INSERT INTO appointments (patient_id, doctor_id, appointment_date, reason, image, status, type) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("iisssss", $patient_id, $doctor_id, $appointment_date, $reason, $document_name, $status, $appointment_type);
 
             if ($stmt->execute()) {
-                header('Location: medical-history.php');
+                
+                header('Location: dashboard.php');
                 exit();
             } else {
                 $message = "<p style='color: red;'>Error booking appointment: " . $stmt->error . "</p>";
@@ -104,7 +106,8 @@ if (!$name) {
             <h3>Patient Options</h3>
             <ul>
                 <li><a href="book-appointment.php">Book New Appointment</a></li>
-                <li><a href="dashboard.php?page=medical-history">View Medical History</a></li>
+                <li><a href="dashboard.php">Your Appointments & History</a></li>
+                <li><a href="cancelled-appointments.php">Cancelled Appointments</a></li>
             </ul>
         </aside>
 

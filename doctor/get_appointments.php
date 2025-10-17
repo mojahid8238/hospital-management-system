@@ -21,8 +21,50 @@ $stmt->close();
 
 $appointments = [];
 if ($doctor_id) {
-    $stmt = $conn->prepare("SELECT a.id, p.name as patient_name, p.profile_pic as patient_profile_pic, a.appointment_date, a.reason, a.status FROM appointments a JOIN patients p ON a.patient_id = p.id WHERE a.doctor_id = ? AND a.appointment_date > NOW() AND a.status != 'Cancelled' ORDER BY a.appointment_date ASC");
-    $stmt->bind_param("i", $doctor_id);
+    // Sorting parameters
+    $sort_by = isset($_GET['sort_by']) ? $_GET['sort_by'] : 'appointment_date';
+    $order = isset($_GET['order']) && in_array(strtoupper($_GET['order']), ['ASC', 'DESC']) ? strtoupper($_GET['order']) : 'ASC';
+
+    // Filtering parameters
+    $filter_status = isset($_GET['status']) ? $_GET['status'] : 'upcoming'; // 'upcoming' is a custom status for default view
+    $filter_type = isset($_GET['type']) ? $_GET['type'] : 'all';
+    $search_term = isset($_GET['search']) ? $_GET['search'] : '';
+
+    $sql = "SELECT a.id, p.name as patient_name, p.profile_pic as patient_profile_pic, a.appointment_date, a.reason, a.status, a.type FROM appointments a JOIN patients p ON a.patient_id = p.id WHERE a.doctor_id = ?";
+
+    $params = [$doctor_id];
+    $types = "i";
+
+    if ($filter_status === 'upcoming') {
+        $sql .= " AND a.appointment_date > NOW() AND a.status != 'Cancelled'";
+    } elseif ($filter_status !== 'all') {
+        $sql .= " AND a.status = ?";
+        $params[] = $filter_status;
+        $types .= "s";
+    }
+
+    if ($filter_type !== 'all') {
+        $sql .= " AND a.type = ?";
+        $params[] = $filter_type;
+        $types .= "s";
+    }
+
+    if (!empty($search_term)) {
+        $sql .= " AND p.name LIKE ?";
+        $params[] = "%".$search_term."%";
+        $types .= "s";
+    }
+
+    // Validate sort_by column to prevent SQL injection
+    $allowed_sort_columns = ['patient_name', 'appointment_date', 'status'];
+    if (!in_array($sort_by, $allowed_sort_columns)) {
+        $sort_by = 'appointment_date'; // Default to a safe column
+    }
+
+    $sql .= " ORDER BY " . $sort_by . " " . $order;
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param($types, ...$params);
     $stmt->execute();
     $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
@@ -33,4 +75,3 @@ if ($doctor_id) {
 
 header('Content-Type: application/json');
 echo json_encode($appointments);
-?>

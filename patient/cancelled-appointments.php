@@ -57,7 +57,7 @@ if ($patient_id) {
             <h3>Patient Options</h3>
             <ul>
                 <li><a href="book-appointment.php">Book New Appointment</a></li>
-                <li><a href="medical-history.php">View Medical History</a></li>
+                <li><a href="dashboard.php">Your Appointments & History</a></li>
                 <li><a href="cancelled-appointments.php">Cancelled Appointments</a></li>
             </ul>
         </aside>
@@ -86,7 +86,10 @@ if ($patient_id) {
                             $interval = $now->diff($appointment_time);
                             $remaining_time = $interval->format('%a Days %h Hours %i Minutes');
                         ?>
-                            <li class="doctor-item" data-name="<?php echo strtolower(htmlspecialchars($appointment['doctor_name'])); ?>" data-status="<?php echo strtolower(htmlspecialchars($appointment['status'])); ?>">
+                            <li class="doctor-item" 
+                                data-name="<?php echo strtolower(htmlspecialchars($appointment['doctor_name'])); ?>" 
+                                data-status="<?php echo strtolower(htmlspecialchars($appointment['status'])); ?>"
+                                id="appointment-<?php echo $appointment['id']; ?>">
                                 <div class="doctor-avatar">
                                     <img src="/hospital-management-system/<?php echo htmlspecialchars($appointment['doctor_profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" 
                                         alt="<?php echo htmlspecialchars($appointment['doctor_name']); ?>" 
@@ -102,7 +105,7 @@ if ($patient_id) {
                                     <p>Status: <span class="badge bg-<?php echo strtolower(htmlspecialchars($appointment['status'])); ?>"><?php echo htmlspecialchars(ucfirst($appointment['status'])); ?></span></p>
                                 </div>
                                 <div class="doctor-info">
-                                    <!-- No action buttons for cancelled appointments -->
+                                    <button class="btn btn-sm btn-outline-danger remove-appointment-btn" data-appointment-id="<?php echo $appointment['id']; ?>">Remove</button>
                                 </div>
                             </li>
                         <?php endforeach; ?>
@@ -121,8 +124,7 @@ if ($patient_id) {
                 <button type="submit" style="display: none;">Upload</button>
             </form>
             <div id="uploadMessage" style="margin-top: 10px; color: green;"></div>
-            <h3><?php echo htmlspecialchars($_SESSION['username']); ?></h3>
-            <p>Role: Patient</p>
+            <h3><?php echo htmlspecialchars($_SESSION['name']); ?></h3>
             <hr>
             <h4>Dashboards</h4>
             <ul>
@@ -181,6 +183,53 @@ if ($patient_id) {
             }
 
             searchDoctor.addEventListener('input', filterAppointments);
+
+            function handleDeleteButtonClick(event) {
+                const button = event.target.closest('.remove-appointment-btn');
+                if (!button) return;
+
+                const appointmentId = button.dataset.appointmentId;
+                if (confirm('Are you sure you want to permanently remove this cancelled appointment? This action cannot be undone.')) {
+                    button.disabled = true;
+
+                    fetch('delete_cancelled_appointment.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ appointment_id: appointmentId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const listItem = document.getElementById(`appointment-${appointmentId}`);
+                            if (listItem) {
+                                listItem.style.transition = 'opacity 0.5s ease';
+                                listItem.style.opacity = '0';
+                                setTimeout(() => {
+                                    listItem.remove();
+                                    // Optionally, update a message if no appointments are left
+                                    const appointmentList = document.getElementById('appointmentList');
+                                    if (appointmentList && appointmentList.children.length === 0) {
+                                        const container = document.querySelector('.container.panel-card');
+                                        if (container) {
+                                            container.innerHTML += '<div class="alert alert-info mt-4">You have no cancelled appointments.</div>';
+                                        }
+                                    }
+                                }, 500);
+                            }
+                        } else {
+                            alert('Error: ' + data.message);
+                            button.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please try again.');
+                        button.disabled = false;
+                    });
+                }
+            }
+
+            document.addEventListener('click', handleDeleteButtonClick);
         });
     </script>
 </body>

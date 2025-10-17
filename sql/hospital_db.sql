@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS appointments (
     doctor_id INT NOT NULL,
     appointment_date DATETIME NOT NULL,
     reason TEXT,
-    status ENUM('Scheduled', 'Completed', 'Cancelled') DEFAULT 'Scheduled',
+    status ENUM('Pending', 'Scheduled', 'Completed', 'Cancelled', 'Online', 'Offline') DEFAULT 'Pending',
+    type VARCHAR(20) NOT NULL DEFAULT 'Scheduled',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
     FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
@@ -107,4 +108,4 @@ ALTER TABLE `doctors` DROP COLUMN IF EXISTS `specialization`;
 ALTER TABLE `doctors` ADD `degrees` VARCHAR(255);
 
 -- Modify appointments table to include 'Online' and 'Offline' status
-ALTER TABLE `appointments` MODIFY COLUMN `status` ENUM('Scheduled', 'Completed', 'Cancelled', 'Online', 'Offline') DEFAULT 'Scheduled';
+

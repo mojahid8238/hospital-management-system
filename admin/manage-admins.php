@@ -1,4 +1,7 @@
 <?php
+$page_title = 'Manage Admins';
+include 'base_admin.php';
+
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 

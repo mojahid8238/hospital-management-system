@@ -40,9 +40,8 @@ if ($result) {
             <h3>Patient Options</h3>
             <ul>
                 <li><a href="book-appointment.php">Book New Appointment</a></li>
-                <li><a href="medical-history.php">View Medical History</a></li>
+                <li><a href="dashboard.php">Your Appointments & History</a></li>
                 <li><a href="cancelled-appointments.php">Cancelled Appointments</a></li>
-                <!-- Add more patient-specific actions here -->
             </ul>
         </aside>
 
@@ -124,8 +123,7 @@ if ($result) {
                 <button type="submit" style="display: none;">Upload</button>
             </form>
             <div id="uploadMessage" style="margin-top: 10px; color: green;"></div>
-            <h3><?php echo htmlspecialchars($_SESSION['username']); ?></h3>
-            <p>Role: Patient</p>
+            <h3><?php echo htmlspecialchars($_SESSION['name']); ?></h3>
             <hr>
             <h4>Dashboards</h4>
             <ul>

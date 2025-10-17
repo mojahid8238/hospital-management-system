@@ -19,18 +19,17 @@ if ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-$medical_history = [];
-if ($patient_id) {
-    $stmt = $conn->prepare("SELECT a.id, d.name as doctor_name, d.profile_pic, s.name as specialization, a.appointment_date, a.reason, a.status FROM appointments a JOIN doctors d ON a.doctor_id = d.id JOIN specializations s ON d.specialization_id = s.id WHERE a.patient_id = ? AND a.status != 'Cancelled' ORDER BY a.appointment_date DESC");
-    $stmt->bind_param("i", $patient_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $medical_history[] = $row;
+    $appointments = [];
+    if ($patient_id) {
+        $stmt = $conn->prepare("SELECT a.id, d.name as doctor_name, d.profile_pic, s.name as specialization, a.appointment_date, a.reason, a.status, a.type FROM appointments a JOIN doctors d ON a.doctor_id = d.id JOIN specializations s ON d.specialization_id = s.id WHERE a.patient_id = ? AND a.status != 'Cancelled'");
+        $stmt->bind_param("i", $patient_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $appointments[] = $row;
+        }
+        $stmt->close();
     }
-    $stmt->close();
-}
 
-header('Content-Type: application/json');
-echo json_encode($medical_history);
-?>
+    header('Content-Type: application/json');
+    echo json_encode($appointments);?>

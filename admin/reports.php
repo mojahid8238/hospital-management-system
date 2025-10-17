@@ -13,7 +13,7 @@ $total_appointments = $conn->query("SELECT COUNT(*) FROM appointments")->fetch_r
 
 <div class="container">
     <h2>Admin Reports</h2>
-    <p>Welcome, Admin <?php echo $_SESSION['username']; ?>! Here are some system reports:</p>
+    <p>Welcome, Admin <?php echo $_SESSION['name']; ?>! Here are some system reports:</p>
 
     <div class="report-card">
         <h3>Total Doctors</h3>
