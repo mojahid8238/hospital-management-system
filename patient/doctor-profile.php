@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('UTC');
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 redirect_if_not_patient();

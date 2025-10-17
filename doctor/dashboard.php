@@ -34,7 +34,7 @@ $profilePicPath = $base_path . $relative_pic_path;
         <aside class="sidebar" id="doctorSidebar">
             <h3>Doctor Options</h3>
             <ul>
-                <li><a href="view-appointments.php" class="sidebar-link" data-target="view-appointments.php">View Your Appointments</a></li>
+                <li><a href="view-appointments.php">View Your Appointments</a></li>
                 </ul>
         </aside>
 
