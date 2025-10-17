@@ -17,7 +17,7 @@ $medical_history = [];
 if ($patient_id) {
     // Fetch past appointments for the patient
     // FIXED: Join with specializations table (s) to get the specialization name
-    $stmt = $conn->prepare("SELECT a.id, d.name as doctor_name, s.name as specialization, a.appointment_date, a.reason, a.status FROM appointments a JOIN doctors d ON a.doctor_id = d.id JOIN specializations s ON d.specialization_id = s.id WHERE a.patient_id = ? ORDER BY a.appointment_date DESC");
+    $stmt = $conn->prepare("SELECT a.id, d.name as doctor_name, d.profile_pic, s.name as specialization, a.appointment_date, a.reason, a.status FROM appointments a JOIN doctors d ON a.doctor_id = d.id JOIN specializations s ON d.specialization_id = s.id WHERE a.patient_id = ? ORDER BY a.appointment_date DESC");
     $stmt->bind_param("i", $patient_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -34,7 +34,7 @@ if ($patient_id) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-   <link rel="stylesheet" href="../assets/css/medical-history.css" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 </head>
 <body>
