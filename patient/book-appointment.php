@@ -40,7 +40,8 @@ if ($result) {
             <h3>Patient Options</h3>
             <ul>
                 <li><a href="book-appointment.php">Book New Appointment</a></li>
-                <li><a href="dashboard.php?page=medical-history">View Medical History</a></li>
+                <li><a href="medical-history.php">View Medical History</a></li>
+                <li><a href="cancelled-appointments.php">Cancelled Appointments</a></li>
                 <!-- Add more patient-specific actions here -->
             </ul>
         </aside>
@@ -137,42 +138,28 @@ if ($result) {
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const patientSidebar = document.getElementById('patientSidebar');
-            sidebarToggle.addEventListener('click', () => {
-                patientSidebar.classList.toggle('closed');
-            });
-
-            const profileToggle = document.getElementById('profileToggle');
-            const profileOverlay = document.getElementById('profileOverlay');
-            profileToggle.addEventListener('click', (event) => {
-                event.stopPropagation();
-                profileOverlay.classList.add('open');
-            });
-
-            profileOverlay.addEventListener('click', function(event) {
-                if (event.target === profileOverlay) {
-                    profileOverlay.classList.remove('open');
-                }
-            });
-
-            const mainContent = document.getElementById('mainContent');
-            mainContent.addEventListener('click', () => {
-                profileOverlay.classList.remove('open');
-            });
-
+        function initializeDoctorFilters() {
             const searchDoctor = document.getElementById('searchDoctor');
             const specializationFilter = document.getElementById('specializationFilter');
             const doctorList = document.getElementById('doctorList');
-            const doctorItems = Array.from(doctorList.getElementsByClassName('doctor-item')); 
+            // Ensure doctorList exists before proceeding
+            if (!doctorList) return;
 
-            searchDoctor.addEventListener('input', filterDoctors);
-            specializationFilter.addEventListener('change', filterDoctors);
+            const doctorItems = Array.from(doctorList.getElementsByClassName('doctor-item'));
+
+            // Remove existing listeners to prevent duplicates if called multiple times
+            if (searchDoctor) {
+                searchDoctor.removeEventListener('input', filterDoctors);
+                searchDoctor.addEventListener('input', filterDoctors);
+            }
+            if (specializationFilter) {
+                specializationFilter.removeEventListener('change', filterDoctors);
+                specializationFilter.addEventListener('change', filterDoctors);
+            }
 
             function filterDoctors() {
-                const searchTerm = searchDoctor.value.toLowerCase();
-                const specTerm = specializationFilter.value.toLowerCase();
+                const searchTerm = searchDoctor ? searchDoctor.value.toLowerCase() : '';
+                const specTerm = specializationFilter ? specializationFilter.value.toLowerCase() : '';
 
                 doctorItems.forEach(item => {
                     const name = item.dataset.name;
@@ -187,6 +174,123 @@ if ($result) {
                     }
                 });
             }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const patientSidebar = document.getElementById('patientSidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+            sidebarToggle.addEventListener('click', () => {
+                patientSidebar.classList.toggle('closed');
+            });
+
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetPage = this.dataset.target;
+                    fetch(targetPage)
+                        .then(response => response.text())
+                        .then(html => {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const bodyContent = doc.querySelector('.container').innerHTML;
+                            mainContent.innerHTML = '<div class="container">' + bodyContent + '</div>';
+                            initializeDoctorFilters(); // Re-initialize after content update
+                        })
+                        .catch(error => {
+                            console.error('Error loading page:', error);
+                            mainContent.innerHTML = '<p style="color: red;">Error loading content.</p>';
+                        });
+                });
+            });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const page = urlParams.get('page');
+            if (page) {
+                const targetPage = page + '.php';
+                fetch(targetPage)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const bodyContent = doc.querySelector('.container').innerHTML;
+                        mainContent.innerHTML = '<div class="container">' + bodyContent + '</div>';
+                        initializeDoctorFilters(); // Re-initialize after content update
+                    })
+                    .catch(error => {
+                        console.error('Error loading page:', error);
+                        mainContent.innerHTML = '<p style="color: red;">Error loading content.</p>';
+                    });
+            }
+
+            const profileToggle = document.getElementById('profileToggle');
+            const profileOverlay = document.getElementById('profileOverlay');
+            const profilePicInput = document.getElementById('profilePicInput');
+            const profilePicUploadForm = document.getElementById('profilePicUploadForm');
+            const profileImageDisplay = document.getElementById('profileImageDisplay');
+            const uploadMessage = document.getElementById('uploadMessage');
+
+            profileToggle.addEventListener('click', (event) => {
+                event.stopPropagation();
+                profileOverlay.classList.add('open');
+            });
+
+            document.addEventListener('click', function(event) {
+                // Check if the click is outside the profile overlay and not on the profile toggle button
+                if (!profileOverlay.contains(event.target) && !profileToggle.contains(event.target)) {
+                    profileOverlay.classList.remove('open');
+                }
+            });
+
+
+
+            const profileContent = document.querySelector('.profile-content');
+            if (profileContent) {
+                profileContent.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                });
+            }
+
+
+
+            profileImageDisplay.addEventListener('click', function() {
+                profilePicInput.click();
+            });
+
+            profilePicInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const formData = new FormData(profilePicUploadForm);
+                    fetch(profilePicUploadForm.action, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const newImagePath = '/hospital-management-system/' + data.profile_pic_path + '?t=' + new Date().getTime();
+                            profileImageDisplay.src = newImagePath;
+                            document.getElementById('profileToggle').src = newImagePath;
+                            uploadMessage.textContent = 'Profile picture updated successfully!';
+                            uploadMessage.style.color = 'green';
+                            setTimeout(() => {
+                                uploadMessage.textContent = '';
+                            }, 1000);
+                        } else {
+                            uploadMessage.textContent = data.message || 'Error uploading profile picture.';
+                            uploadMessage.style.color = 'red';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        uploadMessage.textContent = 'An error occurred during upload.';
+                        uploadMessage.style.color = 'red';
+                    });
+                }
+            });
+
+            initializeDoctorFilters(); // Initial call on DOMContentLoaded
         });
     </script>
 </body>

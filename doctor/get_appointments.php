@@ -21,7 +21,7 @@ $stmt->close();
 
 $appointments = [];
 if ($doctor_id) {
-    $stmt = $conn->prepare("SELECT a.id, p.name as patient_name, p.profile_pic as patient_profile_pic, a.appointment_date, a.reason, a.status FROM appointments a JOIN patients p ON a.patient_id = p.id WHERE a.doctor_id = ? AND a.appointment_date > NOW() ORDER BY a.appointment_date ASC");
+    $stmt = $conn->prepare("SELECT a.id, p.name as patient_name, p.profile_pic as patient_profile_pic, a.appointment_date, a.reason, a.status FROM appointments a JOIN patients p ON a.patient_id = p.id WHERE a.doctor_id = ? AND a.appointment_date > NOW() AND a.status != 'Cancelled' ORDER BY a.appointment_date ASC");
     $stmt->bind_param("i", $doctor_id);
     $stmt->execute();
     $result = $stmt->get_result();

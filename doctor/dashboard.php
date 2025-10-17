@@ -35,6 +35,7 @@ $profilePicPath = $base_path . $relative_pic_path;
             <h3>Doctor Options</h3>
             <ul>
                 <li><a href="view-appointments.php">View Your Appointments</a></li>
+                <li><a href="cancelled-appointments.php">Cancelled Appointments</a></li>
                 </ul>
         </aside>
 

@@ -32,6 +32,7 @@ redirect_if_not_patient();
             <ul>
                 <li><a href="book-appointment.php">Book New Appointment</a></li>
                 <li><a href="medical-history.php" class="sidebar-link" data-target="medical-history.php">View Medical History</a></li>
+                <li><a href="cancelled-appointments.php" class="sidebar-link" data-target="cancelled-appointments.php">Cancelled Appointments</a></li>
                 
                 <!-- Add more patient-specific actions here -->
             </ul>
