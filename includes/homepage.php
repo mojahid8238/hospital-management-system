@@ -25,7 +25,7 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Patient Homepage</title>
+  <title>Homepage</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../assets/css/login-signup.css">
   <link rel="stylesheet" href="../assets/css/home.css" />

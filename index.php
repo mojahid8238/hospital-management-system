@@ -2,6 +2,7 @@
 session_start();
 require_once 'includes/auth.php';
 
+// Redirect logged-in users based on role
 if (is_logged_in()) {
     if (is_admin()) {
         header("Location: admin/dashboard.php");
@@ -13,32 +14,41 @@ if (is_logged_in()) {
     exit();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Welcome - Hospital Management System</title>
-  <link rel="stylesheet" href="assets/css/index.css" />
-</head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hospital Management System</title>
+   <link rel="stylesheet" href="assets/css/landing.css">
+  
+</head>-
 <body>
+  <div class="floating-bg">
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="geometric-shape"></div>
+    <div class="geometric-shape"></div>
+    <div class="geometric-shape"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
 
-  <!-- PUBLIC LANDING PAGE -->
-  <header class="navbar">
-    <div class="nav-left">
-      <a href="#services">Services</a>
-      <a href="#doctors">Doctors</a>
+  <div class="landing-container">
+    <h1>Welcome to Our Hospital Management System</h1>
+    <p>Efficiently manage patients, appointments, staff, and hospital resources — all in one secure platform.</p>
+    <div class="buttons">
+      <a href="auth/login.php">Login</a>
+      <a href="auth/register.php">Register</a>
+      <a href="about.php">Learn More</a>
     </div>
-    <div class="nav-right">
-      <a href="auth/register.php">Sign Up</a>
-      <a href="auth/login.php">Log In</a>
-    </div>
-  </header>
-
-  <section class="slider">
-    <h2>Welcome</h2>
-    <p>This is the landing page for guests and new visitors.</p>
-  </section>
-
+  </div>
 </body>
+
 </html>
