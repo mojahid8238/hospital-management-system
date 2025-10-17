@@ -27,37 +27,19 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
   <meta charset="UTF-8" />
   <title>Homepage</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="../assets/css/login-signup.css">
   <link rel="stylesheet" href="../assets/css/home.css" />
   <link rel="stylesheet" href="../assets/css/medical-history.css" />
 
  
 </head>
-<body>
-  <div class="floating-bg">
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="geometric-shape"></div>
-    <div class="geometric-shape"></div>
-    <div class="geometric-shape"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-  </div>
-<body>
 
   <header class="navbar">
     <div class="nav-left">
-        <a href="#">Patient Homepage</a>
+        <a href="">Homepage</a>
     </div>
     <div class="nav-right">
       <!-- FIX 2: Prepend the ONLY necessary '../' to the CLEAN path ($profilePic) -->
-      <img src="../<?php echo htmlspecialchars($profilePic); ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+      <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
     </div>
   </header>
 
@@ -87,7 +69,7 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
   <div class="profile-overlay" id="profileOverlay">
     <div class="profile-content">
       <!-- FIX 3: Prepend the ONLY necessary '../' to the CLEAN path ($profilePic) -->
-      <img src="../<?php echo htmlspecialchars($profilePic); ?>" alt="Profile Picture" id="profileImageDisplay">
+      <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay">
       <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
         <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
         <button type="submit" style="display: none;">Upload</button>
@@ -109,6 +91,25 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
   </div>
 
   <script>
+    // Global slider functions
+    let slideIndex = { 'mainSlider': 0, 'promoSlider': 0 };
+
+    function plusSlides(n, sliderId) {
+        showSlides(slideIndex[sliderId] += n, sliderId);
+    }
+
+    function showSlides(n, sliderId) {
+        let i;
+        let slider = document.getElementById(sliderId);
+        let slides = slider.getElementsByTagName('img');
+        if (n >= slides.length) { slideIndex[sliderId] = 0 }
+        if (n < 0) { slideIndex[sliderId] = slides.length - 1 }
+        for (i = 0; i < slides.length; i++) {
+            slides[i].classList.remove('active');
+        }
+        slides[slideIndex[sliderId]].classList.add('active');
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const profileToggle = document.getElementById('profileToggle');
         const profileOverlay = document.getElementById('profileOverlay');
@@ -179,8 +180,7 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
             }
         });
 
-        // Slider functionality
-        let slideIndex = { 'mainSlider': 0, 'promoSlider': 0 };
+        // Slider functionality initialization
         showSlides(0, 'mainSlider');
         showSlides(0, 'promoSlider');
 
@@ -192,22 +192,6 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
         setInterval(() => {
             plusSlides(1, 'promoSlider');
         }, 10000);
-
-        function plusSlides(n, sliderId) {
-            showSlides(slideIndex[sliderId] += n, sliderId);
-        }
-
-        function showSlides(n, sliderId) {
-            let i;
-            let slider = document.getElementById(sliderId);
-            let slides = slider.getElementsByTagName('img');
-            if (n >= slides.length) { slideIndex[sliderId] = 0 }
-            if (n < 0) { slideIndex[sliderId] = slides.length - 1 }
-            for (i = 0; i < slides.length; i++) {
-                slides[i].classList.remove('active');
-            }
-            slides[slideIndex[sliderId]].classList.add('active');
-        }
     });
   </script>
 

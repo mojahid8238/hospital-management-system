@@ -7,6 +7,15 @@ require_once '../includes/db.php';
 require_once '../includes/auth.php';
 redirect_if_not_patient();
 
+// --- FIX 1: Robustly determine the absolute profile picture path ---
+// This handles both custom and default pictures reliably.
+// Use a default path that is relative to the project root (no ../)
+$rawProfilePic = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
+// Use ltrim to safely remove the leading "../" if it exists.
+$profilePic = str_starts_with($rawProfilePic, '../') ? substr($rawProfilePic, 3) : $rawProfilePic; 
+// Now $profilePic contains: 'assets/images/profile_pics/patient_2.png' or 'assets/images/default-avatar.png'
+// -------------------------------------------------------------------------
+
 // Fetch doctors
 $doctors = [];
 // UPDATED: Ensure d.profile_pic is included
@@ -26,7 +35,7 @@ if ($result) {
     <title>Book Appointment</title>
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <!-- Linking to the external style.css -->
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/style.css"> 
    <link rel="stylesheet" href="../assets/css/appointment.css" />
    
@@ -34,10 +43,10 @@ if ($result) {
 <body>
     <header class="navbar">
         <div class="nav-left">
-            <a href="../includes/homepage.php">Patient Panel</a>
+            <a href="../includes/homepage.php">Home Page</a>
         </div>
         <div class="nav-right">
-            <span class="user-icon" id="profileToggle"><i class="fas fa-user-circle"></i></span>
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
         </div>
     </header>
 
