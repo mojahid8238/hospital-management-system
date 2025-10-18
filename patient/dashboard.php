@@ -54,29 +54,30 @@ $stmt->close();
             <div class="container panel-card">
                 <h2 class="card-title mb-3">Welcome, <?php echo htmlspecialchars($patient_name); ?>!</h2>
 
-                <!-- Upcoming Appointments Section -->
                 <div class="appointments-section mb-5">
-                    <h3 class="mb-3">Your Upcoming Appointments</h3>
+                    <h3 class="mb-3">Your Confirmed Appointments</h3>
                     <div class="search-filter-container">
                         <div class="search-bar">
                             <i class="fas fa-search"></i>
                             <input type="text" id="searchUpcoming" placeholder="Search Doctor by name...">
                         </div>
-                        <div class="filter-bar">
-                            <i class="fas fa-filter"></i>
-                            <select id="statusFilterUpcoming" class="form-select w-auto">
-                                <option value="all">All</option>
-                                <option value="pending">Pending</option>
-                                <option value="scheduled">Confirmed</option>
-                            </select>
                         </div>
-                    </div>
                     <ul class="doctor-list" id="upcomingAppointmentList">
-                        <!-- Appointments will be loaded here by JavaScript -->
-                    </ul>
+                        </ul>
                 </div>
 
-                <!-- Medical History Section -->
+                <div class="appointments-section mb-5">
+                    <h3 class="mb-3">Your Pending Appointments</h3>
+                    <div class="search-filter-container">
+                        <div class="search-bar">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchPending" placeholder="Search Doctor by name...">
+                        </div>
+                        </div>
+                    <ul class="doctor-list" id="pendingAppointmentList">
+                        </ul>
+                </div>
+
                 <div class="medical-history-section">
                     <h3 class="mb-3">Your Medical History</h3>
                     <div class="search-filter-container">
@@ -109,8 +110,7 @@ $stmt->close();
                                 </tr>
                             </thead>
                             <tbody id="medicalHistoryTableBody">
-                                <!-- Medical history will be loaded here by JavaScript -->
-                            </tbody>
+                                </tbody>
                         </table>
                     </div>
                 </div>
@@ -118,7 +118,6 @@ $stmt->close();
         </main>
     </div>
 
-    <!-- Profile side overlay -->
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
             <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay">
@@ -189,7 +188,7 @@ $stmt->close();
                             profileImageDisplay.src = newImagePath;
                             document.getElementById('profileToggle').src = newImagePath;
                             uploadMessage.textContent = 'Profile picture updated successfully!';
-                            uploadMessage.style.color = 'green';
+                            uploadMessage.style.color = 'blue';
                             setTimeout(() => {
                                 uploadMessage.textContent = '';
                             }, 1000);
@@ -210,12 +209,12 @@ $stmt->close();
             let allAppointments = []; // Store all fetched appointments
 
             const searchUpcoming = document.getElementById('searchUpcoming');
-            const statusFilterUpcoming = document.getElementById('statusFilterUpcoming');
+            const searchPending = document.getElementById('searchPending');
             const searchHistory = document.getElementById('searchHistory');
             const statusFilterHistory = document.getElementById('statusFilterHistory');
 
             searchUpcoming.addEventListener('input', filterAndRenderAll);
-            statusFilterUpcoming.addEventListener('change', filterAndRenderAll);
+            searchPending.addEventListener('input', filterAndRenderAll);
             searchHistory.addEventListener('input', filterAndRenderAll);
             statusFilterHistory.addEventListener('change', filterAndRenderAll);
 
@@ -241,7 +240,7 @@ $stmt->close();
 
                     if (newAppointmentsJson !== currentAppointmentsJson) {
                         allAppointments = data;
-                        filterAndRenderAll(); // Re-render both sections if data changes
+                        filterAndRenderAll(); // Re-render all sections if data changes
                     }
                 })
                 .catch(error => console.error('Error fetching all appointments:', error));
@@ -249,39 +248,42 @@ $stmt->close();
 
             function filterAndRenderAll() {
                 const now = new Date();
-                const upcomingAppointments = [];
+                const confirmedAppointments = [];
+                const pendingAppointments = [];
                 const medicalHistory = [];
 
                 allAppointments.forEach(appointment => {
                     const appointmentDate = new Date(appointment.appointment_date.replace(' ', 'T') + 'Z');
-                    if (appointmentDate > now && (appointment.status === 'Pending' || appointment.status === 'Scheduled')) {
-                        upcomingAppointments.push(appointment);
+                    if (appointmentDate > now) {
+                        if (appointment.status === 'Scheduled') {
+                            confirmedAppointments.push(appointment);
+                        } else if (appointment.status === 'Pending') {
+                            pendingAppointments.push(appointment);
+                        }
                     } else {
                         medicalHistory.push(appointment);
                     }
                 });
 
-                renderUpcomingAppointments(upcomingAppointments);
+                renderConfirmedAppointments(confirmedAppointments);
+                renderPendingAppointments(pendingAppointments);
                 renderMedicalHistory(medicalHistory);
             }
 
-            function renderUpcomingAppointments(appointments) {
+            function renderConfirmedAppointments(appointments) {
                 const appointmentList = document.getElementById('upcomingAppointmentList');
                 appointmentList.innerHTML = '';
 
                 const searchTerm = searchUpcoming.value.toLowerCase();
-                const selectedStatus = statusFilterUpcoming.value;
 
                 const filteredAppointments = appointments.filter(appointment => {
                     const doctorName = appointment.doctor_name.toLowerCase();
-                    const status = appointment.status.toLowerCase();
                     const nameMatch = doctorName.includes(searchTerm);
-                    const statusMatch = selectedStatus === 'all' || status === selectedStatus;
-                    return nameMatch && statusMatch;
+                    return nameMatch;
                 });
 
                 if (filteredAppointments.length === 0) {
-                    appointmentList.innerHTML = '<div class="alert alert-info mt-4">You have no upcoming appointments scheduled.</div>';
+                    appointmentList.innerHTML = '<div class="alert alert-info mt-4">You have no confirmed upcoming appointments.</div>';
                     return;
                 }
 
@@ -305,12 +307,60 @@ $stmt->close();
                         </div>
                         <div class="doctor-info">
                             <p>Reason: ${appointment.reason}</p>
-                            <p>Status: <span class="badge bg-${appointment.status.toLowerCase()}">${appointment.status}</span></p>
+                            <p>Status: <span class="badge bg-success">${appointment.status}</span></p>
                             <p>Type: ${appointment.type}</p>
                         </div>
                         <div class="doctor-info">
-                            ${(appointment.status === 'Pending' || appointment.status === 'Confirmed') ?
-                                `<button class="btn btn-sm btn-outline-danger cancel-appointment-btn" data-appointment-id="${appointment.id}">Cancel</button>` : ''}
+                            <button class="btn btn-sm btn-outline-danger cancel-appointment-btn" data-appointment-id="${appointment.id}">Cancel</button>
+                        </div>
+                    `;
+                    appointmentList.appendChild(listItem);
+                });
+                updateAllTimers();
+            }
+
+            function renderPendingAppointments(appointments) {
+                const appointmentList = document.getElementById('pendingAppointmentList');
+                appointmentList.innerHTML = '';
+
+                const searchTerm = searchPending.value.toLowerCase();
+
+                const filteredAppointments = appointments.filter(appointment => {
+                    const doctorName = appointment.doctor_name.toLowerCase();
+                    const nameMatch = doctorName.includes(searchTerm);
+                    return nameMatch;
+                });
+
+                if (filteredAppointments.length === 0) {
+                    appointmentList.innerHTML = '<div class="alert alert-info mt-4">You have no pending appointments.</div>';
+                    return;
+                }
+
+                filteredAppointments.forEach(appointment => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'doctor-item';
+                    listItem.id = `appointment-${appointment.id}`;
+                    listItem.dataset.doctorName = appointment.doctor_name.toLowerCase();
+                    listItem.dataset.status = appointment.status.toLowerCase();
+                    listItem.dataset.appointmentTime = appointment.appointment_date;
+
+                    listItem.innerHTML = `
+                        <div class="doctor-avatar">
+                            <img src="/hospital-management-system/${appointment.profile_pic || 'assets/images/default-avatar.png'}"
+                                alt="Dr. ${appointment.doctor_name}" class="rounded-circle">
+                        </div>
+                        <div class="doctor-info">
+                            <h4>Dr. ${appointment.doctor_name}</h4>
+                            <p>Appointment: ${new Date(appointment.appointment_date.replace(' ', 'T') + 'Z').toLocaleString()}</p>
+                            <p>Remaining: <span class="remaining-time">Calculating...</span></p>
+                        </div>
+                        <div class="doctor-info">
+                            <p>Reason: ${appointment.reason}</p>
+                            <p>Status: <span class="badge bg-warning text-dark">${appointment.status}</span></p>
+                            <p>Type: ${appointment.type}</p>
+                        </div>
+                        <div class="doctor-info">
+                            <button class="btn btn-sm btn-outline-danger cancel-appointment-btn" data-appointment-id="${appointment.id}">Cancel</button>
                         </div>
                     `;
                     appointmentList.appendChild(listItem);
@@ -330,14 +380,25 @@ $stmt->close();
                     const status = record.status.toLowerCase();
                     const type = record.type.toLowerCase();
                     const nameMatch = doctorName.includes(searchTerm);
-                    const statusMatch = selectedStatus === 'all' || status === selectedStatus;
-                    const typeMatch = selectedStatus === 'online' && type === 'online' || selectedStatus === 'offline' && type === 'offline';
                     
-                    if (selectedStatus === 'all' || selectedStatus === 'completed') {
-                        return nameMatch && statusMatch;
-                    } else { // For 'online' or 'offline' filters
-                        return nameMatch && typeMatch;
+                    // Logic to handle the 'completed' status, or 'online'/'offline' type filters
+                    let statusOrTypeMatch = false;
+                    
+                    if (selectedStatus === 'all') {
+                        // Show all history records
+                        statusOrTypeMatch = true;
+                    } else if (selectedStatus === 'completed') {
+                        // Match status 'completed'
+                        statusOrTypeMatch = status === 'completed';
+                    } else if (selectedStatus === 'online') {
+                        // Match type 'online'
+                        statusOrTypeMatch = type === 'online';
+                    } else if (selectedStatus === 'offline') {
+                        // Match type 'offline'
+                        statusOrTypeMatch = type === 'offline';
                     }
+                    
+                    return nameMatch && statusOrTypeMatch;
                 });
 
                 if (filteredHistory.length === 0) {
@@ -346,6 +407,7 @@ $stmt->close();
                 }
 
                 filteredHistory.forEach(record => {
+                    const statusClass = (record.status.toLowerCase() === 'completed') ? 'bg-primary' : 'bg-secondary';
                     const row = document.createElement('tr');
                     row.dataset.status = record.status.toLowerCase();
                     row.dataset.type = record.type.toLowerCase();
@@ -356,7 +418,7 @@ $stmt->close();
                         <td data-label="Specialization">${record.specialization}</td>
                         <td data-label="Date & Time">${new Date(record.appointment_date.replace(' ', 'T') + 'Z').toLocaleString()}</td>
                         <td data-label="Reason">${record.reason}</td>
-                        <td data-label="Status"><span class="badge bg-${record.status.toLowerCase()}">${record.status}</span></td>
+                        <td data-label="Status"><span class="badge ${statusClass}">${record.status}</span></td>
                         <td data-label="Type">${record.type}</td>
                     `;
                     tableBody.appendChild(row);

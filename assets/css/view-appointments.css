@@ -1,0 +1,77 @@
+/* Responsive and alignment styles for doctor/view-appointments.php */
+
+.doctor-item {
+    cursor: pointer;
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap to the next line on smaller screens */
+    justify-content: space-between;
+    align-items: center;
+}
+
+.doctor-info {
+    flex-grow: 1;
+    padding: 10px;
+}
+
+/* Give each column a basis for width */
+.doctor-info:nth-child(1) { /* Patient info */
+    flex-basis: 30%;
+    display: flex;
+    align-items: center;
+}
+
+.doctor-avatar {
+    margin-right: 15px;
+}
+
+.doctor-info:nth-child(2) { /* Appointment details */
+    flex-basis: 25%;
+}
+
+.doctor-info:nth-child(3) { /* Reason, Status, Type */
+    flex-basis: 20%;
+}
+
+.doctor-info.button-group { /* Action buttons */
+    flex-basis: 25%;
+    text-align: right;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .doctor-info:nth-child(1),
+    .doctor-info:nth-child(2),
+    .doctor-info:nth-child(3),
+    .doctor-info.button-group {
+        flex-basis: 50%; /* Two columns on medium screens */
+    }
+
+    .doctor-info.button-group {
+        text-align: left; /* Align buttons to the left on medium screens */
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .doctor-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .doctor-info:nth-child(1),
+    .doctor-info:nth-child(2),
+    .doctor-info:nth-child(3),
+    .doctor-info.button-group {
+        flex-basis: 100%; /* Full width for each column on small screens */
+        width: 100%;
+        text-align: left;
+    }
+
+    .doctor-info.button-group {
+        margin-top: 15px;
+    }
+
+    .doctor-avatar {
+        margin-bottom: 10px;
+    }
+}

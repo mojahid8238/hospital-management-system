@@ -20,7 +20,7 @@ $stmt->close();
 
 $appointments = [];
 if ($patient_id) {
-    $stmt = $conn->prepare("SELECT a.id, d.name as doctor_name, d.profile_pic as doctor_profile_pic, a.appointment_date, a.reason, a.status FROM appointments a JOIN doctors d ON a.doctor_id = d.id WHERE a.patient_id = ? AND a.status = 'Cancelled' ORDER BY a.appointment_date DESC");
+    $stmt = $conn->prepare("SELECT a.id, d.id as doctor_id, d.name as doctor_name, d.profile_pic as doctor_profile_pic, a.appointment_date, a.reason, a.status FROM appointments a JOIN doctors d ON a.doctor_id = d.id WHERE a.patient_id = ? AND a.status = 'Cancelled' ORDER BY a.appointment_date DESC");
     $stmt->bind_param("i", $patient_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -89,6 +89,7 @@ if ($patient_id) {
                             <li class="doctor-item" 
                                 data-name="<?php echo strtolower(htmlspecialchars($appointment['doctor_name'])); ?>" 
                                 data-status="<?php echo strtolower(htmlspecialchars($appointment['status'])); ?>"
+                                data-doctor-id="<?php echo htmlspecialchars($appointment['doctor_id']); ?>"
                                 id="appointment-<?php echo $appointment['id']; ?>">
                                 <div class="doctor-avatar">
                                     <img src="/hospital-management-system/<?php echo htmlspecialchars($appointment['doctor_profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" 
@@ -227,6 +228,16 @@ if ($patient_id) {
                     });
                 }
             }
+
+            document.addEventListener('click', function(event) {
+                const doctorItem = event.target.closest('.doctor-item');
+                if (doctorItem && !event.target.closest('.remove-appointment-btn')) {
+                    const doctorId = doctorItem.dataset.doctorId;
+                    if (doctorId) {
+                        window.location.href = `doctor-profile.php?id=${doctorId}`;
+                    }
+                }
+            });
 
             document.addEventListener('click', handleDeleteButtonClick);
         });

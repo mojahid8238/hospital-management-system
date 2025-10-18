@@ -39,6 +39,7 @@ if (isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/shared-table.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/view-appointments.css">
 </head>
 <body>
     <header class="navbar">
@@ -66,7 +67,9 @@ if (isset($_SESSION['user_id'])) {
                 <h2 class="card-title mb-3">Manage Your Appointments</h2>
                 <p class="text-muted">Welcome, <strong>Dr. <?php echo htmlspecialchars($doctor_name); ?></strong>! Here you can manage your scheduled appointments:</p>
 
-                <div class="search-filter-container">
+                <!-- The Status Filter Section has been removed as appointments are now separated by status below -->
+
+                <div class="search-filter-container mb-4">
                     <div class="search-bar">
                         <i class="fas fa-search"></i>
                         <input type="text" id="searchPatient" placeholder="Search Patient by name...">
@@ -74,11 +77,7 @@ if (isset($_SESSION['user_id'])) {
                     
                     <div class="filter-bar">
                         <i class="fas fa-filter"></i>
-                        <select id="statusFilter" class="form-select w-auto">
-                            <option value="all">All</option>
-                            <option value="pending">Pending</option>
-                            <option value="scheduled">Confirmed</option>
-                        </select>
+                        <!-- Only typeFilter remains here -->
                         <select id="typeFilter" class="form-select w-auto">
                             <option value="all">All Types</option>
                             <option value="Online">Online</option>
@@ -87,22 +86,31 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 </div>
 
-                <!-- Requested Appointments Section (ID added for easy JS targeting) -->
-                <!-- The original element with 'mb-5' corresponds to the Pending section -->
-                <div class="appointments-section mb-5" id="requestedAppointmentsContainer">
-                    <h3 class="mb-3">Requested Appointments</h3>
-                    <ul class="doctor-list" id="requestedAppointmentList">
-                        <!-- Pending appointments will be loaded here by JavaScript -->
-                    </ul>
-                </div>
+                <!-- Appointments Section -->
+                <div class="appointments-section mb-5" id="appointmentsContainer">
+                    <h3 class="mb-4">Appointment Overview</h3>
 
-                <!-- Accepted Appointments Section (ID added for easy JS targeting) -->
-                <!-- The original element without 'mb-5' corresponds to the Accepted/Confirmed section -->
-                <div class="appointments-section" id="acceptedAppointmentsContainer">
-                    <h3 class="mb-3">Accepted Appointments</h3>
-                    <ul class="doctor-list" id="acceptedAppointmentList">
-                        <!-- Accepted appointments will be loaded here by JavaScript -->
-                    </ul>
+                    <!-- PENDING APPOINTMENTS SECTION -->
+                    <div class="card mb-5 p-4 border-l-8 border-yellow-500 shadow-xl">
+                        <h4 class="card-title text-yellow-600 mb-4"><i class="fas fa-clock mr-2"></i> **Pending Appointments** (Requires Action)</h4>
+                        <ul class="doctor-list" id="pendingAppointmentList">
+                            <!-- Pending appointments will be loaded here by JavaScript -->
+                        </ul>
+                        <div id="pendingEmptyMessage" class="alert alert-info mt-4 text-center p-3 rounded-lg" style="display:none;">
+                            <i class="fas fa-check-circle mr-2"></i> No pending appointments requiring acceptance.
+                        </div>
+                    </div>
+
+                    <!-- CONFIRMED/SCHEDULED APPOINTMENTS SECTION -->
+                    <div class="card p-4 border-l-8 border-blue-500 shadow-xl">
+                        <h4 class="card-title text-blue-600 mb-4"><i class="fas fa-calendar-check mr-2"></i> **Confirmed/Scheduled Appointments**</h4>
+                        <ul class="doctor-list" id="confirmedAppointmentList">
+                            <!-- Confirmed/Scheduled appointments will be loaded here by JavaScript -->
+                        </ul>
+                        <div id="confirmedEmptyMessage" class="alert alert-info mt-4 text-center p-3 rounded-lg" style="display:none;">
+                            <i class="fas fa-list-ul mr-2"></i> No confirmed appointments scheduled.
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -196,52 +204,37 @@ if (isset($_SESSION['user_id'])) {
 
             // --- Appointment Management Logic ---
             
-            const statusFilter = document.getElementById('statusFilter');
+            // Status Filter is now handled by the UI sections and is removed from the controls.
+            // const statusFilter = document.getElementById('statusFilter'); // REMOVED
             const typeFilter = document.getElementById('typeFilter');
             const searchPatient = document.getElementById('searchPatient');
             
-            // NEW: Get container references
-            const requestedAppointmentsContainer = document.getElementById('requestedAppointmentsContainer');
-            const acceptedAppointmentsContainer = document.getElementById('acceptedAppointmentsContainer');
+            // New references for the two separate appointment lists
+            const pendingAppointmentList = document.getElementById('pendingAppointmentList');
+            const confirmedAppointmentList = document.getElementById('confirmedAppointmentList');
+            const pendingEmptyMessage = document.getElementById('pendingEmptyMessage');
+            const confirmedEmptyMessage = document.getElementById('confirmedEmptyMessage');
 
 
             // Event listeners for changes in filtering
-            statusFilter.addEventListener('change', fetchAppointments);
+            // statusFilter.addEventListener('change', fetchAppointments); // REMOVED
             typeFilter.addEventListener('change', fetchAppointments);
             searchPatient.addEventListener('input', applyClientSideFilter);
 
 
             let currentAppointments = [];
 
-            // Fetches latest appointments and updates the list if changed
+            // Fetches latest appointments. Note: The status filter is removed from the request 
+            // to fetch all relevant appointments for client-side separation.
             function fetchAppointments() {
-                // NEW: Toggle section visibility based on filter BEFORE fetching
-                const selectedStatusFilter = statusFilter.value;
-                
-                if (selectedStatusFilter === 'pending') {
-                    // Show Pending container, hide Accepted container
-                    requestedAppointmentsContainer.style.display = 'block';
-                    acceptedAppointmentsContainer.style.display = 'none';
-                } else if (selectedStatusFilter === 'scheduled') {
-                    // Hide Pending container, show Accepted container
-                    requestedAppointmentsContainer.style.display = 'none';
-                    acceptedAppointmentsContainer.style.display = 'block';
-                } else {
-                    // 'all' or any other value: Show both
-                    requestedAppointmentsContainer.style.display = 'block';
-                    acceptedAppointmentsContainer.style.display = 'block';
-                }
-                
+                // Fetch all appointments (status parameter is omitted)
                 const selectedSortBy = 'appointment_date'; 
-                const selectedOrderBy = 'DESC';
-
+                const selectedOrderBy = 'ASC'; // Sort ascending to show nearest appointments first
                 const selectedTypeFilter = typeFilter.value;
 
-                // IMPORTANT: The PHP script 'get_appointments.php' MUST join tables to fetch 
-                // the patient's profile_pic and return it as 'patient_profile_pic' in the JSON response
-                const url = `get_appointments.php?sort_by=${selectedSortBy}&order=${selectedOrderBy}&status=${selectedStatusFilter}&type=${selectedTypeFilter}&t=${new Date().getTime()}`;
+                // IMPORTANT: The URL no longer includes the 'status' parameter to get all relevant appointments (pending, scheduled, etc.)
+                const url = `get_appointments.php?sort_by=${selectedSortBy}&order=${selectedOrderBy}&type=${selectedTypeFilter}&t=${new Date().getTime()}`;
 
-                // Add headers to prevent caching on both browser and server
                 fetch(url, {
                     method: 'GET',
                     headers: {
@@ -259,25 +252,23 @@ if (isset($_SESSION['user_id'])) {
                     .then(data => {
                         currentAppointments = data;
                         renderAppointments(data);
-                        // Apply client-side filter after rendering the fetched data
-                        applyClientSideFilter();
+                        // Apply search filter only after rendering the new lists
+                        applyClientSideFilter(); 
                     })
                     .catch(error => console.error('Error fetching appointments:', error));
             }
             
-            // Renders the list of appointments into two sections
             function renderAppointments(appointments) {
-                const requestedAppointmentList = document.getElementById('requestedAppointmentList');
-                const acceptedAppointmentList = document.getElementById('acceptedAppointmentList');
+                // Clear both lists first
+                pendingAppointmentList.innerHTML = '';
+                confirmedAppointmentList.innerHTML = '';
+                
+                // Group the appointments by their status (Pending vs. Scheduled/Confirmed)
+                const pending = appointments.filter(a => a.status === 'Pending');
+                const confirmed = appointments.filter(a => a.status === 'Scheduled' || a.status === 'Online' || a.status === 'Offline');
 
-                // Clear previous content
-                requestedAppointmentList.innerHTML = '';
-                acceptedAppointmentList.innerHTML = '';
-
-                let requestedCount = 0;
-                let acceptedCount = 0;
-
-                appointments.forEach(appointment => {
+                // Helper function to create the list item
+                const createListItem = (appointment) => {
                     const patientName = appointment.patient_name.toLowerCase();
                     const status = appointment.status.toLowerCase();
                     const appointmentType = appointment.type.toLowerCase();
@@ -291,26 +282,20 @@ if (isset($_SESSION['user_id'])) {
                     listItem.dataset.appointmentType = appointmentType;
 
                     let buttonsHtml = '';
-                    // The confirmed status is checked as 'Scheduled', aligning with the filter value 'scheduled'
                     if (appointment.status === 'Pending') {
                         buttonsHtml = `
                             <button class="btn btn-sm btn-outline-primary accept-appointment-btn" data-appointment-id="${appointment.id}" data-appointment-type="${appointment.type}">Accept</button>
                             <a href="#" class="btn btn-sm btn-outline-success">Message</a>
                             <button class="btn btn-sm btn-outline-danger cancel-appointment-btn" data-appointment-id="${appointment.id}">Cancel</button>
                         `;
-                        requestedCount++;
                     } else if (appointment.status === 'Scheduled' || appointment.status === 'Online' || appointment.status === 'Offline') {
-                        // Assuming 'Scheduled' is the status after acceptance, before completion
-                        // Or using 'Online'/'Offline' if they are used as confirmed statuses
-                         buttonsHtml = `
+                        buttonsHtml = `
                             <button class="btn btn-sm btn-outline-info attend-appointment-btn" data-appointment-id="${appointment.id}" data-appointment-type="${appointment.type}">Attend/Complete</button>
                             <a href="#" class="btn btn-sm btn-outline-success">Message</a>
                             <button class="btn btn-sm btn-outline-warning cancel-appointment-btn" data-appointment-id="${appointment.id}">Reschedule/Cancel</button>
                         `;
-                        acceptedCount++;
                     }
 
-                    // Determine badge color
                     let badgeClass;
                     if (status === 'pending') {
                         badgeClass = 'warning';
@@ -324,20 +309,20 @@ if (isset($_SESSION['user_id'])) {
                         badgeClass = 'secondary';
                     }
 
-                    // --- Fix for Profile Picture Loading: Ensure correct path structure ---
-                    // Using || for a robust default in case patient_profile_pic is missing or null
                     const profilePicPath = appointment.patient_profile_pic || 'assets/images/default-avatar.png';
                     
                     listItem.innerHTML = `
-                        <div class="doctor-avatar">
-                            <img src="/hospital-management-system/${profilePicPath}"
-                                alt="${appointment.patient_name}" 
-                                class="rounded-circle">
-                        </div>
                         <div class="doctor-info">
-                            <h4>${appointment.patient_name}</h4>
-                            <p>Appointment: ${new Date(appointment.appointment_date.replace(' ', 'T') + 'Z').toLocaleString()}</p>
-                            <p>Remaining: <span class="remaining-time">Calculating...</span></p>
+                            <div class="doctor-avatar">
+                                <img src="/hospital-management-system/${profilePicPath}"
+                                    alt="${appointment.patient_name}" 
+                                    class="rounded-circle">
+                            </div>
+                            <div>
+                                <h4>${appointment.patient_name}</h4>
+                                <p>Appointment: ${new Date(appointment.appointment_date.replace(' ', 'T') + 'Z').toLocaleString()}</p>
+                                <p>Remaining: <span class="remaining-time">Calculating...</span></p>
+                            </div>
                         </div>
                         <div class="doctor-info">
                             <p>Reason: ${appointment.reason}</p>
@@ -348,76 +333,77 @@ if (isset($_SESSION['user_id'])) {
                             ${buttonsHtml}
                         </div>
                     `;
+                    return listItem;
+                };
 
-                    if (appointment.status === 'Pending') {
-                        requestedAppointmentList.appendChild(listItem);
-                    } else if (appointment.status === 'Scheduled' || appointment.status === 'Online' || appointment.status === 'Offline') {
-                        acceptedAppointmentList.appendChild(listItem);
-                    }
+                // Render into pending list
+                pending.forEach(appointment => {
+                    pendingAppointmentList.appendChild(createListItem(appointment));
+                });
+                
+                // Render into confirmed list
+                confirmed.forEach(appointment => {
+                    confirmedAppointmentList.appendChild(createListItem(appointment));
                 });
 
-                // --- Functionality Fix: Display alerts only if sections are truly empty after filtering/rendering ---
-                if (requestedCount === 0) {
-                    // Check if the list is empty after the loop
-                    const existingAlert = requestedAppointmentList.querySelector('.alert-info');
-                    if (!existingAlert) {
-                        requestedAppointmentList.innerHTML = '<div class="alert alert-info mt-4">No pending appointments found.</div>';
-                    }
-                }
+                // Update empty messages display
+                pendingEmptyMessage.style.display = pending.length === 0 ? 'block' : 'none';
+                confirmedEmptyMessage.style.display = confirmed.length === 0 ? 'block' : 'none';
 
-                if (acceptedCount === 0) {
-                    // Check if the list is empty after the loop
-                    const existingAlert = acceptedAppointmentList.querySelector('.alert-info');
-                    if (!existingAlert) {
-                        acceptedAppointmentList.innerHTML = '<div class="alert alert-info mt-4">No confirmed appointments found.</div>';
-                    }
-                }
-                
                 updateAllTimers();
             }
 
-            // Client-side filtering (search bar)
             function applyClientSideFilter() {
                 const searchTerm = searchPatient.value.toLowerCase();
                 
-                // Only filter items that are currently visible based on the filter dropdowns (i.e., items in the lists)
-                const allItems = document.querySelectorAll('#requestedAppointmentList .doctor-item, #acceptedAppointmentList .doctor-item');
+                // Check items in both lists
+                const pendingItems = document.querySelectorAll('#pendingAppointmentList .doctor-item');
+                const confirmedItems = document.querySelectorAll('#confirmedAppointmentList .doctor-item');
                 
-                allItems.forEach(item => {
+                let visiblePending = 0;
+                pendingItems.forEach(item => {
                     const name = item.dataset.name;
-                    // Check if the item should be visible based on the search term
-                    if (name.includes(searchTerm)) {
-                        item.style.display = 'flex';
-                    } else {
-                        item.style.display = 'none';
-                    }
+                    const isVisible = name.includes(searchTerm);
+                    item.style.display = isVisible ? 'flex' : 'none';
+                    if (isVisible) visiblePending++;
+                });
+
+                let visibleConfirmed = 0;
+                confirmedItems.forEach(item => {
+                    const name = item.dataset.name;
+                    const isVisible = name.includes(searchTerm);
+                    item.style.display = isVisible ? 'flex' : 'none';
+                    if (isVisible) visibleConfirmed++;
                 });
                 
-                // Re-evaluate empty messages after client-side filter (Optional but robust)
-                updateEmptySectionMessages();
+                updateEmptySectionMessages(visiblePending, visibleConfirmed);
             }
             
-            function updateEmptySectionMessages() {
-                const requestedList = document.getElementById('requestedAppointmentList');
-                const acceptedList = document.getElementById('acceptedAppointmentList');
+            function updateEmptySectionMessages(visiblePending, visibleConfirmed) {
+                // Update based on the current search filter results
                 
-                // Only check for visible items if the parent container is also visible
-                const requestedContainerVisible = requestedAppointmentsContainer.style.display !== 'none';
-                const acceptedContainerVisible = acceptedAppointmentsContainer.style.display !== 'none';
+                // Remove previous messages if they exist (though the filter hides the section too)
+                const totalPending = document.querySelectorAll('#pendingAppointmentList .doctor-item').length;
+                const totalConfirmed = document.querySelectorAll('#confirmedAppointmentList .doctor-item').length;
                 
-                const visibleRequestedItems = requestedList && requestedContainerVisible ? Array.from(requestedList.querySelectorAll('.doctor-item')).filter(item => item.style.display !== 'none').length : 0;
-                const visibleAcceptedItems = acceptedList && acceptedContainerVisible ? Array.from(acceptedList.querySelectorAll('.doctor-item')).filter(item => item.style.display !== 'none').length : 0;
-
-                // Remove previous alerts
-                requestedList.querySelectorAll('.alert-info').forEach(alert => alert.remove());
-                acceptedList.querySelectorAll('.alert-info').forEach(alert => alert.remove());
-
-                // Add alerts if no items are visible AND the container is visible
-                if (visibleRequestedItems === 0 && requestedContainerVisible) {
-                    requestedList.innerHTML += '<div class="alert alert-info mt-4">No pending appointments match your current search.</div>';
+                if (visiblePending === 0 && totalPending > 0) {
+                    pendingEmptyMessage.textContent = `No pending appointments match your search for "${searchPatient.value}".`;
+                    pendingEmptyMessage.style.display = 'block';
+                } else if (totalPending === 0) {
+                    pendingEmptyMessage.textContent = 'No pending appointments requiring acceptance.';
+                    pendingEmptyMessage.style.display = 'block';
+                } else {
+                    pendingEmptyMessage.style.display = 'none';
                 }
-                if (visibleAcceptedItems === 0 && acceptedContainerVisible) {
-                    acceptedList.innerHTML += '<div class="alert alert-info mt-4">No confirmed appointments match your current search.</div>';
+
+                if (visibleConfirmed === 0 && totalConfirmed > 0) {
+                    confirmedEmptyMessage.textContent = `No confirmed appointments match your search for "${searchPatient.value}".`;
+                    confirmedEmptyMessage.style.display = 'block';
+                } else if (totalConfirmed === 0) {
+                    confirmedEmptyMessage.textContent = 'No confirmed appointments scheduled.';
+                    confirmedEmptyMessage.style.display = 'block';
+                } else {
+                    confirmedEmptyMessage.style.display = 'none';
                 }
             }
 
@@ -449,10 +435,11 @@ if (isset($_SESSION['user_id'])) {
             // Handles the cancel/reschedule button click
             function handleCancelButtonClick(event) {
                 const button = event.target.closest('.cancel-appointment-btn');
+                // IMPORTANT: Since window.confirm() is forbidden in this environment, replace it with a console error or a non-blocking UI message.
+                // Assuming `window.alert` is a temporary stand-in for a custom modal or message box.
                 if (!button) return;
 
                 const appointmentId = button.dataset.appointmentId;
-                // NOTE: Replacing window.confirm with custom modal
                 if (window.confirm('Are you sure you want to cancel/reschedule this appointment?')) {
                     button.disabled = true;
                     button.textContent = 'Processing...';
@@ -465,7 +452,6 @@ if (isset($_SESSION['user_id'])) {
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Refresh the appointments list to reflect the status change
                             fetchAppointments(); 
                         } else {
                             console.error('Error:', data.message);
@@ -503,7 +489,6 @@ if (isset($_SESSION['user_id'])) {
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Refresh the appointments list to reflect the status change
                             fetchAppointments();
                         } else {
                             console.error('Error:', data.message);
@@ -533,7 +518,7 @@ if (isset($_SESSION['user_id'])) {
                     button.disabled = true;
                     button.textContent = 'Completing...';
 
-                    fetch('complete_appointment.php', { // New PHP script for completing appointments
+                    fetch('complete_appointment.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ appointment_id: appointmentId })
@@ -541,7 +526,7 @@ if (isset($_SESSION['user_id'])) {
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            fetchAppointments(); // Refresh the appointments list
+                            fetchAppointments();
                         } else {
                             console.error('Error:', data.message);
                             button.disabled = false;
@@ -572,5 +557,3 @@ if (isset($_SESSION['user_id'])) {
             fetchAppointments();
         });
     </script>
-</body>
-</html>

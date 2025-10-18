@@ -67,15 +67,19 @@
     font-size: .75em;
     font-weight: 700;
     line-height: 1;
-    color: #fff;
+    color: #f8f8f8;
     text-align: center;
     white-space: nowrap;
     vertical-align: baseline;
     border-radius: 0.25rem;
 }
 
+.bg-primary{
+    background-color: #198754;
+}
+
 .bg-success {
-    background-color: #198754 !important;
+    background-color: #29ddfdb4 !important;
 }
 
 .bg-danger {
@@ -83,7 +87,7 @@
 }
 
 .bg-warning {
-    background-color: #ffc107 !important;
+    background-color: #f8cc08 !important;
 }
 
 .bg-secondary {

@@ -68,10 +68,10 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $doctor_id = $_GET['id'];
 
-$stmt = $conn->prepare("SELECT name, image FROM doctors WHERE id = ?");
+$stmt = $conn->prepare("SELECT name, profile_pic FROM doctors WHERE id = ?");
 $stmt->bind_param("i", $doctor_id);
 $stmt->execute();
-$stmt->bind_result($name, $image);
+$stmt->bind_result($name, $profile_pic);
 $stmt->fetch();
 $stmt->close();
 
@@ -116,7 +116,7 @@ if (!$name) {
                 <div class="doctor-details-card">
                     <div class="profile-summary">
                         <div class="large-avatar">
-                            <img src="../assets/images/<?php echo htmlspecialchars($image ?? 'default-avatar.png'); ?>" alt="Doctor Profile Picture">
+                            <img src="/hospital-management-system/<?php echo htmlspecialchars($profile_pic ?? 'assets/images/default-avatar.png'); ?>" alt="Doctor Profile Picture">
                         </div>
                         <div class="profile-header">
                             <h3><?php echo htmlspecialchars($name); ?></h3>

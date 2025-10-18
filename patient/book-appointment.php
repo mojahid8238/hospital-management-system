@@ -21,7 +21,7 @@ if ($result) {
     <title>Book Appointment</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-   <link rel="stylesheet" href="../assets/css/appointment.css" />
+    <link rel="stylesheet" href="../assets/css/view-appointments.css">
 
 </head>
 <body>
@@ -288,6 +288,17 @@ if ($result) {
             });
 
             initializeDoctorFilters(); // Initial call on DOMContentLoaded
+
+            const doctorItems = document.querySelectorAll('.doctor-item');
+            doctorItems.forEach(item => {
+                item.style.cursor = 'pointer';
+                item.addEventListener('click', function() {
+                    const link = this.querySelector('.book-btn');
+                    if (link) {
+                        window.location.href = link.href;
+                    }
+                });
+            });
         });
     </script>
 </body>
