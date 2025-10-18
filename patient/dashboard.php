@@ -48,6 +48,7 @@ $stmt->close();
                 <li><a href="book-appointment.php">Book New Appointment</a></li>
                 <li><a href="dashboard.php">Your Appointments & History</a></li>
                 <li><a href="cancelled-appointments.php">Cancelled Appointments</a></li>
+                <li><a href="../messaging/messaging.php">Messages</a></li>
             </ul>
         </aside>
 

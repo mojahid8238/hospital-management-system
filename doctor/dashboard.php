@@ -59,6 +59,7 @@ if (isset($_SESSION['user_id'])) {
                 <li><a href="dashboard.php">View Your Appointments</a></li>
                 <!-- Re-adding the Cancelled Appointments link as it's typically useful -->
                 <li><a href="cancelled-appointments.php">Cancelled Appointments</a></li>
+                <li><a href="../messaging/messaging.php">Messages</a></li>
             </ul>
         </aside>
 
@@ -278,14 +279,13 @@ if (isset($_SESSION['user_id'])) {
                     let buttonsHtml = '';
                     if (appointment.status === 'Pending') {
                         buttonsHtml = `
-                            <button class="btn btn-sm btn-outline-primary accept-appointment-btn" data-appointment-id="${appointment.id}" data-appointment-type="${appointment.type}">Accept</button>
-                            <a href="#" class="btn btn-sm btn-outline-success">Message</a>
+                            <a href="../messaging/messaging.php?patient_id=${appointment.patient_id}" class="btn btn-sm btn-outline-success">Message</a>
                             <button class="btn btn-sm btn-outline-danger cancel-appointment-btn" data-appointment-id="${appointment.id}">Cancel</button>
                         `;
                     } else if (appointment.status === 'Scheduled' || appointment.status === 'Online' || appointment.status === 'Offline') {
                         buttonsHtml = `
-                            <button class="btn btn-sm btn-outline-primary complete-appointment-btn" data-appointment-id="${appointment.id}" data-appointment-type="${appointment.type}">Complete</button>
-                            <a href="#" class="btn btn-sm btn-outline-success">Message</a>
+                            <button class="btn btn-sm btn-outline-primary attend-appointment-btn" data-appointment-id="${appointment.id}" data-appointment-type="${appointment.type}">Complete</button>
+                            <a href="../messaging/messaging.php?patient_id=${appointment.patient_id}" class="btn btn-sm btn-outline-success">Message</a>
                         `;
                     }
 

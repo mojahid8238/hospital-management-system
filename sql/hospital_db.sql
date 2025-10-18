@@ -18,8 +18,7 @@ CREATE TABLE IF NOT EXISTS admin (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    profile_pic VARCHAR(255) DEFAULT 'default-avatar.png',
+profile_pic VARCHAR(255) DEFAULT 'assets/images/default-avatar.png',
     status ENUM('pending', 'approved') NOT NULL DEFAULT 'pending',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -65,16 +64,16 @@ CREATE TABLE IF NOT EXISTS appointments (
 -- The following ALTER TABLE statements might fail if the columns already exist.
 -- This is not an error, and you can safely ignore these errors if the columns are already in your tables.
 
-ALTER TABLE `doctors` ADD `schedule` TIME;
-ALTER TABLE `doctors` ADD `image` VARCHAR(255);
-ALTER TABLE `doctors` ADD `phone` VARCHAR(20);
-ALTER TABLE `patients` ADD `image` VARCHAR(255);
-ALTER TABLE `patients` ADD `username` VARCHAR(255);
-ALTER TABLE `patients` ADD `phone` VARCHAR(20);
-ALTER TABLE `appointments` ADD `image` VARCHAR(255);
+ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `schedule` TIME;
+ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `image` VARCHAR(255);
+ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `phone` VARCHAR(20);
+ALTER TABLE `patients` ADD COLUMN IF NOT EXISTS `image` VARCHAR(255);
+ALTER TABLE `patients` ADD COLUMN IF NOT EXISTS `username` VARCHAR(255);
+ALTER TABLE `patients` ADD COLUMN IF NOT EXISTS `phone` VARCHAR(20);
+ALTER TABLE `appointments` ADD COLUMN IF NOT EXISTS `image` VARCHAR(255);
 ALTER TABLE `appointments` DROP COLUMN IF EXISTS `time`;
-ALTER TABLE `users` ADD `name` VARCHAR(255);
-ALTER TABLE `admin` ADD `image` VARCHAR(255);
+ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `name` VARCHAR(255);
+ALTER TABLE `admin` ADD COLUMN IF NOT EXISTS `image` VARCHAR(255);
 
 -- Create specializations table
 CREATE TABLE IF NOT EXISTS specializations (
@@ -104,10 +103,10 @@ INSERT IGNORE INTO specializations (name) VALUES
 ('Orthopedics');
 
 -- Modify doctors table
-ALTER TABLE `doctors` ADD `specialization_id` INT;
+ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `specialization_id` INT;
 ALTER TABLE `doctors` ADD FOREIGN KEY (`specialization_id`) REFERENCES `specializations`(`id`);
 ALTER TABLE `doctors` DROP COLUMN IF EXISTS `specialization`;
-ALTER TABLE `doctors` ADD `degrees` VARCHAR(255);
+ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `degrees` VARCHAR(255);
 
 -- Modify appointments table to include 'Online' and 'Offline' status
 
@@ -134,6 +133,11 @@ CREATE TABLE IF NOT EXISTS conversations (
     FOREIGN KEY (participant1_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL
 );
+
+-- Update existing default profile pictures to use the full relative path
+UPDATE admin SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'default-avatar.png';
+UPDATE doctors SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'default-avatar.png';
+UPDATE patients SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'default-avatar.png';
 
 -- Add foreign key constraints for circular dependencies
 ALTER TABLE messages ADD CONSTRAINT fk_messages_conversation FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE SET NULL;

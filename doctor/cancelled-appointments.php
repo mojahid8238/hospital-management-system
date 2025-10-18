@@ -58,6 +58,7 @@ if ($doctor_id) {
             <ul>
                 <li><a href="dashboard.php">View Your Appointments</a></li>
                 <li><a href="cancelled-appointments.php">Cancelled Appointments</a></li>
+                <li><a href="../messaging/messaging.php">Messages</a></li>
             </ul>
         </aside>
 
