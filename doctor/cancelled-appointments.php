@@ -56,7 +56,7 @@ if ($doctor_id) {
         <aside class="sidebar" id="doctorSidebar">
             <h3>Doctor Options</h3>
             <ul>
-                <li><a href="view-appointments.php">View Your Appointments</a></li>
+                <li><a href="dashboard.php">View Your Appointments</a></li>
                 <li><a href="cancelled-appointments.php">Cancelled Appointments</a></li>
             </ul>
         </aside>
