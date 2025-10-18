@@ -341,6 +341,14 @@
         object-fit: cover;
     }
 
+    .doctor-info p,
+    .doctor-info h4 {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px; /* Adjust as needed */
+    }
+
 
     .doctor-info {
         flex-grow: 1;
