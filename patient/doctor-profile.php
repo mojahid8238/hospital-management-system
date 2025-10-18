@@ -121,6 +121,7 @@ if (!$name) {
                         <div class="profile-header">
                             <h3><?php echo htmlspecialchars($name); ?></h3>
                             <p>★★★★☆ (4.5)</p>
+                            <a href="../messaging/messaging.php?doctor_id=<?php echo $doctor_id; ?>" class="btn btn-sm btn-outline-success mt-2">Message Doctor</a>
                         </div>
                     </div>
                     <div class="section-title">Description</div>

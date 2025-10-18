@@ -284,9 +284,8 @@ if (isset($_SESSION['user_id'])) {
                         `;
                     } else if (appointment.status === 'Scheduled' || appointment.status === 'Online' || appointment.status === 'Offline') {
                         buttonsHtml = `
-                            <button class="btn btn-sm btn-outline-primary accept-appointment-btn" data-appointment-id="${appointment.id}" data-appointment-type="${appointment.type}">Accept</button>
+                            <button class="btn btn-sm btn-outline-primary complete-appointment-btn" data-appointment-id="${appointment.id}" data-appointment-type="${appointment.type}">Complete</button>
                             <a href="#" class="btn btn-sm btn-outline-success">Message</a>
-                            <button class="btn btn-sm btn-outline-danger cancel-appointment-btn" data-appointment-id="${appointment.id}">Cancel</button>
                         `;
                     }
 

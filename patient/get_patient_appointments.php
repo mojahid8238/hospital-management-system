@@ -21,7 +21,7 @@ $stmt->close();
 
     $appointments = [];
     if ($patient_id) {
-        $stmt = $conn->prepare("SELECT a.id, d.name as doctor_name, d.profile_pic, s.name as specialization, a.appointment_date, a.reason, a.status, a.type FROM appointments a JOIN doctors d ON a.doctor_id = d.id JOIN specializations s ON d.specialization_id = s.id WHERE a.patient_id = ? AND a.status != 'Cancelled'");
+        $stmt = $conn->prepare("SELECT a.id, d.id as doctor_id, d.name as doctor_name, d.profile_pic, s.name as specialization, a.appointment_date, a.reason, a.status, a.type FROM appointments a JOIN doctors d ON a.doctor_id = d.id JOIN specializations s ON d.specialization_id = s.id WHERE a.patient_id = ? AND a.status != 'Cancelled'");
         $stmt->bind_param("i", $patient_id);
         $stmt->execute();
         $result = $stmt->get_result();

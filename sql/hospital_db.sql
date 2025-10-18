@@ -1,3 +1,5 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- Create Database
 CREATE DATABASE IF NOT EXISTS hospital_db;
 USE hospital_db;
@@ -109,3 +111,48 @@ ALTER TABLE `doctors` ADD `degrees` VARCHAR(255);
 
 -- Modify appointments table to include 'Online' and 'Offline' status
 
+-- Messaging Tables
+CREATE TABLE IF NOT EXISTS messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    conversation_id INT DEFAULT NULL,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    message_content TEXT NOT NULL,
+    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_read TINYINT(1) DEFAULT 0,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS conversations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    participant1_id INT NOT NULL,
+    participant2_id INT NOT NULL,
+    last_message_id INT DEFAULT NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    appointment_id INT DEFAULT NULL,
+    FOREIGN KEY (participant1_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL
+);
+
+-- Add foreign key constraints for circular dependencies
+ALTER TABLE messages ADD CONSTRAINT fk_messages_conversation FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE SET NULL;
+ALTER TABLE conversations ADD CONSTRAINT fk_conversations_last_message FOREIGN KEY (last_message_id) REFERENCES messages(id) ON DELETE SET NULL;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Video Calls Table
+CREATE TABLE IF NOT EXISTS video_calls (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    caller_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    appointment_id INT DEFAULT NULL,
+    start_time DATETIME NOT NULL,
+    end_time DATETIME DEFAULT NULL,
+    status ENUM('scheduled', 'in_progress', 'completed', 'cancelled', 'failed') DEFAULT 'scheduled',
+    meeting_link VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (caller_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL
+);

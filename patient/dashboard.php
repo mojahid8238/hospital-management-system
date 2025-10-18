@@ -378,7 +378,9 @@ $stmt->close();
                             <p>Type: ${appointment.type}</p>
                         </div>
                         <div class="doctor-info">
-                            <button class="btn btn-sm btn-outline-danger cancel-appointment-btn" data-appointment-id="${appointment.id}">Cancel</button>
+                            <a href="../messaging/messaging.php?doctor_id=${appointment.doctor_id}" class="btn btn-sm btn-outline-success">Message</a>
+                            ${appointment.status === 'Pending' ? 
+                                `<button class="btn btn-sm btn-outline-danger cancel-appointment-btn" data-appointment-id="${appointment.id}">Cancel</button>` : ''}
                         </div>
                     `;
                     appointmentList.appendChild(listItem);
@@ -433,7 +435,9 @@ $stmt->close();
                             <p>Type: ${appointment.type}</p>
                         </div>
                         <div class="doctor-info">
-                            <button class="btn btn-sm btn-outline-danger cancel-appointment-btn" data-appointment-id="${appointment.id}">Cancel</button>
+                            <a href="../messaging/messaging.php?doctor_id=${appointment.doctor_id}" class="btn btn-sm btn-outline-success">Message</a>
+                            ${appointment.status === 'Pending' ? 
+                                `<button class="btn btn-sm btn-outline-danger cancel-appointment-btn" data-appointment-id="${appointment.id}">Cancel</button>` : ''}
                         </div>
                     `;
                     appointmentList.appendChild(listItem);
