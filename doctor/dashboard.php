@@ -91,25 +91,19 @@ if (isset($_SESSION['user_id'])) {
                     <h3 class="mb-4">Appointment Overview</h3>
 
                     <!-- PENDING APPOINTMENTS SECTION -->
-                    <div class="card mb-5 p-4 border-l-8 border-yellow-500 shadow-xl">
+                    <div class="card mb-5 p-4 border-l-8 border-yellow-500 shadow-xl" id="pendingAppointmentsCard">
                         <h4 class="card-title text-yellow-600 mb-4"><i class="fas fa-clock mr-2"></i> **Pending Appointments** (Requires Action)</h4>
                         <ul class="doctor-list" id="pendingAppointmentList">
                             <!-- Pending appointments will be loaded here by JavaScript -->
                         </ul>
-                        <div id="pendingEmptyMessage" class="alert alert-info mt-4 text-center p-3 rounded-lg" style="display:none;">
-                            <i class="fas fa-check-circle mr-2"></i> No pending appointments requiring acceptance.
-                        </div>
                     </div>
 
                     <!-- CONFIRMED/SCHEDULED APPOINTMENTS SECTION -->
-                    <div class="card p-4 border-l-8 border-blue-500 shadow-xl">
+                    <div class="card p-4 border-l-8 border-blue-500 shadow-xl" id="confirmedAppointmentsCard">
                         <h4 class="card-title text-blue-600 mb-4"><i class="fas fa-calendar-check mr-2"></i> **Confirmed/Scheduled Appointments**</h4>
                         <ul class="doctor-list" id="confirmedAppointmentList">
                             <!-- Confirmed/Scheduled appointments will be loaded here by JavaScript -->
                         </ul>
-                        <div id="confirmedEmptyMessage" class="alert alert-info mt-4 text-center p-3 rounded-lg" style="display:none;">
-                            <i class="fas fa-list-ul mr-2"></i> No confirmed appointments scheduled.
-                        </div>
                     </div>
                 </div>
             </div>
@@ -212,8 +206,8 @@ if (isset($_SESSION['user_id'])) {
             // New references for the two separate appointment lists
             const pendingAppointmentList = document.getElementById('pendingAppointmentList');
             const confirmedAppointmentList = document.getElementById('confirmedAppointmentList');
-            const pendingEmptyMessage = document.getElementById('pendingEmptyMessage');
-            const confirmedEmptyMessage = document.getElementById('confirmedEmptyMessage');
+            const pendingAppointmentsCard = document.getElementById('pendingAppointmentsCard'); // New
+            const confirmedAppointmentsCard = document.getElementById('confirmedAppointmentsCard'); // New
 
 
             // Event listeners for changes in filtering
@@ -300,7 +294,7 @@ if (isset($_SESSION['user_id'])) {
                     if (status === 'pending') {
                         badgeClass = 'warning';
                     } else if (status === 'scheduled' || status === 'online' || status === 'offline') {
-                        badgeClass = 'primary';
+                        badgeClass = 'success';
                     } else if (status === 'completed') {
                         badgeClass = 'primary';
                     } else if (status === 'cancelled') {
@@ -346,9 +340,19 @@ if (isset($_SESSION['user_id'])) {
                     confirmedAppointmentList.appendChild(createListItem(appointment));
                 });
 
-                // Update empty messages display
-                pendingEmptyMessage.style.display = pending.length === 0 ? 'block' : 'none';
-                confirmedEmptyMessage.style.display = confirmed.length === 0 ? 'block' : 'none';
+                // Hide/show pending appointments card
+                if (pending.length === 0) {
+                    pendingAppointmentsCard.style.display = 'none';
+                } else {
+                    pendingAppointmentsCard.style.display = 'block';
+                }
+
+                // Hide/show confirmed appointments card
+                if (confirmed.length === 0) {
+                    confirmedAppointmentsCard.style.display = 'none';
+                } else {
+                    confirmedAppointmentsCard.style.display = 'block';
+                }
 
                 updateAllTimers();
             }
@@ -376,34 +380,17 @@ if (isset($_SESSION['user_id'])) {
                     if (isVisible) visibleConfirmed++;
                 });
 
-                updateEmptySectionMessages(visiblePending, visibleConfirmed);
-            }
-
-            function updateEmptySectionMessages(visiblePending, visibleConfirmed) {
-                // Update based on the current search filter results
-
-                // Remove previous messages if they exist (though the filter hides the section too)
-                const totalPending = document.querySelectorAll('#pendingAppointmentList .doctor-item').length;
-                const totalConfirmed = document.querySelectorAll('#confirmedAppointmentList .doctor-item').length;
-
-                if (visiblePending === 0 && totalPending > 0) {
-                    pendingEmptyMessage.textContent = `No pending appointments match your search for "${searchPatient.value}".`;
-                    pendingEmptyMessage.style.display = 'block';
-                } else if (totalPending === 0) {
-                    pendingEmptyMessage.textContent = 'No pending appointments requiring acceptance.';
-                    pendingEmptyMessage.style.display = 'block';
+                // Update visibility of the cards based on filtered results
+                if (visiblePending === 0) {
+                    pendingAppointmentsCard.style.display = 'none';
                 } else {
-                    pendingEmptyMessage.style.display = 'none';
+                    pendingAppointmentsCard.style.display = 'block';
                 }
 
-                if (visibleConfirmed === 0 && totalConfirmed > 0) {
-                    confirmedEmptyMessage.textContent = `No confirmed appointments match your search for "${searchPatient.value}".`;
-                    confirmedEmptyMessage.style.display = 'block';
-                } else if (totalConfirmed === 0) {
-                    confirmedEmptyMessage.textContent = 'No confirmed appointments scheduled.';
-                    confirmedEmptyMessage.style.display = 'block';
+                if (visibleConfirmed === 0) {
+                    confirmedAppointmentsCard.style.display = 'none';
                 } else {
-                    confirmedEmptyMessage.style.display = 'none';
+                    confirmedAppointmentsCard.style.display = 'block';
                 }
             }
 
