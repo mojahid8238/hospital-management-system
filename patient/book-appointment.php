@@ -292,7 +292,11 @@ if ($result) {
             const doctorItems = document.querySelectorAll('.doctor-item');
             doctorItems.forEach(item => {
                 item.style.cursor = 'pointer';
-                item.addEventListener('click', function() {
+                item.addEventListener('click', function(event) {
+                    // Prevent the click from firing if the book-btn itself is clicked
+                    if (event.target.classList.contains('book-btn')) {
+                        return;
+                    }
                     const link = this.querySelector('.book-btn');
                     if (link) {
                         window.location.href = link.href;

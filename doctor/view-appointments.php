@@ -300,9 +300,9 @@ if (isset($_SESSION['user_id'])) {
                     if (status === 'pending') {
                         badgeClass = 'warning';
                     } else if (status === 'scheduled' || status === 'online' || status === 'offline') {
-                        badgeClass = 'primary';
-                    } else if (status === 'completed') {
                         badgeClass = 'success';
+                    } else if (status === 'completed') {
+                        badgeClass = 'primary';
                     } else if (status === 'cancelled') {
                         badgeClass = 'danger';
                     } else {
