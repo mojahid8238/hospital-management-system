@@ -28,6 +28,7 @@ $stmt->close();
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/shared-table.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/patient-dashboard.css">
 </head>
 <body>
     <header class="navbar">
@@ -296,14 +297,16 @@ $stmt->close();
                     listItem.dataset.appointmentTime = appointment.appointment_date;
 
                     listItem.innerHTML = `
-                        <div class="doctor-avatar">
-                            <img src="/hospital-management-system/${appointment.profile_pic || 'assets/images/default-avatar.png'}"
-                                alt="Dr. ${appointment.doctor_name}" class="rounded-circle">
-                        </div>
                         <div class="doctor-info">
-                            <h4>Dr. ${appointment.doctor_name}</h4>
-                            <p>Appointment: ${new Date(appointment.appointment_date.replace(' ', 'T') + 'Z').toLocaleString()}</p>
-                            <p>Remaining: <span class="remaining-time">Calculating...</span></p>
+                            <div class="doctor-avatar">
+                                <img src="/hospital-management-system/${appointment.profile_pic || 'assets/images/default-avatar.png'}"
+                                    alt="Dr. ${appointment.doctor_name}" class="rounded-circle">
+                            </div>
+                            <div>
+                                <h4>Dr. ${appointment.doctor_name}</h4>
+                                <p>Appointment: ${new Date(appointment.appointment_date.replace(' ', 'T') + 'Z').toLocaleString()}</p>
+                                <p>Remaining: <span class="remaining-time">Calculating...</span></p>
+                            </div>
                         </div>
                         <div class="doctor-info">
                             <p>Reason: ${appointment.reason}</p>
@@ -345,14 +348,16 @@ $stmt->close();
                     listItem.dataset.appointmentTime = appointment.appointment_date;
 
                     listItem.innerHTML = `
-                        <div class="doctor-avatar">
-                            <img src="/hospital-management-system/${appointment.profile_pic || 'assets/images/default-avatar.png'}"
-                                alt="Dr. ${appointment.doctor_name}" class="rounded-circle">
-                        </div>
                         <div class="doctor-info">
-                            <h4>Dr. ${appointment.doctor_name}</h4>
-                            <p>Appointment: ${new Date(appointment.appointment_date.replace(' ', 'T') + 'Z').toLocaleString()}</p>
-                            <p>Remaining: <span class="remaining-time">Calculating...</span></p>
+                            <div class="doctor-avatar">
+                                <img src="/hospital-management-system/${appointment.profile_pic || 'assets/images/default-avatar.png'}"
+                                    alt="Dr. ${appointment.doctor_name}" class="rounded-circle">
+                            </div>
+                            <div>
+                                <h4>Dr. ${appointment.doctor_name}</h4>
+                                <p>Appointment: ${new Date(appointment.appointment_date.replace(' ', 'T') + 'Z').toLocaleString()}</p>
+                                <p>Remaining: <span class="remaining-time">Calculating...</span></p>
+                            </div>
                         </div>
                         <div class="doctor-info">
                             <p>Reason: ${appointment.reason}</p>

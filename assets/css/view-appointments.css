@@ -1,5 +1,13 @@
 /* Responsive and alignment styles for doctor/view-appointments.php */
 
+.doctor-info p,
+.doctor-info h4 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px; /* Adjust as needed */
+}
+
 .doctor-item {
     cursor: pointer;
     display: flex;

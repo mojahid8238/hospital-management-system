@@ -63,8 +63,8 @@ if ($doctor_id) {
 
         <main class="content-area" id="mainContent">
             <div class="container panel-card">
-                <h2 class="card-title mb-3">Your Cancelled Appointments</h2>
-                <p class="text-muted">Welcome, <strong>Dr. <?php echo htmlspecialchars($doctor_name); ?></strong>! Here are your cancelled appointments:</p>
+                <h2 class="card-title mb-3">Welcome, <strong>Dr. <?php echo htmlspecialchars($doctor_name); ?> </h2>
+                <p></strong>Here are your cancelled appointments:</p>
 
                 <div class="search-filter-container">
                     <div class="search-bar">

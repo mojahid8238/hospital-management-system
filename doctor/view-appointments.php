@@ -64,8 +64,8 @@ if (isset($_SESSION['user_id'])) {
 
         <main class="content-area" id="mainContent">
             <div class="container panel-card">
-                <h2 class="card-title mb-3">Manage Your Appointments</h2>
-                <p class="text-muted">Welcome, <strong>Dr. <?php echo htmlspecialchars($doctor_name); ?></strong>! Here you can manage your scheduled appointments:</p>
+                <h2 class="card-title mb-3">Welcome, <strong>Dr. <?php echo htmlspecialchars($doctor_name); ?> </h2>
+                <p></strong>Here you can manage your scheduled appointments:</p>
 
                 <!-- The Status Filter Section has been removed as appointments are now separated by status below -->
 
@@ -92,7 +92,7 @@ if (isset($_SESSION['user_id'])) {
 
                     <!-- PENDING APPOINTMENTS SECTION -->
                     <div class="card mb-5 p-4 border-l-8 border-yellow-500 shadow-xl">
-                        <h4 class="card-title text-yellow-600 mb-4"><i class="fas fa-clock mr-2"></i> **Pending Appointments** (Requires Action)</h4>
+                        <h4 class="card-title text-yellow-600 mb-4"><i class="fas fa-clock mr-2"></i>  Pending Appointments</h4>
                         <ul class="doctor-list" id="pendingAppointmentList">
                             <!-- Pending appointments will be loaded here by JavaScript -->
                         </ul>
@@ -103,7 +103,7 @@ if (isset($_SESSION['user_id'])) {
 
                     <!-- CONFIRMED/SCHEDULED APPOINTMENTS SECTION -->
                     <div class="card p-4 border-l-8 border-blue-500 shadow-xl">
-                        <h4 class="card-title text-blue-600 mb-4"><i class="fas fa-calendar-check mr-2"></i> **Confirmed/Scheduled Appointments**</h4>
+                        <h4 class="card-title text-blue-600 mb-4"><i class="fas fa-calendar-check mr-2"></i> Confirmed/Scheduled Appointments</h4>
                         <ul class="doctor-list" id="confirmedAppointmentList">
                             <!-- Confirmed/Scheduled appointments will be loaded here by JavaScript -->
                         </ul>
@@ -126,7 +126,7 @@ if (isset($_SESSION['user_id'])) {
             </form>
             <div id="uploadMessage" style="margin-top: 10px; color: green;"></div>
             <!-- Display the initialized doctor name here -->
-            <h3><?php echo htmlspecialchars($doctor_name); ?></h3>
+            <h3>Dr. <?php echo htmlspecialchars($doctor_name); ?></h3>
             <hr>
             <ul>
                 <li><a href="dashboard.php">Doctor Dashboard</a></li>
@@ -290,9 +290,9 @@ if (isset($_SESSION['user_id'])) {
                         `;
                     } else if (appointment.status === 'Scheduled' || appointment.status === 'Online' || appointment.status === 'Offline') {
                         buttonsHtml = `
-                            <button class="btn btn-sm btn-outline-info attend-appointment-btn" data-appointment-id="${appointment.id}" data-appointment-type="${appointment.type}">Attend/Complete</button>
+                            <button class="btn btn-sm btn-outline-primary accept-appointment-btn" data-appointment-id="${appointment.id}" data-appointment-type="${appointment.type}">Attend</button>
                             <a href="#" class="btn btn-sm btn-outline-success">Message</a>
-                            <button class="btn btn-sm btn-outline-warning cancel-appointment-btn" data-appointment-id="${appointment.id}">Reschedule/Cancel</button>
+                            <button class="btn btn-sm btn-outline-danger cancel-appointment-btn" data-appointment-id="${appointment.id}">Change</button>
                         `;
                     }
 
