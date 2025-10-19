@@ -30,7 +30,7 @@ if ($doctor_id) {
     $filter_type = isset($_GET['type']) ? $_GET['type'] : 'all';
     $search_term = isset($_GET['search']) ? $_GET['search'] : '';
 
-    $sql = "SELECT a.id, p.id as patient_id, p.name as patient_name, p.profile_pic as patient_profile_pic, a.appointment_date, a.reason, a.status, a.type FROM appointments a JOIN patients p ON a.patient_id = p.id WHERE a.doctor_id = ?";
+    $sql = "SELECT a.id, p.id as patient_id, p.user_id as patient_user_id, p.name as patient_name, p.profile_pic as patient_profile_pic, a.appointment_date, a.reason, a.status, a.type FROM appointments a JOIN patients p ON a.patient_id = p.id WHERE a.doctor_id = ?";
 
     $params = [$doctor_id];
     $types = "i";

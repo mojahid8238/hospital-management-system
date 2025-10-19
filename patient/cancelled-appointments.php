@@ -38,7 +38,7 @@ if ($patient_id) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cancelled Appointments</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
-    <link rel="stylesheet" href="../assets/css/shared-table.css">
+    <link rel="stylesheet" href="../assets/css/shared-table-design.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
