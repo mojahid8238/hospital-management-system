@@ -10,36 +10,32 @@ header('Content-Type: application/json');
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $user_id = $_SESSION['user_id'];
 
-    // Fetch conversations for the current user
     $stmt = $conn->prepare("
         SELECT 
             c.id as conversation_id, 
             c.appointment_id, 
-            IF(c.participant1_id = ?, p2.id, p1.id) as other_participant_id,
-            IF(c.participant1_id = ?, p2.name, p1.name) as other_participant_name,
+            other_user.id as other_participant_id,
+            other_user.name as other_participant_name,
             CASE
-                WHEN IF(c.participant1_id = ?, p2.role, p1.role) = 'admin' THEN IF(c.participant1_id = ?, admin2.profile_pic, admin1.profile_pic)
-                WHEN IF(c.participant1_id = ?, p2.role, p1.role) = 'doctor' THEN IF(c.participant1_id = ?, doctor2.profile_pic, doctor1.profile_pic)
-                WHEN IF(c.participant1_id = ?, p2.role, p1.role) = 'patient' THEN IF(c.participant1_id = ?, patient2.profile_pic, patient1.profile_pic)
+                WHEN other_user.role = 'admin' THEN admin.profile_pic
+                WHEN other_user.role = 'doctor' THEN doctor.profile_pic
+                WHEN other_user.role = 'patient' THEN patient.profile_pic
                 ELSE 'assets/images/default-avatar.png'
             END as other_participant_profile_pic,
             m.message_content as last_message, 
             m.timestamp as last_message_timestamp,
             (SELECT COUNT(*) FROM messages WHERE conversation_id = c.id AND receiver_id = ? AND is_read = 0) as unread_count
         FROM conversations c
-        JOIN users p1 ON c.participant1_id = p1.id
-        JOIN users p2 ON c.participant2_id = p2.id
-        LEFT JOIN admin admin1 ON p1.id = admin1.user_id
-        LEFT JOIN admin admin2 ON p2.id = admin2.user_id
-        LEFT JOIN doctors doctor1 ON p1.id = doctor1.user_id
-        LEFT JOIN doctors doctor2 ON p2.id = doctor2.user_id
-        LEFT JOIN patients patient1 ON p1.id = patient1.user_id
-        LEFT JOIN patients patient2 ON p2.id = patient2.user_id
+        JOIN users u ON (c.participant1_id = u.id OR c.participant2_id = u.id) AND u.id = ?
+        JOIN users other_user ON (c.participant1_id = other_user.id OR c.participant2_id = other_user.id) AND other_user.id != ?
+        LEFT JOIN admin ON other_user.id = admin.user_id
+        LEFT JOIN doctors doctor ON other_user.id = doctor.user_id
+        LEFT JOIN patients patient ON other_user.id = patient.user_id
         LEFT JOIN messages m ON c.last_message_id = m.id
-        WHERE c.participant1_id = ? OR c.participant2_id = ?
+        WHERE u.id = ?
         ORDER BY c.updated_at DESC
     ");
-    $stmt->bind_param("iiiiiiiiiii", $user_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id, $user_id);
+    $stmt->bind_param("iiii", $user_id, $user_id, $user_id, $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
 

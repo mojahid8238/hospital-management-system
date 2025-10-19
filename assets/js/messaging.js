@@ -4,23 +4,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const chatMessages = document.getElementById('chatMessages');
     const messageInput = document.getElementById('messageInput');
     const sendMessageBtn = document.getElementById('sendMessageBtn');
+    const uploadImageBtn = document.getElementById('uploadImageBtn');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const clearImagePreviewBtn = document.getElementById('clearImagePreview');
 
     let activeConversationId = null;
     let activeReceiverId = null;
+    let activeReceiverProfilePic = null;
 
-    // Variables passed from PHP
     const otherParticipantUserId = window.otherParticipantUserId;
-    console.log('JavaScript Debug - otherParticipantUserId from window:', otherParticipantUserId);
     const initialAppointmentId = window.initialAppointmentId;
-    const targetDoctorId = window.targetDoctorId;
-    const targetPatientId = window.targetPatientId;
 
-    // If a specific participant is targeted, initialize activeReceiverId immediately
     if (otherParticipantUserId) {
         activeReceiverId = otherParticipantUserId;
-        console.log('activeReceiverId after initialization:', activeReceiverId);
-        // You might want to fetch the other participant's name here if not already known
-        chatHeader.innerHTML = `<h3>Chat with ${window.otherParticipantName || 'User ID: ' + otherParticipantUserId}</h3>`; // Use name if available
+        chatHeader.innerHTML = `<h3>Chat with ${window.otherParticipantName || 'User ID: ' + otherParticipantUserId}</h3>`;
         chatMessages.innerHTML = '<div class="alert alert-info">Start a new conversation.</div>';
     }
 
@@ -29,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    renderConversations(data.conversations);
+                    renderConversations(data.conversations, selectInitial);
                 }
             });
     }
@@ -42,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
             listItem.className = 'conversation-item';
             listItem.dataset.conversationId = conv.conversation_id;
             listItem.dataset.receiverId = conv.other_participant_id;
+            listItem.dataset.profilePic = conv.other_participant_profile_pic;
 
             const profilePic = conv.other_participant_profile_pic ? `/hospital-management-system/${conv.other_participant_profile_pic}` : '/hospital-management-system/assets/images/default-avatar.png';
 
@@ -51,55 +51,46 @@ document.addEventListener('DOMContentLoaded', function () {
                     <h4>${conv.other_participant_name}</h4>
                     <p>${conv.last_message || ''}</p>
                 </div>
-                ${conv.unread_count > 0 ? `<span class="unread-dot">.</span>` : ''}
+                ${conv.unread_count > 0 ? `<span class="unread-dot"></span>` : ''}
             `;
             listItem.addEventListener('click', () => {
                 activeConversationId = conv.conversation_id;
                 activeReceiverId = conv.other_participant_id;
-                chatHeader.innerHTML = `<h3>${conv.other_participant_name}</h3>`;
+                activeReceiverProfilePic = conv.other_participant_profile_pic;
+                chatHeader.innerHTML = `<img src="${profilePic}" alt="Avatar"><h3>${conv.other_participant_name}</h3>`;
                 fetchMessages(activeConversationId);
                 document.querySelectorAll('.conversation-item').forEach(item => item.classList.remove('active'));
                 listItem.classList.add('active');
 
-                // Mark messages as read only if activeConversationId is set
                 if (activeConversationId) {
-                    console.log('Calling mark_as_read.php for conversation_id:', activeConversationId);
                     fetch('../messaging/mark_as_read.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ conversation_id: activeConversationId })
                     })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('mark_as_read.php response:', data);
-                    if (data.success) {
-                        console.log('Messages marked as read successfully.');
-                        // Remove unread count badge from UI
-                        const unreadCountBadge = listItem.querySelector('.unread-count');
-                        if (unreadCountBadge) {
-                            unreadCountBadge.remove();
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const unreadDot = listItem.querySelector('.unread-dot');
+                            if (unreadDot) {
+                                unreadDot.remove();
+                            }
                         }
-                    } else {
-                        console.error('Failed to mark messages as read:', data.message);
-                    }
-                })
-                                    .catch(error => console.error('Error marking messages as read:', error));
-                                }            });
+                    });
+                }
+            });
             conversationsList.appendChild(listItem);
 
-            // Check if this is the initial conversation to select
             if (selectInitial && otherParticipantUserId && conv.other_participant_id == otherParticipantUserId) {
-                listItem.click(); // Simulate click to activate
+                listItem.click();
                 initialConversationFound = true;
             }
         });
 
-        // If initial participant was specified but no existing conversation found, prepare for new chat
         if (selectInitial && otherParticipantUserId && !initialConversationFound) {
-            activeConversationId = null; // No existing conversation
+            activeConversationId = null;
             activeReceiverId = otherParticipantUserId;
-            // You might want to fetch the other participant's name here if not already known
-            chatHeader.textContent = `Chat with User ID: ${otherParticipantUserId}`; // Placeholder
+            chatHeader.innerHTML = `<h3>Chat with ${window.otherParticipantName}</h3>`;
             chatMessages.innerHTML = '<div class="alert alert-info">Start a new conversation.</div>';
         }
     }
@@ -125,8 +116,16 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 messageElement.classList.add('received');
             }
+
+            let messageContent = '';
+            if (msg.message_type === 'image') {
+                messageContent = `<img src="/hospital-management-system/${msg.message_content}" class="message-image">`;
+            } else {
+                messageContent = `<p>${msg.message_content}</p>`;
+            }
+
             messageElement.innerHTML = `
-                <p>${msg.message_content}</p>
+                ${messageContent}
                 <span class="timestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span>
             `;
             chatMessages.appendChild(messageElement);
@@ -136,17 +135,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function sendMessage() {
         const messageContent = messageInput.value.trim();
-        console.log('sendMessage called.');
-        console.log('messageContent:', messageContent);
-        console.log('activeReceiverId:', activeReceiverId);
-        if (messageContent === '' || !activeReceiverId) {
-            console.log('Message content is empty or activeReceiverId is not set. Returning.');
+        const imageFile = imageInput.files[0];
+
+        if (messageContent === '' && !imageFile) {
             return;
         }
 
         const formData = new FormData();
         formData.append('receiver_id', activeReceiverId);
         formData.append('message_content', messageContent);
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
         if (initialAppointmentId) {
             formData.append('appointment_id', initialAppointmentId);
         }
@@ -159,13 +159,40 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(data => {
             if (data.success) {
                 messageInput.value = '';
+                imageInput.value = '';
+                imagePreviewContainer.style.display = 'none';
+                imagePreview.src = '#';
                 if (data.conversation_id) {
                     activeConversationId = data.conversation_id;
                 }
                 fetchMessages(activeConversationId);
+                fetchConversations();
             }
         });
     }
+
+    uploadImageBtn.addEventListener('click', () => imageInput.click());
+
+    imageInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreviewContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            imagePreview.src = '#';
+            imagePreviewContainer.style.display = 'none';
+        }
+    });
+
+    clearImagePreviewBtn.addEventListener('click', function() {
+        imageInput.value = '';
+        imagePreview.src = '#';
+        imagePreviewContainer.style.display = 'none';
+    });
 
     sendMessageBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', function (e) {
@@ -174,25 +201,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Initial load
-    if (otherParticipantUserId) {
-        // Perform initial fetch for the targeted participant
-        fetchConversations(true);
+    fetchConversations(true);
+
+    setInterval(() => {
         if (activeConversationId) {
             fetchMessages(activeConversationId);
         }
-    } else {
-        // Perform initial fetch for general conversations
         fetchConversations();
-    }
-
-    // Set up polling: faster initial poll, then normal interval
-    setTimeout(() => {
-        setInterval(() => {
-            fetchConversations();
-            if (activeConversationId) {
-                fetchMessages(activeConversationId);
-            }
-        }, 5000); // Normal polling interval
-    }, 1000); // Shorter delay for the first poll after initial load
+    }, 5000);
 });

@@ -18,8 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     $conversation_id = filter_var($conversation_id, FILTER_SANITIZE_NUMBER_INT);
 
-    // Fetch messages for the given conversation
-    $stmt = $conn->prepare("SELECT m.*, u.username as sender_username FROM messages m JOIN users u ON m.sender_id = u.id WHERE conversation_id = ? ORDER BY timestamp ASC");
+    $stmt = $conn->prepare("SELECT m.id, m.sender_id, m.message_content, m.message_type, m.timestamp, u.name as sender_name FROM messages m JOIN users u ON m.sender_id = u.id WHERE m.conversation_id = ? ORDER BY m.timestamp ASC");
     $stmt->bind_param("i", $conversation_id);
     $stmt->execute();
     $result = $stmt->get_result();

@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS admin (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
-profile_pic VARCHAR(255) DEFAULT 'assets/images/default-avatar.png',
+    profile_pic VARCHAR(255) DEFAULT 'assets/images/default-avatar.png',
     status ENUM('pending', 'approved') NOT NULL DEFAULT 'pending',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS doctors (
     user_id INT NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE,
-    profile_pic VARCHAR(255) DEFAULT 'default-avatar.png',
+    profile_pic VARCHAR(255) DEFAULT 'assets/images/default-avatar.png',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS patients (
     gender ENUM('Male', 'Female', 'Other'),
     address VARCHAR(255),
     email VARCHAR(100) UNIQUE,
-    profile_pic VARCHAR(255) DEFAULT 'default-avatar.png',
+    profile_pic VARCHAR(255) DEFAULT 'assets/images/default-avatar.png',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -61,9 +61,6 @@ CREATE TABLE IF NOT EXISTS appointments (
 );
 
 -- Schema Updates
--- The following ALTER TABLE statements might fail if the columns already exist.
--- This is not an error, and you can safely ignore these errors if the columns are already in your tables.
-
 ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `schedule` TIME;
 ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `image` VARCHAR(255);
 ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `phone` VARCHAR(20);
@@ -82,33 +79,17 @@ CREATE TABLE IF NOT EXISTS specializations (
 );
 
 -- Populate specializations table
--- Using INSERT IGNORE to avoid errors if the specializations already exist.
 INSERT IGNORE INTO specializations (name) VALUES
-('Cardiology'),
-('Dermatology'),
-('Neurology'),
-('Oncology'),
-('Pediatrics'),
-('Psychiatry'),
-('Radiology'),
-('Urology'),
-('Gastroenterology'),
-('Endocrinology'),
-('Nephrology'),
-('Pulmonology'),
-('Rheumatology'),
-('Ophthalmology'),
-('Otolaryngology (ENT)'),
-('Gynecology'),
-('Orthopedics');
+('Cardiology'), ('Dermatology'), ('Neurology'), ('Oncology'), ('Pediatrics'),
+('Psychiatry'), ('Radiology'), ('Urology'), ('Gastroenterology'), ('Endocrinology'),
+('Nephrology'), ('Pulmonology'), ('Rheumatology'), ('Ophthalmology'), ('Otolaryngology (ENT)'),
+('Gynecology'), ('Orthopedics');
 
 -- Modify doctors table
 ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `specialization_id` INT;
-ALTER TABLE `doctors` ADD FOREIGN KEY (`specialization_id`) REFERENCES `specializations`(`id`);
+ALTER TABLE `doctors` ADD FOREIGN KEY IF NOT EXISTS (`specialization_id`) REFERENCES `specializations`(`id`);
 ALTER TABLE `doctors` DROP COLUMN IF EXISTS `specialization`;
 ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `degrees` VARCHAR(255);
-
--- Modify appointments table to include 'Online' and 'Offline' status
 
 -- Messaging Tables
 CREATE TABLE IF NOT EXISTS messages (
@@ -117,6 +98,7 @@ CREATE TABLE IF NOT EXISTS messages (
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
     message_content TEXT NOT NULL,
+    message_type VARCHAR(10) NOT NULL DEFAULT 'text',
     timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_read TINYINT(1) DEFAULT 0,
     FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -131,17 +113,14 @@ CREATE TABLE IF NOT EXISTS conversations (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     appointment_id INT DEFAULT NULL,
     FOREIGN KEY (participant1_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL,
+    FOREIGN KEY (last_message_id) REFERENCES messages(id) ON DELETE SET NULL
 );
 
 -- Update existing default profile pictures to use the full relative path
 UPDATE admin SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'default-avatar.png';
 UPDATE doctors SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'default-avatar.png';
 UPDATE patients SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'default-avatar.png';
-
--- Add foreign key constraints for circular dependencies
-ALTER TABLE messages ADD CONSTRAINT fk_messages_conversation FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE SET NULL;
-ALTER TABLE conversations ADD CONSTRAINT fk_conversations_last_message FOREIGN KEY (last_message_id) REFERENCES messages(id) ON DELETE SET NULL;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
