@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                             data-doctor-name="${appointment.doctor_name}"
                                             data-profile-pic="${appointment.profile_pic || 'assets/images/default-avatar.png'}"
                                             data-conversation-id="${appointment.conversation_id || ''}">
-                                        Chat
+                                        Message
                                     </button>
                                 </div>
                             `;

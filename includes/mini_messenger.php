@@ -14,10 +14,12 @@
                 <img id="miniMessengerImagePreview" src="#" alt="Image Preview">
                 <button id="miniMessengerClearImagePreview" class="mini-messenger-clear-image-btn">&times;</button>
             </div>
-            <input type="file" id="miniMessengerImageInput" accept="image/*" style="display: none;">
-            <button id="miniMessengerUploadImageBtn" class="mini-messenger-icon-btn"><i class="fas fa-image"></i></button>
-            <input type="text" id="miniMessengerMessageInput" placeholder="Type a message...">
-            <button id="miniMessengerSendMessageBtn" class="mini-messenger-icon-btn"><i class="fas fa-paper-plane"></i></button>
+            <div class="mini-messenger-message-input-row">
+                <input type="file" id="miniMessengerImageInput" accept="image/*" style="display: none;">
+                <button id="miniMessengerUploadImageBtn" class="mini-messenger-icon-btn"><i class="fas fa-image"></i></button>
+                <input type="text" id="miniMessengerMessageInput" placeholder="Type a message...">
+                <button id="miniMessengerSendMessageBtn" class="mini-messenger-icon-btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
         </div>
     </div>
 </div>

@@ -130,6 +130,29 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+/* Message wrapper for aligning message bubble and timestamp */
+.message-wrapper {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px; /* Space between message groups */
+}
+
+.message-wrapper.sent {
+    align-items: flex-end; /* Align sent messages to the right */
+}
+
+.message-wrapper.received {
+    align-items: flex-start; /* Align received messages to the left */
+}
+
+/* Timestamp styling */
+.timestamp {
+    font-size: 0.75rem;
+    color: #6c757d; /* Muted color */
+    margin-top: 2px; /* Small space between message bubble and timestamp */
+    /* Text alignment will be inherited from message-wrapper */
+}
+
 /* Sent messages */
 .mini-messenger-message.sent {
     align-self: flex-end;
@@ -183,11 +206,17 @@
 /* Input area */
 .mini-messenger-input-area {
     display: flex;
-    align-items: center;
+    flex-direction: column; /* Changed to column */
     padding: 10px 15px;
     border-top: 1px solid #e0e0e0;
     background-color: #ffffff;
+}
+
+.mini-messenger-message-input-row {
+    display: flex;
+    align-items: center;
     gap: 8px;
+    width: 100%; /* Ensure it takes full width */
 }
 
 .mini-messenger-input-area input[type="text"] {
@@ -216,6 +245,10 @@
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+.mini-messenger-icon-btn i { /* Explicitly target the icon */
+    color: #007bff;
+}
+
 .mini-messenger-icon-btn:hover {
     background-color: #e9ecef;
     color: #0056b3;
@@ -225,17 +258,19 @@
 .mini-messenger-image-preview-container {
     display: flex;
     align-items: center;
-    padding: 8px;
+    /* Removed fixed padding */
     border: 1px solid #d1d1d1;
     border-radius: 8px;
-    margin: 0 15px 10px 15px;
+    margin: 10px 0; /* Adjusted margin for top/bottom spacing */
     position: relative;
     background-color: #f0f2f5;
+    width: fit-content; /* Shrink to fit content */
+    padding: 5px; /* Small padding around the image */
 }
 
 .mini-messenger-image-preview-container img {
-    max-width: 60px;
-    max-height: 60px;
+    max-width: 40px; /* Smaller */
+    max-height: 40px; /* Smaller */
     border-radius: 6px;
     margin-right: 10px;
     object-fit: cover;

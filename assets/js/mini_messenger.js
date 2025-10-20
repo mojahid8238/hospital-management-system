@@ -278,12 +278,17 @@
         
         miniMessengerMessages.innerHTML = '';
         messages.forEach(msg => {
+            const messageWrapper = document.createElement('div'); // New wrapper for message and timestamp
+            messageWrapper.classList.add('message-wrapper'); // Add a class for styling
+
             const messageElement = document.createElement('div');
             messageElement.classList.add('mini-messenger-message');
             // Assuming currentUserId is globally available from the dashboard/session data
-            if (msg.sender_id === currentUserId) { 
+            if (msg.sender_id === currentUserId) {
+                messageWrapper.classList.add('sent'); // Apply alignment to wrapper
                 messageElement.classList.add('sent');
             } else {
+                messageWrapper.classList.add('received'); // Apply alignment to wrapper
                 messageElement.classList.add('received');
             }
 
@@ -294,11 +299,15 @@
                 messageContent = `<p>${msg.message_content}</p>`;
             }
 
-            messageElement.innerHTML = `
-                ${messageContent}
-                <span class="timestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span>
-            `;
-            miniMessengerMessages.appendChild(messageElement);
+            messageElement.innerHTML = messageContent; // Message content only in the bubble
+
+            const timestampElement = document.createElement('span');
+            timestampElement.classList.add('timestamp');
+            timestampElement.textContent = new Date(msg.timestamp).toLocaleTimeString();
+
+            messageWrapper.appendChild(messageElement);
+            messageWrapper.appendChild(timestampElement);
+            miniMessengerMessages.appendChild(messageWrapper);
         });
         miniMessengerMessages.scrollTop = miniMessengerMessages.scrollHeight;
     }

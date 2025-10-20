@@ -109,11 +109,17 @@ document.addEventListener('DOMContentLoaded', function () {
     function renderMessages(messages) {
         chatMessages.innerHTML = '';
         messages.forEach(msg => {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('message-wrapper');
+
             const messageElement = document.createElement('div');
             messageElement.classList.add('message');
+
             if (msg.sender_id === currentUserId) {
+                messageWrapper.classList.add('sent');
                 messageElement.classList.add('sent');
             } else {
+                messageWrapper.classList.add('received');
                 messageElement.classList.add('received');
             }
 
@@ -124,11 +130,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 messageContent = `<p>${msg.message_content}</p>`;
             }
 
-            messageElement.innerHTML = `
-                ${messageContent}
-                <span class="timestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span>
-            `;
-            chatMessages.appendChild(messageElement);
+            messageElement.innerHTML = messageContent;
+
+            const timestampElement = document.createElement('span');
+            timestampElement.classList.add('timestamp');
+            timestampElement.textContent = new Date(msg.timestamp).toLocaleTimeString();
+
+            messageWrapper.appendChild(messageElement);
+            messageWrapper.appendChild(timestampElement);
+            chatMessages.appendChild(messageWrapper);
         });
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
