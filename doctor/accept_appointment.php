@@ -45,7 +45,7 @@ if (!$isDoctor) {
 
 $input = json_decode(file_get_contents('php://input'), true);
 $appointment_id = $input['appointment_id'] ?? null;
-$appointment_type = $input['appointment_type'] ?? null;
+$appointment_type = $input['type'] ?? null;
 
 // Log received data
 error_log("Received appointment_id for acceptance: " . ($appointment_id ?? 'null'));

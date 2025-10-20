@@ -1,3 +1,5 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- Create Database
 CREATE DATABASE IF NOT EXISTS hospital_db;
 USE hospital_db;
@@ -16,8 +18,7 @@ CREATE TABLE IF NOT EXISTS admin (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    profile_pic VARCHAR(255) DEFAULT 'default-avatar.png',
+    profile_pic VARCHAR(255) DEFAULT 'assets/images/default-avatar.png',
     status ENUM('pending', 'approved') NOT NULL DEFAULT 'pending',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -28,7 +29,7 @@ CREATE TABLE IF NOT EXISTS doctors (
     user_id INT NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE,
-    profile_pic VARCHAR(255) DEFAULT 'default-avatar.png',
+    profile_pic VARCHAR(255) DEFAULT 'assets/images/default-avatar.png',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -41,7 +42,7 @@ CREATE TABLE IF NOT EXISTS patients (
     gender ENUM('Male', 'Female', 'Other'),
     address VARCHAR(255),
     email VARCHAR(100) UNIQUE,
-    profile_pic VARCHAR(255) DEFAULT 'default-avatar.png',
+    profile_pic VARCHAR(255) DEFAULT 'assets/images/default-avatar.png',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -60,19 +61,16 @@ CREATE TABLE IF NOT EXISTS appointments (
 );
 
 -- Schema Updates
--- The following ALTER TABLE statements might fail if the columns already exist.
--- This is not an error, and you can safely ignore these errors if the columns are already in your tables.
-
-ALTER TABLE `doctors` ADD `schedule` TIME;
-ALTER TABLE `doctors` ADD `image` VARCHAR(255);
-ALTER TABLE `doctors` ADD `phone` VARCHAR(20);
-ALTER TABLE `patients` ADD `image` VARCHAR(255);
-ALTER TABLE `patients` ADD `username` VARCHAR(255);
-ALTER TABLE `patients` ADD `phone` VARCHAR(20);
-ALTER TABLE `appointments` ADD `image` VARCHAR(255);
+ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `schedule` TIME;
+ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `image` VARCHAR(255);
+ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `phone` VARCHAR(20);
+ALTER TABLE `patients` ADD COLUMN IF NOT EXISTS `image` VARCHAR(255);
+ALTER TABLE `patients` ADD COLUMN IF NOT EXISTS `username` VARCHAR(255);
+ALTER TABLE `patients` ADD COLUMN IF NOT EXISTS `phone` VARCHAR(20);
+ALTER TABLE `appointments` ADD COLUMN IF NOT EXISTS `image` VARCHAR(255);
 ALTER TABLE `appointments` DROP COLUMN IF EXISTS `time`;
-ALTER TABLE `users` ADD `name` VARCHAR(255);
-ALTER TABLE `admin` ADD `image` VARCHAR(255);
+ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `name` VARCHAR(255);
+ALTER TABLE `admin` ADD COLUMN IF NOT EXISTS `image` VARCHAR(255);
 
 -- Create specializations table
 CREATE TABLE IF NOT EXISTS specializations (
@@ -81,31 +79,63 @@ CREATE TABLE IF NOT EXISTS specializations (
 );
 
 -- Populate specializations table
--- Using INSERT IGNORE to avoid errors if the specializations already exist.
 INSERT IGNORE INTO specializations (name) VALUES
-('Cardiology'),
-('Dermatology'),
-('Neurology'),
-('Oncology'),
-('Pediatrics'),
-('Psychiatry'),
-('Radiology'),
-('Urology'),
-('Gastroenterology'),
-('Endocrinology'),
-('Nephrology'),
-('Pulmonology'),
-('Rheumatology'),
-('Ophthalmology'),
-('Otolaryngology (ENT)'),
-('Gynecology'),
-('Orthopedics');
+('Cardiology'), ('Dermatology'), ('Neurology'), ('Oncology'), ('Pediatrics'),
+('Psychiatry'), ('Radiology'), ('Urology'), ('Gastroenterology'), ('Endocrinology'),
+('Nephrology'), ('Pulmonology'), ('Rheumatology'), ('Ophthalmology'), ('Otolaryngology (ENT)'),
+('Gynecology'), ('Orthopedics');
 
 -- Modify doctors table
-ALTER TABLE `doctors` ADD `specialization_id` INT;
-ALTER TABLE `doctors` ADD FOREIGN KEY (`specialization_id`) REFERENCES `specializations`(`id`);
+ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `specialization_id` INT;
+ALTER TABLE `doctors` ADD FOREIGN KEY IF NOT EXISTS (`specialization_id`) REFERENCES `specializations`(`id`);
 ALTER TABLE `doctors` DROP COLUMN IF EXISTS `specialization`;
-ALTER TABLE `doctors` ADD `degrees` VARCHAR(255);
+ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `degrees` VARCHAR(255);
 
--- Modify appointments table to include 'Online' and 'Offline' status
+-- Messaging Tables
+CREATE TABLE IF NOT EXISTS messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    conversation_id INT DEFAULT NULL,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    message_content TEXT NOT NULL,
+    message_type VARCHAR(10) NOT NULL DEFAULT 'text',
+    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_read TINYINT(1) DEFAULT 0,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
+CREATE TABLE IF NOT EXISTS conversations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    participant1_id INT NOT NULL,
+    participant2_id INT NOT NULL,
+    last_message_id INT DEFAULT NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    appointment_id INT DEFAULT NULL,
+    FOREIGN KEY (participant1_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL,
+    FOREIGN KEY (last_message_id) REFERENCES messages(id) ON DELETE SET NULL
+);
+
+-- Update existing default profile pictures to use the full relative path
+UPDATE admin SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'default-avatar.png';
+UPDATE doctors SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'default-avatar.png';
+UPDATE patients SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'default-avatar.png';
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Video Calls Table
+CREATE TABLE IF NOT EXISTS video_calls (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    caller_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    appointment_id INT DEFAULT NULL,
+    start_time DATETIME NOT NULL,
+    end_time DATETIME DEFAULT NULL,
+    status ENUM('scheduled', 'in_progress', 'completed', 'cancelled', 'failed') DEFAULT 'scheduled',
+    meeting_link VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (caller_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL
+);

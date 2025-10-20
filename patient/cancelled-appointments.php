@@ -38,7 +38,7 @@ if ($patient_id) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cancelled Appointments</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
-    <link rel="stylesheet" href="../assets/css/shared-table.css">
+    <link rel="stylesheet" href="../assets/css/shared-table-design.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
@@ -59,6 +59,7 @@ if ($patient_id) {
                 <li><a href="book-appointment.php">Book New Appointment</a></li>
                 <li><a href="dashboard.php">Your Appointments & History</a></li>
                 <li><a href="cancelled-appointments.php">Cancelled Appointments</a></li>
+                <li><a href="../messaging/messaging.php">Messages</a></li>
             </ul>
         </aside>
 
@@ -164,25 +165,35 @@ if ($patient_id) {
 
             const searchDoctor = document.getElementById('searchDoctor');
             const appointmentList = document.getElementById('appointmentList');
-            const appointmentItems = Array.from(appointmentList.getElementsByClassName('doctor-item'));
 
-            function filterAppointments() {
-                const searchTerm = searchDoctor.value.toLowerCase();
+            console.log('searchDoctor:', searchDoctor);
+            console.log('appointmentList:', appointmentList);
 
-                appointmentItems.forEach(item => {
-                    const name = item.dataset.name;
+            if (appointmentList) { // Only proceed if appointmentList exists
+                try {
+                    const appointmentItems = Array.from(appointmentList.getElementsByClassName('doctor-item'));
 
-                    const nameMatch = name.includes(searchTerm);
+                    function filterAppointments() {
+                        const searchTerm = searchDoctor.value.toLowerCase();
 
-                    if (nameMatch) {
-                        item.style.display = 'flex';
-                    } else {
-                        item.style.display = 'none';
+                        appointmentItems.forEach(item => {
+                            const name = item.dataset.name;
+
+                            const nameMatch = name.includes(searchTerm);
+
+                            if (nameMatch) {
+                                item.style.display = 'flex';
+                            } else {
+                                item.style.display = 'none';
+                            }
+                        });
                     }
-                });
-            }
 
-            searchDoctor.addEventListener('input', filterAppointments);
+                    searchDoctor.addEventListener('input', filterAppointments);
+                } catch (error) {
+                    console.error('Error in filterAppointments setup:', error);
+                }
+            }
 
             function handleDeleteButtonClick(event) {
                 const button = event.target.closest('.remove-appointment-btn');
