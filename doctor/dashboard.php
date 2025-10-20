@@ -92,7 +92,7 @@ if (isset($_SESSION['user_id'])) {
 
                     <!-- PENDING APPOINTMENTS SECTION -->
                     <div class="card mb-5 p-4 border-l-8 border-yellow-500 shadow-xl" id="pendingAppointmentsCard">
-                        <h4 class="card-title text-yellow-600 mb-4"><i class="fas fa-clock mr-2"></i> **Pending Appointments** (Requires Action)</h4>
+                        <h4 class="card-title text-yellow-600 mb-4"><i class="fas fa-clock mr-2"></i> Pending Appointments </h4>
                         <ul class="doctor-list" id="pendingAppointmentList">
                             <!-- Pending appointments will be loaded here by JavaScript -->
                         </ul>
@@ -100,7 +100,7 @@ if (isset($_SESSION['user_id'])) {
 
                     <!-- CONFIRMED/SCHEDULED APPOINTMENTS SECTION -->
                     <div class="card p-4 border-l-8 border-blue-500 shadow-xl" id="confirmedAppointmentsCard">
-                        <h4 class="card-title text-blue-600 mb-4"><i class="fas fa-calendar-check mr-2"></i> **Confirmed/Scheduled Appointments**</h4>
+                        <h4 class="card-title text-blue-600 mb-4"><i class="fas fa-calendar-check mr-2"></i> Confirmed/Scheduled Appointments</h4>
                         <ul class="doctor-list" id="confirmedAppointmentList">
                             <!-- Confirmed/Scheduled appointments will be loaded here by JavaScript -->
                         </ul>
