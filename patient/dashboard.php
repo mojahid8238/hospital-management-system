@@ -55,7 +55,7 @@ $stmt->close();
 
         <main class="content-area" id="mainContent">
             <div class="container panel-card">
-                <h2 class="card-title mb-3">Welcome, <?php echo htmlspecialchars($patient_name); ?>!</h2>
+                <h2 class="card-title mb-3">Welcome, <?php echo htmlspecialchars($_SESSION['name'] ?? 'Patient'); ?>!</h2>
 
                 <div class="search-filter-container mb-4">
                     <div class="search-bar">
@@ -132,7 +132,7 @@ $stmt->close();
                 <button type="submit" style="display: none;">Upload</button>
             </form>
             <div id="uploadMessage" style="margin-top: 10px; color: green;"></div>
-            <h3><?php echo htmlspecialchars($_SESSION['name']); ?></h3>
+            <h3><?php echo htmlspecialchars($_SESSION['name'] ?? 'Patient'); ?></h3>
             <hr>
             <ul>
                 <li><a href="dashboard.php">Patient Dashboard</a></li>
@@ -150,5 +150,6 @@ $stmt->close();
     </script>
     <script src="../assets/js/mini_messenger.js"></script>
     <script src="../assets/js/patient-dashboard-logic.js"></script>
+    <script src="../assets/js/profile-overlay.js"></script>
 </body>
 </html>

@@ -112,7 +112,7 @@ if (isset($_SESSION['user_id'])) {
                 <button type="submit" style="display: none;">Upload</button>
             </form>
             <div id="uploadMessage" style="margin-top: 10px; color: green;"></div>
-            <h3><?php echo htmlspecialchars($doctor_name); ?></h3>
+            <h3><?php echo htmlspecialchars($_SESSION['name'] ?? 'Doctor'); ?></h3>
             <hr>
             <ul>
                 <li><a href="dashboard.php">Doctor Dashboard</a></li>
@@ -129,5 +129,6 @@ if (isset($_SESSION['user_id'])) {
     </script>
     <script src="../assets/js/mini_messenger.js"></script>
     <script src="../assets/js/doctor-dashboard-logic.js"></script>
+    <script src="../assets/js/profile-overlay.js"></script>
 </body>
 </html>

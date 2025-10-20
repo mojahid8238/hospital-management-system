@@ -40,6 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt_admin->fetch();
                     $stmt_admin->close();
 
+                    // Add fallbacks for potentially null values
+                    $profile_pic = $profile_pic ?? 'assets/images/default-avatar.png';
+                    $name = $name ?? 'Admin User';
+
                     if ($status === 'approved') {
                         $_SESSION['user_id'] = $user_id;
                         $_SESSION['username'] = $username;
@@ -63,6 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt_doctor->bind_result($profile_pic, $name);
                         $stmt_doctor->fetch();
                         $stmt_doctor->close();
+
+                        // Add fallbacks for potentially null values
+                        $profile_pic = $profile_pic ?? 'assets/images/default-avatar.png';
+                        $name = $name ?? 'Doctor';
+
                         $_SESSION['profile_pic'] = $profile_pic;
                         $_SESSION['name'] = $name;
                         header("Location: ../doctor/dashboard.php");
@@ -73,6 +82,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt_patient->bind_result($profile_pic, $name);
                         $stmt_patient->fetch();
                         $stmt_patient->close();
+
+                        // Add fallbacks for potentially null values
+                        $profile_pic = $profile_pic ?? 'assets/images/default-avatar.png';
+                        $name = $name ?? 'Patient';
+
                         $_SESSION['profile_pic'] = $profile_pic;
                         $_SESSION['name'] = $name;
                         header("Location: ../includes/homepage.php");
