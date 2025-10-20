@@ -77,12 +77,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                     ${appointment.status === 'Pending' ? `
                                         <button class="btn btn-danger cancel-btn" data-appointment-id="${appointment.id}">Cancel</button>
                                     ` : ''}
-                                    <button class="btn btn-info message-btn"
+                                    <button class="btn btn-info chat-btn"
                                             data-doctor-id="${appointment.doctor_user_id}"
                                             data-doctor-name="${appointment.doctor_name}"
-                                            data-doctor-profile-pic="${appointment.profile_pic || 'assets/images/default-avatar.png'}"
+                                            data-profile-pic="${appointment.profile_pic || 'assets/images/default-avatar.png'}"
                                             data-conversation-id="${appointment.conversation_id || ''}">
-                                        Message
+                                        Chat
                                     </button>
                                 </div>
                             `;
@@ -135,12 +135,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // Event listener for Message button
-        document.querySelectorAll('.message-btn').forEach(button => {
+        // Event listener for Chat button
+        document.querySelectorAll('.chat-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const doctorId = this.dataset.doctorId;
                 const doctorName = this.dataset.doctorName;
-                const doctorProfilePic = this.dataset.doctorProfilePic;
+                const doctorProfilePic = this.dataset.profilePic; // Note: data-profile-pic
                 const conversationId = this.dataset.conversationId;
                 if (window.openMiniMessenger) {
                     window.openMiniMessenger(doctorId, doctorName, doctorProfilePic, conversationId);
