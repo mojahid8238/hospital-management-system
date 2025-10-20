@@ -13,7 +13,7 @@ if (!is_logged_in()) {
 // Use a default path that is relative to the project root (no ../)
 $rawProfilePic = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
 // Use ltrim to safely remove the leading "../" if it exists.
-$profilePic = ltrim($rawProfilePic, '../'); 
+$profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic); 
 // Now $profilePic contains: 'assets/images/profile_pics/patient_2.png' or 'assets/images/default-avatar.png'
 // -------------------------------------------------------------------------
 
