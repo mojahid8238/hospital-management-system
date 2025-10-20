@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once 'includes/auth.php';
 
 // Redirect logged-in users based on role

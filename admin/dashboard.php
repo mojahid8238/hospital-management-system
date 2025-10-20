@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 redirect_if_not_admin();
@@ -72,7 +71,7 @@ $profile_pic_path = htmlspecialchars($base_url . $image_relative_path);
             <!-- Upload message container -->
             <div id="uploadMessage" style="font-size: 0.95rem; text-align: center; margin-top: 5px;"></div>
             
-            <h3><?php echo htmlspecialchars($_SESSION['name']); ?></h3>
+            <h3><?php echo htmlspecialchars($_SESSION['name'] ?? 'Admin'); ?></h3>
             <hr>
             <ul>
                 <li><a href="dashboard.php">Admin Dashboard</a></li>

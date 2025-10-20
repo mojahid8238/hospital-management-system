@@ -1,6 +1,5 @@
 <?php
 error_log("mark_as_read.php: REQUEST_METHOD = " . $_SERVER['REQUEST_METHOD']);
-session_start();
 include_once '../includes/db.php';
 include_once '../includes/auth.php';
 

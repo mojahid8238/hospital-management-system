@@ -6,7 +6,6 @@ error_reporting(E_ALL);
 ini_set('log_errors', 1);
 ini_set('display_errors', 0); // This is the critical change
 
-session_start();
 // NOTE: Assuming db.php and auth.php are correctly located and initialize $conn
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
