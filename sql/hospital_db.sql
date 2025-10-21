@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS admin (
     status ENUM('pending', 'approved') NOT NULL DEFAULT 'pending',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+ALTER TABLE `admin` ADD COLUMN IF NOT EXISTS `email` VARCHAR(100) UNIQUE;
 
 -- Doctors Table (linked to users)
 CREATE TABLE IF NOT EXISTS doctors (

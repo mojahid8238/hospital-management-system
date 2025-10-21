@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
@@ -99,6 +102,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $_SESSION['user_id'] = $user_id;
                                 $_SESSION['username'] = $username;
                                 $_SESSION['role'] = $role;
+                                $_SESSION['name'] = $fullname; // Set the name for the session
+                                $_SESSION['profile_pic'] = 'assets/images/default-avatar.png'; // Set a default profile pic
                                 header("Location: ../admin/dashboard.php");
                                 exit();
                             } else {
@@ -150,6 +155,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $_SESSION['user_id'] = $user_id;
                             $_SESSION['username'] = $username;
                             $_SESSION['role'] = $role;
+                            $_SESSION['name'] = $fullname; // Set the name for the session
+                            $_SESSION['profile_pic'] = 'assets/images/default-avatar.png'; // Set a default profile pic
                             header("Location: ../doctor/dashboard.php");
                             exit();
                         }
@@ -188,6 +195,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $_SESSION['user_id'] = $user_id;
                             $_SESSION['username'] = $username;
                             $_SESSION['role'] = $role;
+                            $_SESSION['name'] = $fullname; // Set the name for the session
+                            $_SESSION['profile_pic'] = 'assets/images/default-avatar.png'; // Set a default profile pic
                             header("Location: ../includes/homepage.php");
                             exit();
                         }
