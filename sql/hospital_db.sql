@@ -140,3 +140,5 @@ CREATE TABLE IF NOT EXISTS video_calls (
     FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL
 );
+
+ALTER TABLE appointments ADD COLUMN is_call_active TINYINT(1) DEFAULT 0;

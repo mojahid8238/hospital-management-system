@@ -1,94 +1,136 @@
-4# Steps to Add Video Calling with Jitsi
+Here is a step-by-step guide to integrate a video calling system using Jitsi Meet into your hospital management project.
 
-This document outlines the steps to integrate a free and easy-to-use video calling feature into the hospital management system using Jitsi.
+**Step 1: Create the Video Call Page**
 
-## 1. What is Jitsi?
+1.  Create a new file named `video_call.php` in the root directory of your project.
+2.  This page will embed the Jitsi video conference. It will get the room name from the URL.
+3.  Add the following code to `video_call.php`:
 
-Jitsi is a set of open-source projects that allows you to easily build and deploy secure video conferencing solutions. We will use the Jitsi Meet IFrame API, which is the simplest way to embed a Jitsi video call into a web page.
+    ```php
+    <?php
+    session_start();
+    // include('includes/auth.php'); // Ensure user is logged in
+    $room_name = "test-room";
+    if(isset($_GET['room'])) {
+        $room_name = htmlspecialchars($_GET['room']);
+    }
+    ?>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Video Call</title>
+        <style>
+            body, html {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                overflow: hidden;
+            }
+            #meet {
+                height: 100%;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="meet"></div>
+        <script src="https://meet.jit.si/external_api.js"></script>
+        <script>
+            const domain = 'meet.jit.si';
+            const options = {
+                roomName: '<?php echo $room_name; ?>',
+                width: '100%',
+                height: '100%',
+                parentNode: document.querySelector('#meet'),
+                userInfo: {
+                    // email: 'email@example.com',
+                    // displayName: 'Your Name'
+                }
+            };
+            const api = new JitsiMeetExternalAPI(domain, options);
+        </script>
+    </body>
+    </html>
+    ```
 
-## 2. Integration Steps
+**Step 2: Modify the Doctor's Dashboard to Start a Call**
 
-The integration is done entirely on the frontend (client-side) for a basic setup.
+1.  Open the `doctor/dashboard.php` file.
+2.  In the section where appointments are listed, add a "Start Call" button for each appointment(it is available and it's name is complete).
+3.  This button will link to the `video_call/video_call.php` page, passing a unique room name. A good unique room name would be based on the appointment ID (e.g., `appointment-` followed by the appointment ID).
 
-### Step 2.1: Add a placeholder for the video call
+    Example code to add in your appointments loop in `doctor/dashboard.php`:
 
-In the file where you want to show the video call (e.g., `messaging/messaging.php` or a new `video_call.php` page), add a `div` element that will contain the video conference.
+    ```php
+    // Inside your loop that displays appointments
+    $appointment_id = $row['appointment_id']; // or whatever your appointment ID column is
+    $room_name = 'hms-appointment-' . $appointment_id;
+    echo '<td><a href="../video_call.php?room=' . $room_name . '" target="_blank" class="btn btn-primary">Start Call</a></td>';
+    ```
+    *Note: You might need to adjust the path to `video_call.php` based on your file structure.*
 
-```html
-<div id="jitsi-container" style="width: 800px; height: 600px;"></div>
-```
+**Step 3: Modify the Patient's Dashboard to Join a Call**
 
-You can also add a "Start Video Call" button to trigger the video call.
+1.  Open the `patient/dashboard.php` file.
+2.  Similar to the doctor's dashboard, in the section where appointments are listed, you'll need to add a "Join Call" button.
+3.  This button should only appear when the doctor has started the call. To achieve this, you can add a new column to your `appointments` table in the database, for example, `video_call_status` which can be 'active' or 'inactive'. When the doctor clicks "Start Call", you would update this status.
 
-```html
-<button id="startVideoCallBtn">Start Video Call</button>
-```
+    For a simpler approach without database changes, you can have the "Join Call" button always visible for upcoming appointments, and the patient can join at the scheduled time. The doctor would need to have started the call for the meeting to begin.
 
-### Step 2.2: Include the Jitsi IFrame API script
+    Example code to add in your appointments loop in `patient/dashboard.php`:
 
-Include the Jitsi IFrame API script in your HTML file. It's best to put this at the bottom of your `<body>` tag.
+    ```php
+    // Inside your loop that displays appointments
+    $appointment_id = $row['appointment_id']; // or whatever your appointment ID column is
+    $room_name = 'hms-appointment-' . $appointment_id;
+    echo '<td><a href="../video_call.php?room=' . $room_name . '" target="_blank" class="btn btn-success">Join Call</a></td>';
+    ```
 
-```html
-<script src="https://meet.jit.si/external_api.js"></script>
-```
+**Step 4: Notification for the Patient (Simple Implementation)**
 
-### Step 2.3: Write the JavaScript to initialize the video call
+To notify the patient that the doctor has started the call, you can implement a simple polling mechanism on the patient's dashboard.
 
-Add a script to your page to initialize the Jitsi video call when the "Start Video Call" button is clicked.
+1.  **Database Change (Recommended):**
+    *   Add a new column to your `appointments` table, for example, `is_call_active` (TINYINT, default 0).
+    *   When the doctor clicks "Start Call", you'll need an AJAX call to a new PHP script (e.g., `start_call.php`) that updates `is_call_active` to 1 for that appointment. The "Start Call" button would trigger this AJAX call and then open the video call page.
 
-```javascript
-document.getElementById('startVideoCallBtn').addEventListener('click', () => {
-    const domain = 'meet.jit.si';
-    // Generate a unique room name for each call.
-    // For example, you can use the appointment ID.
-    const roomName = 'hms-appointment-' + appointmentId; // Make sure appointmentId is available in your JS
-    const options = {
-        roomName: roomName,
-        width: 800,
-        height: 600,
-        parentNode: document.querySelector('#jitsi-container'),
-        userInfo: {
-            displayName: '<?php echo $_SESSION['name']; ?>' // Pass the user's name
+2.  **Patient Dashboard (`patient/dashboard.php`):**
+    *   Add a JavaScript snippet that periodically checks the status of the call for their upcoming appointment.
+    *   If the call is active, it can display a notification or enable the "Join Call" button.
+
+    Example JavaScript using jQuery (you might need to include jQuery if you haven't already):
+
+    ```html
+    <!-- Add this to patient/dashboard.php -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        function checkCallStatus() {
+            // Assuming you have the appointment ID available in the DOM
+            let appointmentId = $('.appointment-row').data('appointment-id');
+            if (appointmentId) {
+                $.ajax({
+                    url: 'check_call_status.php', // You need to create this file
+                    type: 'POST',
+                    data: { appointment_id: appointmentId },
+                    success: function(response) {
+                        if (response === 'active') {
+                            // Show a notification and/or the join button
+                            $('#join-call-btn-' + appointmentId).show();
+                            alert('Your doctor has started the video call.');
+                            // To avoid repeated alerts, you might want to set a flag
+                        }
+                    }
+                });
+            }
         }
-    };
-    const api = new JitsiMeetExternalAPI(domain, options);
-
-    // You can also add event listeners to the Jitsi API
-    api.addEventListener('videoConferenceJoined', () => {
-        console.log('Local user joined');
+        // Check every 10 seconds
+        setInterval(checkCallStatus, 10000);
     });
-});
-```
+    </script>
+    ```
 
-## 3. Where to put the video call feature
+3.  **Create `video_call/check_call_status.php`:**
+    This file would check the `is_call_active` flag in the database for the given appointment ID and echo "active" if it's 1.
 
-A good place to add the video call feature would be in the `messaging/messaging.php` page. You could add a video call button in the chat header. When clicked, it could open the video call in a modal window or navigate to a dedicated video call page.
-
-For online appointments, you could have a "Join Call" button that directly opens the video call interface.
-
-## 4. Example Implementation
-
-Here is an example of how you could modify `messaging/messaging.php` to add a video call button.
-
-In `messaging/messaging.php`, add this to the chat header:
-```php
-<div class="chat-header" id="chatHeader">
-    <!-- existing content -->
-    <button id="startVideoCallBtn" style="margin-left: auto; background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 5px;">
-        <i class="fas fa-video"></i> Video Call
-    </button>
-</div>
-```
-
-Then, add the Jitsi container and the scripts at the bottom of the `<body>`:
-```html
-<!-- at the bottom of the body -->
-<div id="jitsi-container" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1001;"></div>
-<script src="https://meet.jit.si/external_api.js"></script>
-<script>
-    // ... (the javascript from step 2.3)
-    // You would need to get the appointmentId for the room name.
-</script>
-```
-
-This is a basic outline. You can customize the appearance and functionality further based on your needs.
+This guide provides a basic framework. You'll need to adapt the code to your specific database schema and existing application logic.

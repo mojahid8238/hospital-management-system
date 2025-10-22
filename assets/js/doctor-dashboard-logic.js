@@ -72,6 +72,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <button class="btn btn-danger cancel-btn" data-appointment-id="${appointment.id}">Cancel</button>
                                 ` : ''}
                                 ${appointment.status === 'Scheduled' ? `
+                                    ${appointment.type === 'Online' ? `
+                                    <button class="btn btn-success start-call-btn" data-appointment-id="${appointment.id}">Start Call</button>
+                                    <button class="btn btn-danger end-call-btn" data-appointment-id="${appointment.id}">End Call</button>
+                                    ` : ''}
                                     <button class="btn btn-primary complete-btn" data-appointment-id="${appointment.id}">Complete</button>
                                 ` : ''}
                                 <button class="btn btn-info message-btn"
@@ -151,6 +155,48 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 })
                 .catch(error => console.error('Error canceling appointment:', error));
+            });
+        });
+
+        document.querySelectorAll('.start-call-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const appointmentId = this.dataset.appointmentId;
+                fetch('../doctor/start_call.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ appointment_id: appointmentId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Open the video call in a new tab
+                        window.open(`../video_call.php?room=hms-appointment-${appointmentId}`, '_blank');
+                    } else {
+                        alert('Failed to start call: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('Error starting call:', error));
+            });
+        });
+
+        document.querySelectorAll('.end-call-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const appointmentId = this.dataset.appointmentId;
+                fetch('../doctor/end_call.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ appointment_id: appointmentId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        fetchAndRenderAppointments(); // Refresh list to reflect status change
+                    } else {
+                        alert('Failed to end call: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('Error ending call:', error));
             });
         });
 

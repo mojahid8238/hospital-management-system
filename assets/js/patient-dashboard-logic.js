@@ -73,9 +73,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <p><strong>Type:</strong> ${appointment.type}</p>
                                     <p><strong>Status:</strong> <span class="badge ${getStatusBadgeClass(appointment.status)}">${appointment.status}</span></p>
                                 </div>
-                                <div class="doctor-info">
+                                <div class="doctor-info button-group">
                                     ${appointment.status === 'Pending' ? `
                                         <button class="btn btn-danger cancel-btn" data-appointment-id="${appointment.id}">Cancel</button>
+                                    ` : ''}
+                                    ${appointment.status === 'Scheduled' && appointment.type === 'Online' ? `
+                                        <a href="../video_call.php?room=hms-appointment-${appointment.id}" target="_blank" class="btn btn-success join-call-button hidden-call-button" id="join-call-btn-${appointment.id}">Join Call</a>
                                     ` : ''}
                                     <button class="btn btn-info chat-btn"
                                             data-doctor-id="${appointment.doctor_user_id}"
@@ -158,4 +161,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial data fetch
     fetchAndRenderPatientData();
+
+    function pollForActiveCalls() {
+        // Get all currently displayed scheduled online appointments
+        document.querySelectorAll('.join-call-button').forEach(button => {
+                        const appointmentId = button.id.replace('join-call-btn-', '');
+                        console.log('Polling check_call_status for appointment ID:', appointmentId); // Added log
+                        $.ajax({
+                            url: '/hospital-management-system/patient/check_call_status.php',
+                            type: 'POST',
+                            data: { appointment_id: appointmentId },
+                            success: function(response) {                                                                        console.log('check_call_status.php response for appointment ' + appointmentId + ':', response);
+                                                                                                                        if (response.trim() === 'active') { // Use .trim() to handle potential whitespace
+                                                                                                                            console.log('Attempting to show button:', button.id, button); // Added log
+                                                                                                                            $(button).removeClass('hidden-call-button'); // Show the button by removing class
+                                                                                                                            // Optional: Add a visual cue or notification
+                                                                                                                        } else {
+                                                                                                                            console.log('Attempting to hide button:', button.id, button); // Added log
+                                                                                                                            $(button).addClass('hidden-call-button'); // Hide if it becomes inactive by adding class
+                                                                                                                        }                                                                    },
+                error: function(xhr, status, error) {
+                    console.error('Error checking call status:', error);
+                }
+            });
+        });
+    }
+
+    // Call pollForActiveCalls initially and then periodically
+    pollForActiveCalls();
+    setInterval(pollForActiveCalls, 10000); // Poll every 10 seconds for call status
 });

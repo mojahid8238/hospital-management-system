@@ -15,6 +15,7 @@ $result = $stmt->get_result();
 if ($row = $result->fetch_assoc()) {
     $patient_id = $row['id'];
     $patient_name = $row['name'];
+    $_SESSION['patient_id'] = $patient_id; // Store patient_id in session
 }
 $stmt->close();
 ?>
@@ -30,6 +31,7 @@ $stmt->close();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/patient-dashboard.css">
     <link rel="stylesheet" href="../assets/css/mini_messenger.css">
+    <link rel="stylesheet" href="../assets/css/hidden_call_button.css">
 </head>
 <body>
     <header class="navbar">
@@ -148,6 +150,7 @@ $stmt->close();
     <script>
         const currentUserId = <?php echo json_encode($_SESSION['user_id']); ?>;
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../assets/js/mini_messenger.js"></script>
     <script src="../assets/js/patient-dashboard-logic.js"></script>
     <script src="../assets/js/profile-overlay.js"></script>
