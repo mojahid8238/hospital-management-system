@@ -88,35 +88,96 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $doctor_id) {
 }
 ?>
 
-<div class="container">
-    <h2>Edit Doctor</h2>
-    <?php echo $message; ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Doctor</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-left">
+            <button class="sidebar-toggle-btn" id="sidebarToggle">☰ Toggle Menu</button>
+            <a href="#">Admin Panel</a>
+        </div>
+        <div class="nav-right">
+            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+        </div>
+    </header>
 
-    <?php if ($doctor): ?>
-        <form action="edit-doctor.php?id=<?php echo $doctor['id']; ?>" method="POST">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($doctor['name']); ?>" required>
-            <br>
-            <label for="specialization">Specialization:</label>
-            <select id="specialization" name="specialization" required>
-                <?php foreach ($specializations as $spec): ?>
-                    <option value="<?php echo htmlspecialchars($spec['name']); ?>" <?php echo ($doctor['specialization'] == $spec['name']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($spec['name']); ?></option>
-                <?php endforeach; ?>
-            </select>
-            <br>
-            <label for="phone">Phone:</label>
-            <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($doctor['phone']); ?>" required>
-            <br>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($doctor['email']); ?>" required>
-            <br>
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($doctor['username']); ?>" required>
-            <br>
-            <button type="submit">Update Doctor</button>
-            <a href="manage-doctors.php" class="cancel-button">Cancel</a>
-        </form>
-    <?php else: ?>
-        <p>Doctor details could not be loaded. <a href="manage-doctors.php">Go back to Manage Doctors</a></p>
-    <?php endif; ?>
-</div>
+    <div class="main-wrapper">
+        <aside class="sidebar" id="adminSidebar">
+            <h3>Admin Options</h3>
+            <ul>
+                <li><a href="manage-admins.php" class="sidebar-link">Manage Admins</a></li>
+                <li><a href="manage-doctors.php" class="sidebar-link">Manage Doctors</a></li>
+                <li><a href="manage-patients.php" class="sidebar-link">Manage Patients</a></li>
+                <li><a href="reports.php" class="sidebar-link">View Reports</a></li>
+            </ul>
+        </aside>
+
+        <main class="content-area" id="mainContent">
+            <div class="container">
+                <h2>Edit Doctor</h2>
+                <?php echo $message; ?>
+
+                <?php if ($doctor): ?>
+                    <form action="edit-doctor.php?id=<?php echo $doctor['id']; ?>" method="POST">
+                        <div class="form-group">
+                            <label for="name">Name:</label>
+                            <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($doctor['name']); ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="specialization">Specialization:</label>
+                            <select id="specialization" name="specialization" required>
+                                <?php foreach ($specializations as $spec): ?>
+                                    <option value="<?php echo htmlspecialchars($spec['name']); ?>" <?php echo ($doctor['specialization'] == $spec['name']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($spec['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone:</label>
+                            <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($doctor['phone']); ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($doctor['email']); ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="username">Username:</label>
+                            <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($doctor['username']); ?>" required>
+                        </div>
+                        <button type="submit">Update Doctor</button>
+                        <a href="manage-doctors.php" class="cancel-button">Cancel</a>
+                    </form>
+                <?php else: ?>
+                    <p>Doctor details could not be loaded. <a href="manage-doctors.php">Go back to Manage Doctors</a></p>
+                <?php endif; ?>
+            </div>
+        </main>
+    </div>
+
+    <div class="profile-overlay" id="profileOverlay">
+        <div class="profile-content">
+            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" id="profileImageDisplay">
+            <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data" style="display: none;">
+                <input type="file" name="profile_pic" id="profilePicInput" accept="image/*">
+            </form>
+            <div id="uploadMessage" style="font-size: 0.95rem; text-align: center; margin-top: 5px;"></div>
+            <h3><?php echo htmlspecialchars($_SESSION['name'] ?? 'Admin'); ?></h3>
+            <hr>
+            <ul>
+                <li><a href="dashboard.php">Admin Dashboard</a></li>
+                <li><a href="#">Settings</a></li>
+                <li><a href="../auth/logout.php">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="../assets/js/profile-overlay.js"></script>
+    <script src="../assets/js/admin-dashboard.js"></script>
+</body>
+</html>

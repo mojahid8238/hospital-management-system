@@ -1,7 +1,5 @@
 <?php
 $page_title = 'Manage Doctors';
-include 'base_admin.php';
-
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 redirect_if_not_admin();
@@ -130,77 +128,113 @@ if ($result) {
     }
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../assets/css/style.css"> 
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+    
+ <header class="navbar">
+        <div class="nav-left">
+        <button class="sidebar-toggle-btn" id="sidebarToggle">☰ Toggle Menu</button>
 
-<div class="container">
-    <h2>Manage Doctors</h2>
-    <?php echo $message; ?>
+        <a href="#">Admin Panel</a>          
+        </div>
+        <div class="nav-right">
+            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+        </div>
+    </header>
 
-    <h3>Add New Doctor</h3>
-    <form action="manage-doctors.php" method="POST">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-        <br>
-        <label for="specialization">Specialization:</label>
-        <input list="specialization-list" id="specialization" name="specialization" required>
-        <datalist id="specialization-list">
-            <?php foreach ($specializations as $spec): ?>
-                <option value="<?php echo $spec['name']; ?>">
-            <?php endforeach; ?>
-        </datalist>
-        <br>
-        <label for="degrees">Degrees:</label>
-        <input type="text" id="degrees" name="degrees" required>
-        <br>
-        <label for="schedule">Schedule:</label>
-        <input type="text" id="schedule" name="schedule" required>
-        <br>
-        <label for="phone">Phone:</label>
-        <input type="text" id="phone" name="phone" required>
-        <br>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        <br>
-        <button type="submit">Add Doctor</button>
-    </form>
+    <div class="main-wrapper">
+        <aside class="sidebar" id="adminSidebar">
+            <h3>Admin Options</h3>
+            <ul>
+                <li><a href="manage-admins.php" class="sidebar-link" data-target="manage-admins.php">Manage Admins</a></li>
+                <li><a href="manage-doctors.php" class="sidebar-link" data-target="manage-doctors.php">Manage Doctors</a></li>
+                <li><a href="manage-patients.php" class="sidebar-link" data-target="manage-patients.php">Manage Patients</a></li>
+                <li><a href="reports.php" class="sidebar-link" data-target="reports.php">View Reports</a></li>
+            </ul>
+        </aside>
 
-    <h3>Existing Doctors</h3>
-    <?php if (empty($doctors)): ?>
-        <p>No doctors found.</p>
-    <?php else: ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Picture</th>
-                    <th>Name</th>
-                    <th>Specialization</th>
-                    <th>Degrees</th>
-                    <th>Schedule</th>
-                    <th>Phone</th>
-                    <th>Email</th>
-                    <th>Username</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($doctors as $doctor): ?>
-                    <tr>
-                        <td><?php echo $doctor['id']; ?></td>
-                        <td><img src="/hospital-management-system/<?php echo htmlspecialchars($doctor['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" alt="Profile Pic" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"></td>
-                        <td><?php echo $doctor['name']; ?></td>
-                        <td><?php echo $doctor['specialization']; ?></td>
-                        <td><?php echo $doctor['degrees']; ?></td>
-                        <td><?php echo $doctor['schedule']; ?></td>
-                        <td><?php echo $doctor['phone']; ?></td>
-                        <td><?php echo $doctor['email']; ?></td>
-                        <td><?php echo $doctor['username']; ?></td>
-                            <td class="action-links">
-                                <a href="edit-doctor.php?id=<?php echo $doctor['id']; ?>">Edit</a> |
-                                <a href="manage-doctors.php?action=delete&id=<?php echo $doctor['id']; ?>" onclick="return confirm('Are you sure you want to delete this doctor and their associated user account?');">Delete</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-        </table>
-        <?php endif; ?>
+        <main class="content-area" id="mainContent">
+            <div class="container">
+                <h2>Manage Doctors</h2>
+                <?php echo $message; ?>
+
+               
+
+                <h3>Existing Doctors</h3>
+                <?php if (empty($doctors)): ?>
+                    <p>No doctors found.</p>
+                <?php else: ?>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Picture</th>
+                                        <th>Name</th>
+                                        <th>Specialization</th>
+                                        <th>Degrees</th>
+                                        <th>Schedule</th>
+                                        <th>Phone</th>
+                                        <th>Email</th>
+                                        <th>Username</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($doctors as $doctor): ?>
+                                        <tr>
+                                            <td><?php echo $doctor['id']; ?></td>
+                                            <td><img src="/hospital-management-system/<?php echo htmlspecialchars($doctor['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" alt="Profile Pic" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"></td>
+                                            <td><?php echo $doctor['name']; ?></td>
+                                            <td><?php echo $doctor['specialization']; ?></td>
+                                            <td><?php echo $doctor['degrees']; ?></td>
+                                            <td><?php echo $doctor['schedule']; ?></td>
+                                            <td><?php echo $doctor['phone']; ?></td>
+                                            <td><?php echo $doctor['email']; ?></td>
+                                            <td><?php echo $doctor['username']; ?></td>
+                                            <td class="action-links">
+                                                <a href="edit-doctor.php?id=<?php echo $doctor['id']; ?>">Edit</a> |
+                                                <a href="manage-doctors.php?action=delete&id=<?php echo $doctor['id']; ?>" onclick="return confirm('Are you sure you want to delete this doctor and their associated user account?');">Delete</a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>                <?php endif; ?>
+            </div>
+        </main>
     </div>
+
+    <div class="profile-overlay" id="profileOverlay">
+        <div class="profile-content">
+            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" id="profileImageDisplay">
+           
+            <!-- Hidden form and input for file selection -->
+            <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data" style="display: none;">
+                <input type="file" name="profile_pic" id="profilePicInput" accept="image/*">
+            </form>
+            <!-- Upload message container -->
+            <div id="uploadMessage" style="font-size: 0.95rem; text-align: center; margin-top: 5px;"></div>
+            
+            <h3><?php echo htmlspecialchars($_SESSION['name'] ?? 'Admin'); ?></h3>
+            <hr>
+            <ul>
+                <li><a href="dashboard.php">Admin Dashboard</a></li>
+                <li><a href="#">Settings</a></li>
+                <li><a href="../auth/logout.php">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="../assets/js/profile-overlay.js"></script>
+    <script src="../assets/js/admin-dashboard.js"></script>
+</body>
+</html>

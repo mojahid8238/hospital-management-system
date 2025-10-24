@@ -83,5 +83,6 @@ $profile_pic_path = htmlspecialchars($base_url . $image_relative_path);
     </div>
 
     <script src="../assets/js/profile-overlay.js"></script>
+    <script src="../assets/js/admin-dashboard.js"></script>
 </body>
 </html>

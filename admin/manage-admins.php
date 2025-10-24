@@ -1,12 +1,22 @@
 <?php
 $page_title = 'Manage Admins';
-include 'base_admin.php';
-
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 
 redirect_if_not_logged_in();
 redirect_if_not_admin();
+
+// Define the base URL for asset loading
+$base_url = '/hospital-management-system/';
+
+// Ensure profile_pic session is initialized for display
+if (!isset($_SESSION['profile_pic'])) {
+    $_SESSION['profile_pic'] = 'assets/images/default-avatar.png'; 
+}
+
+// Construct the path for the profile picture
+$image_relative_path = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
+$profile_pic_path = htmlspecialchars($base_url . $image_relative_path);
 
 // Handle approval
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approve_admin'])) {
@@ -55,39 +65,102 @@ while ($row = $result->fetch_assoc()) {
 $stmt->close();
 ?>
 
-<div class="container">
-    <h2>Manage Admins</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../assets/css/style.css"> 
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-left">
+        <button class="sidebar-toggle-btn" id="sidebarToggle">☰ Toggle Menu</button>
 
-    <h3>Pending Admin Requests</h3>
-    <?php if (empty($pending_admins)): ?>
-        <p>No pending admin requests.</p>
-    <?php else: ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($pending_admins as $admin): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($admin['name']) ?></td>
-                        <td><?= htmlspecialchars($admin['email']) ?></td>
-                        <td>
-                                <form method="POST" style="display: inline-block;">
-                                    <input type="hidden" name="admin_id" value="<?= $admin['id'] ?>">
-                                    <button type="submit" name="approve_admin">Approve</button>
-                                </form>
-                                <form method="POST" style="display: inline-block;">
-                                    <input type="hidden" name="admin_id" value="<?= $admin['id'] ?>">
-                                    <button type="submit" name="cancel_admin" style="background-color: red;" onclick="return confirm('Are you sure you want to cancel this admin request?')">Cancel</button>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php endif; ?>
+        <a href="#">Admin Panel</a>          
+        </div>
+        <div class="nav-right">
+            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+        </div>
+    </header>
+
+    <div class="main-wrapper">
+        <aside class="sidebar" id="adminSidebar">
+            <h3>Admin Options</h3>
+            <ul>
+                <li><a href="manage-admins.php" class="sidebar-link" data-target="manage-admins.php">Manage Admins</a></li>
+                <li><a href="manage-doctors.php" class="sidebar-link" data-target="manage-doctors.php">Manage Doctors</a></li>
+                <li><a href="manage-patients.php" class="sidebar-link" data-target="manage-patients.php">Manage Patients</a></li>
+                <li><a href="reports.php" class="sidebar-link" data-target="reports.php">View Reports</a></li>
+            </ul>
+        </aside>
+
+        
+        <main class="content-area" id="mainContent">
+            <div class="container">
+                <h2>Manage Admins</h2>
+
+                <h3>Pending Admin Requests</h3>
+                <?php if (empty($pending_admins)): ?>
+                    <p>No pending admin requests.</p>
+                <?php else: ?>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($pending_admins as $admin): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($admin['name']) ?></td>
+                                            <td><?= htmlspecialchars($admin['email']) ?></td>
+                                            <td>
+                                                <form method="POST" style="display: inline-block;">
+                                                    <input type="hidden" name="admin_id" value="<?= $admin['id'] ?>">
+                                                    <button type="submit" name="approve_admin">Approve</button>
+                                                </form>
+                                                <form method="POST" style="display: inline-block;">
+                                                    <input type="hidden" name="admin_id" value="<?= $admin['id'] ?>">
+                                                    <button type="submit" name="cancel_admin" style="background-color: red;" onclick="return confirm('Are you sure you want to cancel this admin request?')">Cancel</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>                <?php endif; ?>
+            </div>
+        </main>
     </div>
+
+    <div class="profile-overlay" id="profileOverlay">
+        <div class="profile-content">
+            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" id="profileImageDisplay">
+           
+            <!-- Hidden form and input for file selection -->
+            <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data" style="display: none;">
+                <input type="file" name="profile_pic" id="profilePicInput" accept="image/*">
+            </form>
+            <!-- Upload message container -->
+            <div id="uploadMessage" style="font-size: 0.95rem; text-align: center; margin-top: 5px;"></div>
+            
+            <h3><?php echo htmlspecialchars($_SESSION['name'] ?? 'Admin'); ?></h3>
+            <hr>
+            <ul>
+                <li><a href="dashboard.php">Admin Dashboard</a></li>
+                <li><a href="#">Settings</a></li>
+                <li><a href="../auth/logout.php">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="../assets/js/profile-overlay.js"></script>
+    <script src="../assets/js/admin-dashboard.js"></script>
+</body>
+</html>
