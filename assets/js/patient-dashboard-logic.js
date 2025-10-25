@@ -26,81 +26,104 @@ document.addEventListener('DOMContentLoaded', function() {
                 medicalHistoryTableBody.innerHTML = '';
 
                 appointments.forEach(appointment => {
-                    const doctorName = appointment.doctor_name.toLowerCase();
-                    const appointmentStatus = appointment.status.toLowerCase();
-                    const appointmentType = appointment.type.toLowerCase();
+                    // Extract date and time from appointment_date (DATETIME format)
+                    const appointmentDateTime = new Date(appointment.appointment_date);
+                    const date = appointmentDateTime.toISOString().split('T')[0]; // YYYY-MM-DD
+                    const time = appointmentDateTime.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
 
-                    // Filter logic
-                    const matchesSearch = searchQuery === '' || doctorName.includes(searchQuery) || appointment.reason.toLowerCase().includes(searchQuery);
-                    const matchesStatus = statusFilter === 'all' || appointmentStatus === statusFilter || appointmentType === statusFilter;
-
-                    if (matchesSearch && matchesStatus) {
-                        // Extract date and time from appointment_date (DATETIME format)
-                        const appointmentDateTime = new Date(appointment.appointment_date);
-                        const date = appointmentDateTime.toISOString().split('T')[0]; // YYYY-MM-DD
-                        const time = appointmentDateTime.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
-
-                        // Helper function to get badge class based on status
-                        function getStatusBadgeClass(status) {
-                            switch (status) {
-                                case 'Pending': return 'bg-warning';
-                                case 'Scheduled': return 'bg-primary';
-                                case 'Completed': return 'bg-success';
-                                case 'Cancelled': return 'bg-danger';
-                                default: return 'bg-secondary';
-                            }
+                    // Helper function to get badge class based on status
+                    function getStatusBadgeClass(status) {
+                        switch (status) {
+                            case 'Pending': return 'bg-warning';
+                            case 'Scheduled': return 'bg-primary';
+                            case 'Completed': return 'bg-success';
+                            case 'Cancelled': return 'bg-danger';
+                            default: return 'bg-secondary';
                         }
+                    }
 
-                        if (appointment.status === 'Pending' || appointment.status === 'Scheduled') {
-                            const listItem = document.createElement('li');
-                            listItem.className = 'doctor-list-item'; // Reusing doctor-list-item class for styling consistency
-                            listItem.innerHTML = `
-                                <div class="doctor-info">
-                                    <div class="doctor-avatar">
-                                        <img src="/${appointment.profile_pic || 'assets/images/default-avatar.png'}?t=${new Date().getTime()}" alt="Doctor Profile" class="user-profile-pic">
-                                    </div>
-                                    <div class="doctor-details">
-                                        <h4>Dr. ${appointment.doctor_name}</h4>
-                                        <p><strong>Specialization:</strong> ${appointment.specialization}</p>
-                                    </div>
+                    if (appointment.status === 'Pending') {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'doctor-list-item'; // Reusing doctor-list-item class for styling consistency
+                        listItem.innerHTML = `
+                            <div class="doctor-info">
+                                <div class="doctor-avatar">
+                                    <img src="/${appointment.profile_pic || 'assets/images/default-avatar.png'}?t=${new Date().getTime()}" alt="Doctor Profile" class="user-profile-pic">
                                 </div>
-                                <div class="doctor-info">
-                                    <p><strong>Date:</strong> ${date}</p>
-                                    <p><strong>Time:</strong> ${time}</p>
+                                <div class="doctor-details">
+                                    <h4>Dr. ${appointment.doctor_name}</h4>
+                                    <p><strong>Specialization:</strong> ${appointment.specialization}</p>
                                 </div>
-                                <div class="doctor-info">
-                                    <p><strong>Reason:</strong> ${appointment.reason}</p>
-                                    <p><strong>Type:</strong> ${appointment.type}</p>
-                                    <p><strong>Status:</strong> <span class="badge ${getStatusBadgeClass(appointment.status)}">${appointment.status}</span></p>
+                            </div>
+                            <div class="doctor-info">
+                                <p><strong>Date:</strong> ${date}</p>
+                                <p><strong>Time:</strong> ${time}</p>
+                            </div>
+                            <div class="doctor-info">
+                                <p><strong>Reason:</strong> ${appointment.reason}</p>
+                                <p><strong>Type:</strong> ${appointment.type}</p>
+                                <p><strong>Status:</strong> <span class="badge ${getStatusBadgeClass(appointment.status)}">${appointment.status}</span></p>
+                            </div>
+                            <div class="doctor-info">
+                                <button class="btn btn-danger cancel-btn" data-appointment-id="${appointment.id}">Cancel</button>
+                                <button class="btn btn-info chat-btn"
+                                        data-doctor-id="${appointment.doctor_user_id}"
+                                        data-doctor-name="${appointment.doctor_name}"
+                                        data-profile-pic="${appointment.profile_pic || 'assets/images/default-avatar.png'}"
+                                        data-conversation-id="${appointment.conversation_id || ''}">
+                                    Message
+                                </button>
+                            </div>
+                        `;
+                        pendingAppointmentList.appendChild(listItem);
+                    } else if (appointment.status === 'Scheduled') {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'doctor-list-item'; // Reusing doctor-list-item class for styling consistency
+                        listItem.innerHTML = `
+                            <div class="doctor-info">
+                                <div class="doctor-avatar">
+                                    <img src="/${appointment.profile_pic || 'assets/images/default-avatar.png'}?t=${new Date().getTime()}" alt="Doctor Profile" class="user-profile-pic">
                                 </div>
-                                <div class="doctor-info">
-                                    ${appointment.status === 'Pending' ? `
-                                        <button class="btn btn-danger cancel-btn" data-appointment-id="${appointment.id}">Cancel</button>
-                                    ` : ''}
-                                    <button class="btn btn-info chat-btn"
-                                            data-doctor-id="${appointment.doctor_user_id}"
-                                            data-doctor-name="${appointment.doctor_name}"
-                                            data-profile-pic="${appointment.profile_pic || 'assets/images/default-avatar.png'}"
-                                            data-conversation-id="${appointment.conversation_id || ''}">
-                                        Message
-                                    </button>
+                                <div class="doctor-details">
+                                    <h4>Dr. ${appointment.doctor_name}</h4>
+                                    <p><strong>Specialization:</strong> ${appointment.specialization}</p>
                                 </div>
-                            `;
-                            if (appointment.status === 'Pending') {
-                                pendingAppointmentList.appendChild(listItem);
-                            } else {
-                                upcomingAppointmentList.appendChild(listItem);
-                            }
-                        } else if (appointment.status === 'Completed') {
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${date}</td>
-                                <td>Dr. ${appointment.doctor_name}</td>
-                                <td>${appointment.reason}</td>
-                                <td><span class="badge ${getStatusBadgeClass(appointment.status)}">${appointment.status}</span></td>
-                            `;
-                            medicalHistoryTableBody.appendChild(row);
-                        }
+                            </div>
+                            <div class="doctor-info">
+                                <p><strong>Date:</strong> ${date}</p>
+                                <p><strong>Time:</strong> ${time}</p>
+                            </div>
+                            <div class="doctor-info">
+                                <p><strong>Reason:</strong> ${appointment.reason}</p>
+                                <p><strong>Type:</strong> ${appointment.type}</p>
+                                <p><strong>Status:</strong> <span class="badge ${getStatusBadgeClass(appointment.status)}">${appointment.status}</span></p>
+                            </div>
+                            <div class="doctor-info">
+                                <button class="btn btn-info chat-btn"
+                                        data-doctor-id="${appointment.doctor_user_id}"
+                                        data-doctor-name="${appointment.doctor_name}"
+                                        data-profile-pic="${appointment.profile_pic || 'assets/images/default-avatar.png'}"
+                                        data-conversation-id="${appointment.conversation_id || ''}">
+                                    Message
+                                </button>
+                            </div>
+                        `;
+                        upcomingAppointmentList.appendChild(listItem);
+                    } else if (appointment.status === 'Completed') {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${appointment.id}</td>
+                            <td>
+                                <img src="/${appointment.profile_pic || 'assets/images/default-avatar.png'}?t=${new Date().getTime()}" alt="Doctor Profile" class="user-profile-pic-small">
+                            </td>
+                            <td>Dr. ${appointment.doctor_name}</td>
+                            <td>${appointment.specialization}</td>
+                            <td>${date} ${time}</td>
+                            <td>${appointment.reason}</td>
+                            <td><span class="badge ${getStatusBadgeClass(appointment.status)}">${appointment.status}</span></td>
+                            <td>${appointment.type}</td>
+                        `;
+                        medicalHistoryTableBody.appendChild(row);
                     }
                 });
                 addEventListenersToButtons(); // Call after rendering appointments
@@ -158,4 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial data fetch
     fetchAndRenderPatientData();
+
+    // Poll for new appointments every 5 seconds
+    setInterval(fetchAndRenderPatientData, 5000);
 });

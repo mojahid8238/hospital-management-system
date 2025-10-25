@@ -18,9 +18,7 @@ $rawProfilePic = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
 $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic); 
 // Now $profilePic contains: 'assets/images/profile_pics/patient_2.png' or 'assets/images/default-avatar.png'
 // -------------------------------------------------------------------------
-?>
 
-<!DOCTYPE html>
 $total_doctors = $conn->query("SELECT COUNT(*) FROM doctors")->fetch_row()[0];
 $total_patients = $conn->query("SELECT COUNT(*) FROM patients")->fetch_row()[0];
 $total_appointments = $conn->query("SELECT COUNT(*) FROM appointments")->fetch_row()[0];

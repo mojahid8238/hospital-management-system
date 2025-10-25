@@ -10,9 +10,6 @@ require_once '../includes/auth.php';
 header('Content-Type: application/json');
 $response = ['success' => false, 'message' => 'An unknown error occurred.'];
 
-// Log session data for debugging
-error_log("Session data: " . print_r($_SESSION, true));
-
 if (!is_logged_in()) {
     $response['message'] = 'Unauthorized: User not logged in.';
     echo json_encode($response);
@@ -27,9 +24,6 @@ if (!is_patient()) {
 
 $input = json_decode(file_get_contents('php://input'), true);
 $appointment_id = $input['appointment_id'] ?? null;
-
-// Log received appointment_id
-error_log("Received appointment_id for deletion: " . ($appointment_id ?? 'null'));
 
 if (!$appointment_id) {
     $response['message'] = 'Appointment ID is required.';
@@ -47,9 +41,6 @@ if ($row = $result->fetch_assoc()) {
     $patient_id = $row['id'];
 }
 $stmt->close();
-
-// Log retrieved patient_id
-error_log("Retrieved patient_id for deletion: " . ($patient_id ?? 'null'));
 
 if (!$patient_id) {
     $response['message'] = 'Patient not found or not associated with this user account.';
@@ -88,8 +79,8 @@ if ($stmt->execute()) {
     }
 } else {
     $response['message'] = 'Database error during deletion: ' . $stmt->error;
-    error_log("Database DELETE error: " . $stmt->error);
 }
 $stmt->close();
 $conn->close();
 echo json_encode($response);
+?>

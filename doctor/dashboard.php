@@ -91,6 +91,13 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
                             <option value="Online">Online</option>
                             <option value="Offline">Offline</option>
                         </select>
+                        <select id="statusFilter" class="form-select w-auto">
+                            <option value="upcoming">Upcoming</option>
+                            <option value="pending">Pending</option>
+                            <option value="scheduled">Scheduled</option>
+                            <option value="completed">Completed</option>
+                            <option value="all">All Statuses</option>
+                        </select>
                     </div>
                 </div>
 

@@ -141,5 +141,38 @@ if ($patient_id) {
         const BASE_URL = '/';
     </script>
     <script src="../assets/js/profile-overlay.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function fetchAndRenderCancelledAppointments() {
+                // Re-fetch the entire page content or just the appointment list
+                // For simplicity, we'll just reload the page for now.
+                // A more advanced solution would involve fetching JSON and re-rendering the list.
+                window.location.reload(); 
+            }
+
+            document.querySelectorAll('.remove-appointment-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const appointmentId = this.dataset.appointmentId;
+                    if (confirm('Are you sure you want to permanently remove this cancelled appointment?')) {
+                        fetch('delete_cancelled_appointment.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ appointment_id: appointmentId })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert(data.message);
+                                fetchAndRenderCancelledAppointments(); // Refresh the list
+                            } else {
+                                alert('Failed to remove appointment: ' + data.message);
+                            }
+                        })
+                        .catch(error => console.error('Error removing appointment:', error));
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

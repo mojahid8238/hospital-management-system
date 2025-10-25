@@ -3,6 +3,8 @@ require_once '../includes/db.php';
 require_once '../includes/auth.php';
 redirect_if_not_admin();
 
+$message = ''; // Initialize message variable
+
 // Ensure profile_pic session is initialized for display
 if (!isset($_SESSION['profile_pic'])) {
     $_SESSION['profile_pic'] = 'assets/images/default-avatar.png'; 

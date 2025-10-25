@@ -88,8 +88,7 @@
                 console.log('Mini-messenger minimized.');
                 miniMessengerMinimizeBtn.textContent = '□'; // Change to maximize icon
                 if (minimizedProfilePic) {
-                    minimizedProfilePic.src = `/hospital-management-system/${currentMiniChatReceiverProfilePic || 'assets/images/default-avatar.png'}`;
-                    minimizedProfilePic.style.display = 'block';
+                    minimizedProfilePic.src = `/${currentMiniChatReceiverProfilePic || 'assets/images/default-avatar.png'}`;                    minimizedProfilePic.style.display = 'block';
                 }
                 if (miniMessengerHeader) miniMessengerHeader.style.display = 'none';
                 if (miniMessengerCloseBtn) miniMessengerCloseBtn.style.display = 'none'; // Explicitly hide close button
@@ -130,6 +129,7 @@
                 miniMessenger.classList.remove('minimized');
                 if (minimizedProfilePic) minimizedProfilePic.style.display = 'none';
                 if (miniMessengerHeader) miniMessengerHeader.style.display = 'flex';
+                if (miniMessengerCloseBtn) miniMessengerCloseBtn.style.display = 'flex'; // Explicitly show close button
                 if (miniMessengerMessages) miniMessengerMessages.style.display = 'flex';
                 if (miniMessengerMessageInput) miniMessengerMessageInput.style.display = 'flex';
                 if (miniMessengerSendMessageBtn) miniMessengerSendMessageBtn.style.display = 'flex';
@@ -294,7 +294,7 @@
 
             let messageContent = '';
             if (msg.message_type === 'image') {
-                messageContent = `<img src="/hospital-management-system/${msg.message_content}" class="message-image">`;
+                messageContent = `<img src="/${msg.message_content}" class="message-image">`;
             } else {
                 messageContent = `<p>${msg.message_content}</p>`;
             }

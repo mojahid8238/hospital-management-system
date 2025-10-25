@@ -3,12 +3,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const confirmedAppointmentList = document.getElementById('confirmedAppointmentList');
     const searchPatientInput = document.getElementById('searchPatient');
     const typeFilterSelect = document.getElementById('typeFilter');
+    const statusFilterSelect = document.getElementById('statusFilter'); // New: Get status filter
 
     function fetchAndRenderAppointments() {
         const searchQuery = searchPatientInput ? searchPatientInput.value.toLowerCase() : '';
         const typeFilter = typeFilterSelect ? typeFilterSelect.value : 'all';
+        const statusFilter = statusFilterSelect ? statusFilterSelect.value : 'upcoming'; // New: Get status filter
 
-        fetch('../doctor/get_appointments.php')
+        fetch(`../doctor/get_appointments.php?search=${searchQuery}&type=${typeFilter}&status=${statusFilter}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -16,79 +18,67 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(appointments => {
-                // The original get_appointments.php returns an array directly, not an object with 'success' and 'appointments' keys.
-                // So, 'appointments' here is directly the array of appointment objects.
-                
                 pendingAppointmentList.innerHTML = '';
                 confirmedAppointmentList.innerHTML = '';
 
                 appointments.forEach(appointment => {
-                    const patientName = appointment.patient_name.toLowerCase();
-                    const appointmentType = appointment.type.toLowerCase();
+                    const listItem = document.createElement('li');
+                    listItem.className = 'doctor-list-item';
 
-                    if ((searchQuery === '' || patientName.includes(searchQuery)) &&
-                        (typeFilter === 'all' || appointmentType === typeFilter.toLowerCase())) {
+                    const appointmentDateTime = new Date(appointment.appointment_date);
+                    const date = appointmentDateTime.toISOString().split('T')[0];
+                    const time = appointmentDateTime.toTimeString().split(' ')[0].substring(0, 5);
 
-                        const listItem = document.createElement('li');
-                        listItem.className = 'doctor-list-item';
-
-                        // Extract date and time from appointment_date (DATETIME format)
-                        const appointmentDateTime = new Date(appointment.appointment_date);
-                        const date = appointmentDateTime.toISOString().split('T')[0]; // YYYY-MM-DD
-                        const time = appointmentDateTime.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
-
-                        // Helper function to get badge class based on status
-                        function getStatusBadgeClass(status) {
-                            switch (status) {
-                                case 'Pending': return 'bg-warning';
-                                case 'Scheduled': return 'bg-primary';
-                                case 'Completed': return 'bg-success';
-                                case 'Cancelled': return 'bg-danger';
-                                default: return 'bg-secondary';
-                            }
+                    function getStatusBadgeClass(status) {
+                        switch (status) {
+                            case 'Pending': return 'bg-warning';
+                            case 'Scheduled': return 'bg-primary';
+                            case 'Completed': return 'bg-success';
+                            case 'Cancelled': return 'bg-danger';
+                            default: return 'bg-secondary';
                         }
+                    }
 
-                        listItem.innerHTML = `
-                            <div class="doctor-info">
-                                <div class="doctor-avatar">
-                                    <img src="/${appointment.patient_profile_pic || 'assets/images/default-avatar.png'}" alt="Patient Profile">
-                                </div>
-                                <div class="doctor-details">
-                                    <h4>${appointment.patient_name}</h4>
-                                    <p><strong>Reason:</strong> ${appointment.reason}</p>
-                                </div>
+                    listItem.innerHTML = `
+                        <div class="doctor-info">
+                            <div class="doctor-avatar">
+                                <img src="/${appointment.patient_profile_pic || 'assets/images/default-avatar.png'}" alt="Patient Profile">
                             </div>
-                            <div class="doctor-info">
-                                <p><strong>Date:</strong> ${date}</p>
-                                <p><strong>Time:</strong> ${time}</p>
+                            <div class="doctor-details">
+                                <h4>${appointment.patient_name}</h4>
+                                <p><strong>Reason:</strong> ${appointment.reason}</p>
                             </div>
-                            <div class="doctor-info">
-                                <p><strong>Type:</strong> ${appointment.type}</p>
-                                <p><strong>Status:</strong> <span class="badge ${getStatusBadgeClass(appointment.status)}">${appointment.status}</span></p>
-                            </div>
-                            <div class="doctor-info button-group">
-                                ${appointment.status === 'Pending' ? `
-                                    <button class="btn btn-success accept-btn" data-appointment-id="${appointment.id}" data-appointment-type="${appointment.type}">Accept</button>
-                                    <button class="btn btn-danger cancel-btn" data-appointment-id="${appointment.id}">Cancel</button>
-                                ` : ''}
-                                ${appointment.status === 'Scheduled' ? `
-                                    <button class="btn btn-primary complete-btn" data-appointment-id="${appointment.id}">Complete</button>
-                                ` : ''}
-                                <button class="btn btn-info message-btn"
-                                        data-patient-id="${appointment.patient_user_id}"
-                                        data-patient-name="${appointment.patient_name}"
-                                        data-patient-profile-pic="${appointment.patient_profile_pic || 'assets/images/default-avatar.png'}"
-                                        data-conversation-id="${appointment.conversation_id || ''}">
-                                    Message
-                                </button>
-                            </div>
-                        `;
+                        </div>
+                        <div class="doctor-info">
+                            <p><strong>Date:</strong> ${date}</p>
+                            <p><strong>Time:</strong> ${time}</p>
+                        </div>
+                        <div class="doctor-info">
+                            <p><strong>Type:</strong> ${appointment.type}</p>
+                            <p><strong>Status:</strong> <span class="badge ${getStatusBadgeClass(appointment.status)}">${appointment.status}</span></p>
+                        </div>
+                        <div class="doctor-info button-group">
+                            ${appointment.status === 'Pending' ? `
+                                <button class="btn btn-success accept-btn" data-appointment-id="${appointment.id}" data-appointment-type="${appointment.type}">Accept</button>
+                                <button class="btn btn-danger cancel-btn" data-appointment-id="${appointment.id}">Cancel</button>
+                            ` : ''}
+                            ${appointment.status === 'Scheduled' ? `
+                                <button class="btn btn-primary complete-btn" data-appointment-id="${appointment.id}">Complete</button>
+                            ` : ''}
+                            <button class="btn btn-info message-btn"
+                                    data-patient-id="${appointment.patient_user_id}"
+                                    data-patient-name="${appointment.patient_name}"
+                                    data-patient-profile-pic="${appointment.patient_profile_pic || 'assets/images/default-avatar.png'}"
+                                    data-conversation-id="${appointment.conversation_id || ''}">
+                                Message
+                            </button>
+                        </div>
+                    `;
 
-                        if (appointment.status === 'Pending') {
-                            pendingAppointmentList.appendChild(listItem);
-                        } else if (appointment.status === 'Scheduled') {
-                            confirmedAppointmentList.appendChild(listItem);
-                        }
+                    if (appointment.status === 'Pending') {
+                        pendingAppointmentList.appendChild(listItem);
+                    } else if (appointment.status === 'Scheduled') {
+                        confirmedAppointmentList.appendChild(listItem);
                     }
                 });
 
@@ -112,11 +102,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // Add event listeners for accept, cancel, complete buttons (assuming these exist in your PHP)
         document.querySelectorAll('.accept-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const appointmentId = this.dataset.appointmentId;
-                const appointmentType = this.dataset.appointmentType; // Get the type
+                const appointmentType = this.dataset.appointmentType;
                 fetch('../doctor/accept_appointment.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -125,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        fetchAndRenderAppointments(); // Refresh list
+                        fetchAndRenderAppointments();
                     } else {
                         alert('Failed to accept appointment: ' + data.message);
                     }
@@ -145,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        fetchAndRenderAppointments(); // Refresh list
+                        fetchAndRenderAppointments();
                     } else {
                         alert('Failed to cancel appointment: ' + data.message);
                     }
@@ -165,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        fetchAndRenderAppointments(); // Refresh list
+                        fetchAndRenderAppointments();
                     } else {
                         alert('Failed to complete appointment: ' + data.message);
                     }
@@ -175,9 +164,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Initial fetch and render
-    fetchAndRenderAppointments();
-
     // Add event listeners for search and filter
     if (searchPatientInput) {
         searchPatientInput.addEventListener('input', fetchAndRenderAppointments);
@@ -185,7 +171,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeFilterSelect) {
         typeFilterSelect.addEventListener('change', fetchAndRenderAppointments);
     }
+    if (statusFilterSelect) { // New: Add event listener for status filter
+        statusFilterSelect.addEventListener('change', fetchAndRenderAppointments);
+    }
 
-    // Poll for new appointments every 30 seconds (adjust as needed)
-    setInterval(fetchAndRenderAppointments, 30000);
+    // Initial fetch and render
+    fetchAndRenderAppointments();
+
+    // Poll for new appointments every 5 seconds (adjust as needed)
+    setInterval(fetchAndRenderAppointments, 5000);
 });
