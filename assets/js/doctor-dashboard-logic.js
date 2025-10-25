@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         listItem.innerHTML = `
                             <div class="doctor-info">
                                 <div class="doctor-avatar">
-                                    <img src="/hospital-management-system/${appointment.patient_profile_pic || 'assets/images/default-avatar.png'}" alt="Patient Profile">
+                                    <img src="/${appointment.patient_profile_pic || 'assets/images/default-avatar.png'}" alt="Patient Profile">
                                 </div>
                                 <div class="doctor-details">
                                     <h4>${appointment.patient_name}</h4>

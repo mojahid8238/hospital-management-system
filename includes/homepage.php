@@ -87,6 +87,7 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
   </div>
 
   <script>
+    const BASE_URL = '/';
     // Global slider functions
     let slideIndex = { 'mainSlider': 0, 'promoSlider': 0 };
 

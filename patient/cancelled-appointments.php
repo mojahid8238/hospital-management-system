@@ -48,7 +48,7 @@ if ($patient_id) {
             <a href="#">Patient Panel</a>
         </div>
         <div class="nav-right">
-            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+            <img src="/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon user-profile-pic" id="profileToggle">
         </div>
     </header>
 
@@ -93,9 +93,9 @@ if ($patient_id) {
                                 data-doctor-id="<?php echo htmlspecialchars($appointment['doctor_id']); ?>"
                                 id="appointment-<?php echo $appointment['id']; ?>">
                                 <div class="doctor-avatar">
-                                    <img src="/hospital-management-system/<?php echo htmlspecialchars($appointment['doctor_profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" 
+                                    <img src="/<?php echo htmlspecialchars($appointment['doctor_profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" 
                                         alt="<?php echo htmlspecialchars($appointment['doctor_name']); ?>" 
-                                        class="rounded-circle">
+                                        class="rounded-circle user-profile-pic">
                                 </div>
                                 <div class="doctor-info">
                                     <h4><?php echo htmlspecialchars($appointment['doctor_name']); ?></h4>
@@ -120,7 +120,7 @@ if ($patient_id) {
     <!-- Profile side overlay -->
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay">
+            <img src="/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="user-profile-pic">
             <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
                 <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
                 <button type="submit" style="display: none;">Upload</button>
@@ -138,120 +138,8 @@ if ($patient_id) {
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const patientSidebar = document.getElementById('patientSidebar');
-            sidebarToggle.addEventListener('click', () => {
-                patientSidebar.classList.toggle('closed');
-            });
-
-            const profileToggle = document.getElementById('profileToggle');
-            const profileOverlay = document.getElementById('profileOverlay');
-            profileToggle.addEventListener('click', (event) => {
-                event.stopPropagation();
-                profileOverlay.classList.add('open');
-            });
-
-            profileOverlay.addEventListener('click', function(event) {
-                if (event.target === profileOverlay) {
-                    profileOverlay.classList.remove('open');
-                }
-            });
-
-            const mainContent = document.getElementById('mainContent');
-            mainContent.addEventListener('click', () => {
-                profileOverlay.classList.remove('open');
-            });
-
-            const searchDoctor = document.getElementById('searchDoctor');
-            const appointmentList = document.getElementById('appointmentList');
-
-            console.log('searchDoctor:', searchDoctor);
-            console.log('appointmentList:', appointmentList);
-
-            if (appointmentList) { // Only proceed if appointmentList exists
-                try {
-                    const appointmentItems = Array.from(appointmentList.getElementsByClassName('doctor-item'));
-
-                    function filterAppointments() {
-                        const searchTerm = searchDoctor.value.toLowerCase();
-
-                        appointmentItems.forEach(item => {
-                            const name = item.dataset.name;
-
-                            const nameMatch = name.includes(searchTerm);
-
-                            if (nameMatch) {
-                                item.style.display = 'flex';
-                            } else {
-                                item.style.display = 'none';
-                            }
-                        });
-                    }
-
-                    searchDoctor.addEventListener('input', filterAppointments);
-                } catch (error) {
-                    console.error('Error in filterAppointments setup:', error);
-                }
-            }
-
-            function handleDeleteButtonClick(event) {
-                const button = event.target.closest('.remove-appointment-btn');
-                if (!button) return;
-
-                const appointmentId = button.dataset.appointmentId;
-                if (confirm('Are you sure you want to permanently remove this cancelled appointment? This action cannot be undone.')) {
-                    button.disabled = true;
-
-                    fetch('delete_cancelled_appointment.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ appointment_id: appointmentId })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const listItem = document.getElementById(`appointment-${appointmentId}`);
-                            if (listItem) {
-                                listItem.style.transition = 'opacity 0.5s ease';
-                                listItem.style.opacity = '0';
-                                setTimeout(() => {
-                                    listItem.remove();
-                                    // Optionally, update a message if no appointments are left
-                                    const appointmentList = document.getElementById('appointmentList');
-                                    if (appointmentList && appointmentList.children.length === 0) {
-                                        const container = document.querySelector('.container.panel-card');
-                                        if (container) {
-                                            container.innerHTML += '<div class="alert alert-info mt-4">You have no cancelled appointments.</div>';
-                                        }
-                                    }
-                                }, 500);
-                            }
-                        } else {
-                            alert('Error: ' + data.message);
-                            button.disabled = false;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred. Please try again.');
-                        button.disabled = false;
-                    });
-                }
-            }
-
-            document.addEventListener('click', function(event) {
-                const doctorItem = event.target.closest('.doctor-item');
-                if (doctorItem && !event.target.closest('.remove-appointment-btn')) {
-                    const doctorId = doctorItem.dataset.doctorId;
-                    if (doctorId) {
-                        window.location.href = `doctor-profile.php?id=${doctorId}`;
-                    }
-                }
-            });
-
-            document.addEventListener('click', handleDeleteButtonClick);
-        });
+        const BASE_URL = '/';
     </script>
+    <script src="../assets/js/profile-overlay.js"></script>
 </body>
 </html>

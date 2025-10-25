@@ -8,17 +8,28 @@ $patient_id = null;
 $patient_name = '';
 
 // Get the patient_id and name associated with the logged-in user
-$stmt = $conn->prepare("SELECT id, name FROM patients WHERE user_id = ?");
+$stmt = $conn->prepare("SELECT id, name, profile_pic FROM patients WHERE user_id = ?");
 $stmt->bind_param("i", $_SESSION['user_id']);
 $stmt->execute();
 $result = $stmt->get_result();
 if ($row = $result->fetch_assoc()) {
     $patient_id = $row['id'];
     $patient_name = $row['name'];
+    $_SESSION['profile_pic'] = $row['profile_pic'] ?? 'assets/images/default-avatar.png';
 }
 $stmt->close();
-?>
 
+// -------------------------------------------------------------------------
+// FIX 1: Clean the path stored in the database/session by 
+//        removing the leading '../' if it exists.
+// -------------------------------------------------------------------------
+// Use a default path that is relative to the project root (no ../)
+$rawProfilePic = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
+// Use ltrim to safely remove the leading "../" if it exists.
+$profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic); 
+// Now $profilePic contains: 'assets/images/profile_pics/patient_2.png' or 'assets/images/default-avatar.png'
+// -------------------------------------------------------------------------
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,7 +49,7 @@ $stmt->close();
             <a href="#">Patient Panel</a>
         </div>
         <div class="nav-right">
-            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon user-profile-pic" id="profileToggle">
         </div>
     </header>
 
@@ -126,7 +137,7 @@ $stmt->close();
 
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay">
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="user-profile-pic">
             <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
                 <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
                 <button type="submit" style="display: none;">Upload</button>
@@ -147,6 +158,9 @@ $stmt->close();
 
     <script>
         const currentUserId = <?php echo json_encode($_SESSION['user_id']); ?>;
+    </script>
+    <script>
+        const BASE_URL = '/';
     </script>
     <script src="../assets/js/mini_messenger.js"></script>
     <script src="../assets/js/patient-dashboard-logic.js"></script>

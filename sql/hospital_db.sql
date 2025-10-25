@@ -113,9 +113,9 @@ CREATE TABLE IF NOT EXISTS conversations (
 );
 
 -- Update existing default profile pictures to use the full relative path
-UPDATE admin SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'default-avatar.png';
-UPDATE doctors SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'default-avatar.png';
-UPDATE patients SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'default-avatar.png';
+UPDATE admin SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'assets/images/default-avatar.png';
+UPDATE doctors SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'assets/images/default-avatar.png';
+UPDATE patients SET profile_pic = 'assets/images/default-avatar.png' WHERE profile_pic = 'assets/images/default-avatar.png';
 
 SET FOREIGN_KEY_CHECKS = 1;
 

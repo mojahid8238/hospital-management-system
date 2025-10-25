@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
             listItem.dataset.receiverId = conv.other_participant_id;
             listItem.dataset.profilePic = conv.other_participant_profile_pic;
 
-            const profilePic = conv.other_participant_profile_pic ? `/hospital-management-system/${conv.other_participant_profile_pic}` : '/hospital-management-system/assets/images/default-avatar.png';
+            const profilePic = conv.other_participant_profile_pic ? `/${conv.other_participant_profile_pic}` : '/assets/images/default-avatar.png';
 
             listItem.innerHTML = `
                 <img src="${profilePic}" alt="Avatar">
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             let messageContent = '';
             if (msg.message_type === 'image') {
-                messageContent = `<img src="/hospital-management-system/${msg.message_content}" class="message-image">`;
+                messageContent = `<img src="/${msg.message_content}" class="message-image">`;
             } else {
                 messageContent = `<p>${msg.message_content}</p>`;
             }

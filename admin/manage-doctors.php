@@ -146,8 +146,7 @@ if ($result) {
         <a href="#">Admin Panel</a>          
         </div>
         <div class="nav-right">
-            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
-        </div>
+                            <img src="<?php echo $profile_pic_path; ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon user-profile-pic" id="profileToggle">        </div>
     </header>
 
     <div class="main-wrapper">
@@ -192,7 +191,7 @@ if ($result) {
                                     <?php foreach ($doctors as $doctor): ?>
                                         <tr>
                                             <td><?php echo $doctor['id']; ?></td>
-                                            <td><img src="/hospital-management-system/<?php echo htmlspecialchars($doctor['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" alt="Profile Pic" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"></td>
+                                            <td><img src="/<?php echo htmlspecialchars($doctor['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Pic" class="user-profile-pic" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"></td>
                                             <td><?php echo $doctor['name']; ?></td>
                                             <td><?php echo $doctor['specialization']; ?></td>
                                             <td><?php echo $doctor['degrees']; ?></td>
@@ -215,7 +214,7 @@ if ($result) {
 
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" id="profileImageDisplay">
+            <img src="<?php echo $profile_pic_path; ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="user-profile-pic">
            
             <!-- Hidden form and input for file selection -->
             <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data" style="display: none;">

@@ -13,12 +13,13 @@ if (!$doctor_id) {
 }
 
 // Fetch doctor details
-$stmt = $conn->prepare("SELECT d.id, d.name, d.specialization, d.phone, d.email, u.username, u.id as user_id FROM doctors d JOIN users u ON d.user_id = u.id WHERE d.id = ?");
+$stmt = $conn->prepare("SELECT d.id, d.name, d.specialization, d.phone, d.email, u.username, u.id as user_id, d.profile_pic FROM doctors d JOIN users u ON d.user_id = u.id WHERE d.id = ?");
 $stmt->bind_param("i", $doctor_id);
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows === 1) {
     $doctor = $result->fetch_assoc();
+    $_SESSION['profile_pic'] = $doctor['profile_pic'] ?? 'assets/images/default-avatar.png';
 } else {
     $message = "<p style='color: red;'>Doctor not found.</p>";
     $doctor_id = null;
@@ -32,60 +33,16 @@ if ($result->num_rows === 1) {
         $specializations[] = $row;
     }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $doctor_id) {
-    $name = $_POST['name'] ?? '';
-    $specialization_name = $_POST['specialization'] ?? ''; // Get specialization name from form
-    $phone = $_POST['phone'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $username = $_POST['username'] ?? '';
-
-    if (empty($name) || empty($specialization_name) || empty($phone) || empty($email) || empty($username)) {
-        $message = "<p style='color: red;'>All fields are required.</p>";
-    } else {
-        // Get specialization_id from specializations table
-        $stmt_spec_id = $conn->prepare("SELECT id FROM specializations WHERE name = ?");
-        $stmt_spec_id->bind_param("s", $specialization_name);
-        $stmt_spec_id->execute();
-        $result_spec_id = $stmt_spec_id->get_result();
-        $spec_row = $result_spec_id->fetch_assoc();
-        $specialization_id = $spec_row['id'] ?? null;
-        $stmt_spec_id->close();
-
-        if ($specialization_id === null) {
-            $message = "<p style='color: red;'>Error: Invalid specialization selected.</p>";
-        } else {
-            $conn->begin_transaction();
-            try {
-                // Update doctor details
-                $stmt_doctor = $conn->prepare("UPDATE doctors SET name = ?, specialization_id = ?, phone = ?, email = ? WHERE id = ?");
-                $stmt_doctor->bind_param("sisssi", $name, $specialization_id, $phone, $email, $doctor_id);
-                $stmt_doctor->execute();
-                $stmt_doctor->close();
-
-                // Update username
-                $stmt_user = $conn->prepare("UPDATE users SET username = ? WHERE id = ?");
-                $stmt_user->bind_param("si", $username, $doctor['user_id']);
-                $stmt_user->execute();
-                $stmt_user->close();
-
-                $conn->commit();
-                $message = "<p style='color: green;'>Doctor updated successfully!</p>";
-
-                // Refresh doctor data
-                $stmt = $conn->prepare("SELECT d.id, d.name, s.name as specialization, d.phone, d.email, u.username, u.id as user_id FROM doctors d JOIN users u ON d.user_id = u.id JOIN specializations s ON d.specialization_id = s.id WHERE d.id = ?");
-                $stmt->bind_param("i", $doctor_id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $doctor = $result->fetch_assoc();
-                $stmt->close();
-
-            } catch (mysqli_sql_exception $exception) {
-                $conn->rollback();
-                $message = "<p style='color: red;'>Error updating doctor: " . $exception->getMessage() . "</p>";
-            }
-        }
-    }
-}
+// -------------------------------------------------------------------------
+// FIX 1: Clean the path stored in the database/session by 
+//        removing the leading '../' if it exists.
+// -------------------------------------------------------------------------
+// Use a default path that is relative to the project root (no ../)
+$rawProfilePic = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
+// Use ltrim to safely remove the leading "../" if it exists.
+$profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic); 
+// Now $profilePic contains: 'assets/images/profile_pics/patient_2.png' or 'assets/images/default-avatar.png'
+// -------------------------------------------------------------------------
 ?>
 
 <!DOCTYPE html>
@@ -104,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $doctor_id) {
             <a href="#">Admin Panel</a>
         </div>
         <div class="nav-right">
-            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon user-profile-pic" id="profileToggle">
         </div>
     </header>
 
@@ -162,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $doctor_id) {
 
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" id="profileImageDisplay">
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="user-profile-pic">
             <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data" style="display: none;">
                 <input type="file" name="profile_pic" id="profilePicInput" accept="image/*">
             </form>
@@ -177,6 +134,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $doctor_id) {
         </div>
     </div>
 
+    <script>
+        const BASE_URL = '/';
+    </script>
     <script src="../assets/js/profile-overlay.js"></script>
     <script src="../assets/js/admin-dashboard.js"></script>
 </body>

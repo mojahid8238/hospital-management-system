@@ -97,7 +97,7 @@ if (!$name) {
             <a href="#">Patient Panel</a>
         </div>
         <div class="nav-right">
-            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+            <img src="/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon user-profile-pic" id="profileToggle">
         </div>
     </header>
 
@@ -116,7 +116,7 @@ if (!$name) {
                 <div class="doctor-details-card">
                     <div class="profile-summary">
                         <div class="large-avatar">
-                            <img src="/hospital-management-system/<?php echo htmlspecialchars($profile_pic ?? 'assets/images/default-avatar.png'); ?>" alt="Doctor Profile Picture">
+                            <img src="/<?php echo htmlspecialchars($profile_pic ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Doctor Profile Picture" class="user-profile-pic">
                         </div>
                         <div class="profile-header">
                             <h3><?php echo htmlspecialchars($name); ?></h3>

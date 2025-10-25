@@ -3,52 +3,21 @@ require_once '../includes/db.php';
 require_once '../includes/auth.php';
 redirect_if_not_admin();
 
-$message = '';
-
-// Handle Delete Patient
-if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
-    $patient_id_to_delete = $_GET['id'];
-
-    // Get user_id associated with the patient to delete from users table as well
-    $stmt_get_user = $conn->prepare("SELECT user_id FROM patients WHERE id = ?");
-    $stmt_get_user->bind_param("i", $patient_id_to_delete);
-    $stmt_get_user->execute();
-    $stmt_get_user->bind_result($user_id_to_delete);
-    $stmt_get_user->fetch();
-    $stmt_get_user->close();
-
-    if ($user_id_to_delete) {
-        $conn->begin_transaction();
-        try {
-            // Delete patient
-            $stmt_patient = $conn->prepare("DELETE FROM patients WHERE id = ?");
-            $stmt_patient->bind_param("i", $patient_id_to_delete);
-            $stmt_patient->execute();
-            $stmt_patient->close();
-
-            // Delete associated user
-            $stmt_user = $conn->prepare("DELETE FROM users WHERE id = ?");
-            $stmt_user->bind_param("i", $user_id_to_delete);
-            $stmt_user->execute();
-            $stmt_user->close();
-
-            $conn->commit();
-            $message = "<p style='color: green;'>Patient and associated user deleted successfully!</p>";
-        } catch (mysqli_sql_exception $exception) {
-            $conn->rollback();
-            $message = "<p style='color: red;'>Error deleting patient: " . $exception->getMessage() . "</p>";
-        }
-    }
+// Ensure profile_pic session is initialized for display
+if (!isset($_SESSION['profile_pic'])) {
+    $_SESSION['profile_pic'] = 'assets/images/default-avatar.png'; 
 }
 
-// Fetch all patients
-$patients = [];
-$result = $conn->query("SELECT id, name, date_of_birth, gender, address, phone, email, username, profile_pic FROM patients");
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $patients[] = $row;
-    }
-}
+// -------------------------------------------------------------------------
+// FIX 1: Clean the path stored in the database/session by 
+//        removing the leading '../' if it exists.
+// -------------------------------------------------------------------------
+// Use a default path that is relative to the project root (no ../)
+$rawProfilePic = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
+// Use ltrim to safely remove the leading "../" if it exists.
+$profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic); 
+// Now $profilePic contains: 'assets/images/profile_pics/patient_2.png' or 'assets/images/default-avatar.png'
+// -------------------------------------------------------------------------
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -68,7 +37,7 @@ if ($result) {
         <a href="#">Admin Panel</a>          
         </div>
         <div class="nav-right">
-            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon user-profile-pic" id="profileToggle">
         </div>
     </header>
 
@@ -120,7 +89,7 @@ if ($result) {
                                             <td><?php echo $patient['phone']; ?></td>
                                             <td><?php echo $patient['email']; ?></td>
                                             <td><?php echo $patient['username']; ?></td>
-                                            <td><img src="/hospital-management-system/<?php echo htmlspecialchars($patient['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>" alt="Profile Pic" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"></td>
+                                            <td><img src="../<?php echo htmlspecialchars($patient['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Pic" class="user-profile-pic" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"></td>
                                             <td class="action-links">
                                                 <a href="edit-patient.php?id=<?php echo $patient['id']; ?>">Edit</a> |
                                                 <a href="manage-patients.php?action=delete&id=<?php echo $patient['id']; ?>" onclick="return confirm('Are you sure you want to delete this patient and their associated user account?');">Delete</a>
@@ -136,7 +105,7 @@ if ($result) {
 
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" id="profileImageDisplay">
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="user-profile-pic">
            
             <!-- Hidden form and input for file selection -->
             <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data" style="display: none;">

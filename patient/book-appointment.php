@@ -31,7 +31,7 @@ if ($result) {
             <a href="#">Patient Panel</a>
         </div>
         <div class="nav-right">
-            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+            <img src="/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon user-profile-pic" id="profileToggle">
         </div>
     </header>
 
@@ -94,9 +94,9 @@ if ($result) {
                             <li class="doctor-item" data-name="<?php echo strtolower($escaped_name); ?>" data-spec="<?php echo strtolower($escaped_spec); ?>">
                                 <div class="doctor-avatar">
                                     <?php if ($doctor_img_path !== null): ?>
-                                        <img src="<?php echo $doctor_img_path; ?>" 
+                                        <img src="<?php echo $doctor_img_path; ?>?t=<?php echo time(); ?>" 
                                              alt="Dr. <?php echo $escaped_name; ?> Profile"
-                                             onerror="this.onerror=null; this.src='<?php echo $default_img_path; ?>';">
+                                             onerror="this.onerror=null; this.src='<?php echo $default_img_path; ?>';" class="user-profile-pic">
                                     <?php else:
                                         // Fallback to Font Awesome icon if no custom image is set 
                                     ?><i class="fas fa-user-md"></i>
@@ -118,7 +118,7 @@ if ($result) {
     <!-- Profile side overlay -->
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="/hospital-management-system/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay">
+            <img src="/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="user-profile-pic">
             <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
                 <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
                 <button type="submit" style="display: none;">Upload</button>
@@ -136,175 +136,8 @@ if ($result) {
     </div>
 
     <script>
-        function initializeDoctorFilters() {
-            const searchDoctor = document.getElementById('searchDoctor');
-            const specializationFilter = document.getElementById('specializationFilter');
-            const doctorList = document.getElementById('doctorList');
-            // Ensure doctorList exists before proceeding
-            if (!doctorList) return;
-
-            const doctorItems = Array.from(doctorList.getElementsByClassName('doctor-item'));
-
-            // Remove existing listeners to prevent duplicates if called multiple times
-            if (searchDoctor) {
-                searchDoctor.removeEventListener('input', filterDoctors);
-                searchDoctor.addEventListener('input', filterDoctors);
-            }
-            if (specializationFilter) {
-                specializationFilter.removeEventListener('change', filterDoctors);
-                specializationFilter.addEventListener('change', filterDoctors);
-            }
-
-            function filterDoctors() {
-                const searchTerm = searchDoctor ? searchDoctor.value.toLowerCase() : '';
-                const specTerm = specializationFilter ? specializationFilter.value.toLowerCase() : '';
-
-                doctorItems.forEach(item => {
-                    const name = item.dataset.name;
-                    const spec = item.dataset.spec;
-                    const nameMatch = name.includes(searchTerm);
-                    const specMatch = specTerm === "" || spec === specTerm;
-
-                    if (nameMatch && specMatch) {
-                        item.style.display = 'flex';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const patientSidebar = document.getElementById('patientSidebar');
-            const mainContent = document.getElementById('mainContent');
-            const sidebarLinks = document.querySelectorAll('.sidebar-link');
-
-            sidebarToggle.addEventListener('click', () => {
-                patientSidebar.classList.toggle('closed');
-            });
-
-            sidebarLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetPage = this.dataset.target;
-                    fetch(targetPage)
-                        .then(response => response.text())
-                        .then(html => {
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(html, 'text/html');
-                            const bodyContent = doc.querySelector('.container').innerHTML;
-                            mainContent.innerHTML = '<div class="container">' + bodyContent + '</div>';
-                            initializeDoctorFilters(); // Re-initialize after content update
-                        })
-                        .catch(error => {
-                            console.error('Error loading page:', error);
-                            mainContent.innerHTML = '<p style="color: red;">Error loading content.</p>';
-                        });
-                });
-            });
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const page = urlParams.get('page');
-            if (page) {
-                const targetPage = page + '.php';
-                fetch(targetPage)
-                    .then(response => response.text())
-                    .then(html => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const bodyContent = doc.querySelector('.container').innerHTML;
-                        mainContent.innerHTML = '<div class="container">' + bodyContent + '</div>';
-                        initializeDoctorFilters(); // Re-initialize after content update
-                    })
-                    .catch(error => {
-                        console.error('Error loading page:', error);
-                        mainContent.innerHTML = '<p style="color: red;">Error loading content.</p>';
-                    });
-            }
-
-            const profileToggle = document.getElementById('profileToggle');
-            const profileOverlay = document.getElementById('profileOverlay');
-            const profilePicInput = document.getElementById('profilePicInput');
-            const profilePicUploadForm = document.getElementById('profilePicUploadForm');
-            const profileImageDisplay = document.getElementById('profileImageDisplay');
-            const uploadMessage = document.getElementById('uploadMessage');
-
-            profileToggle.addEventListener('click', (event) => {
-                event.stopPropagation();
-                profileOverlay.classList.add('open');
-            });
-
-            document.addEventListener('click', function(event) {
-                // Check if the click is outside the profile overlay and not on the profile toggle button
-                if (!profileOverlay.contains(event.target) && !profileToggle.contains(event.target)) {
-                    profileOverlay.classList.remove('open');
-                }
-            });
-
-
-
-            const profileContent = document.querySelector('.profile-content');
-            if (profileContent) {
-                profileContent.addEventListener('click', function(event) {
-                    event.stopPropagation();
-                });
-            }
-
-
-
-            profileImageDisplay.addEventListener('click', function() {
-                profilePicInput.click();
-            });
-
-            profilePicInput.addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    const formData = new FormData(profilePicUploadForm);
-                    fetch(profilePicUploadForm.action, {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const newImagePath = '/hospital-management-system/' + data.profile_pic_path + '?t=' + new Date().getTime();
-                            profileImageDisplay.src = newImagePath;
-                            document.getElementById('profileToggle').src = newImagePath;
-                            uploadMessage.textContent = 'Profile picture updated successfully!';
-                            uploadMessage.style.color = 'green';
-                            setTimeout(() => {
-                                uploadMessage.textContent = '';
-                            }, 1000);
-                        } else {
-                            uploadMessage.textContent = data.message || 'Error uploading profile picture.';
-                            uploadMessage.style.color = 'red';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        uploadMessage.textContent = 'An error occurred during upload.';
-                        uploadMessage.style.color = 'red';
-                    });
-                }
-            });
-
-            initializeDoctorFilters(); // Initial call on DOMContentLoaded
-
-            const doctorItems = document.querySelectorAll('.doctor-item');
-            doctorItems.forEach(item => {
-                item.style.cursor = 'pointer';
-                item.addEventListener('click', function(event) {
-                    // Prevent the click from firing if the book-btn itself is clicked
-                    if (event.target.classList.contains('book-btn')) {
-                        return;
-                    }
-                    const link = this.querySelector('.book-btn');
-                    if (link) {
-                        window.location.href = link.href;
-                    }
-                });
-            });
-        });
+        const BASE_URL = '/';
     </script>
+    <script src="../assets/js/profile-overlay.js"></script>
 </body>
 </html>

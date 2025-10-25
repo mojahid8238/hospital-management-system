@@ -21,28 +21,28 @@ function is_patient() {
 
 function redirect_if_not_logged_in() {
     if (!is_logged_in()) {
-        header("Location: /hospital-management-system/auth/login.php");
+        header("Location: /auth/login.php");
         exit();
     }
 }
 
 function redirect_if_not_admin() {
     if (!is_admin()) {
-        header("Location: /hospital-management-system/index.php"); // Redirect to a general page or error page
+        header("Location: /index.php"); // Redirect to a general page or error page
         exit();
     }
 }
 
 function redirect_if_not_doctor() {
     if (!is_doctor()) {
-        header("Location: /hospital-management-system/index.php");
+        header("Location: /index.php");
         exit();
     }
 }
 
 function redirect_if_not_patient() {
     if (!is_patient()) {
-        header("Location: /hospital-management-system/index.php");
+        header("Location: /index.php");
         exit();
     }
 }

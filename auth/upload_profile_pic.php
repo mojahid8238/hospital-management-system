@@ -45,7 +45,7 @@ if ($file['error'] !== UPLOAD_ERR_OK) {
 // Allowed types and size checks (omitted for brevity, assuming correct from previous step)
 
 // --- Path Construction ---
-$upload_dir = __DIR__ . '/../assets/images/profile_pics/';
+$upload_dir = '/var/www/html/assets/images/profile_pics/';
 $file_extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)); // Sanitize extension
 $new_file_name = $role . '_' . $user_id . '.' . $file_extension;
 $target_file = $upload_dir . $new_file_name;

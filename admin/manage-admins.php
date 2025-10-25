@@ -6,19 +6,24 @@ require_once '../includes/auth.php';
 redirect_if_not_logged_in();
 redirect_if_not_admin();
 
-// Define the base URL for asset loading
-$base_url = '/hospital-management-system/';
-
 // Ensure profile_pic session is initialized for display
 if (!isset($_SESSION['profile_pic'])) {
     $_SESSION['profile_pic'] = 'assets/images/default-avatar.png'; 
 }
 
-// Construct the path for the profile picture
-$image_relative_path = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
-$profile_pic_path = htmlspecialchars($base_url . $image_relative_path);
+// -------------------------------------------------------------------------
+// FIX 1: Clean the path stored in the database/session by 
+//        removing the leading '../' if it exists.
+// -------------------------------------------------------------------------
+// Use a default path that is relative to the project root (no ../)
+$rawProfilePic = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
+// Use ltrim to safely remove the leading "../" if it exists.
+$profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic); 
+// Now $profilePic contains: 'assets/images/profile_pics/patient_2.png' or 'assets/images/default-avatar.png'
+// -------------------------------------------------------------------------
+?>
 
-// Handle approval
+<!DOCTYPE html>
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approve_admin'])) {
     $admin_id_to_approve = $_POST['admin_id'];
     $stmt = $conn->prepare("UPDATE admin SET status = 'approved' WHERE id = ?");
@@ -82,7 +87,7 @@ $stmt->close();
         <a href="#">Admin Panel</a>          
         </div>
         <div class="nav-right">
-            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon user-profile-pic" id="profileToggle">
         </div>
     </header>
 
@@ -141,7 +146,7 @@ $stmt->close();
 
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" id="profileImageDisplay">
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="user-profile-pic">
            
             <!-- Hidden form and input for file selection -->
             <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data" style="display: none;">
@@ -160,6 +165,9 @@ $stmt->close();
         </div>
     </div>
 
+    <script>
+        const BASE_URL = '/';
+    </script>
     <script src="../assets/js/profile-overlay.js"></script>
     <script src="../assets/js/admin-dashboard.js"></script>
 </body>

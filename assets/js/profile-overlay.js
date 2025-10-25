@@ -52,19 +52,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        const newImagePath = base_url + data.profile_pic_path + '?t=' + new Date().getTime();
-                        
-                        if(profileImageDisplay) {
-                            profileImageDisplay.src = newImagePath;
-                        }
-                        // Also update the small icon in the header
-                        if(profileToggle) {
-                            profileToggle.src = newImagePath;
-                        }
-
-                        if(uploadMessage) {
-                            uploadMessage.textContent = 'Profile picture updated successfully!';
+                                                                    if (data.success) {
+                                                                        const newImagePath = base_url + data.profile_pic_path + '?t=' + new Date().getTime();
+                                            
+                                                                        if(profileImageDisplay) {
+                                                                            profileImageDisplay.src = newImagePath;
+                                                                        }
+                                                                        // Also update the small icon in the header
+                                                                        if(profileToggle) {
+                                                                            profileToggle.src = newImagePath;
+                                                                        }
+                                            
+                                                                        // Update all other profile picture instances with the class 'user-profile-pic'
+                                                                        const allProfilePics = document.querySelectorAll('.user-profile-pic');
+                                                                        allProfilePics.forEach(img => {
+                                                                            img.src = newImagePath;
+                                                                        });
+                                            
+                                                                        if(uploadMessage) {                            uploadMessage.textContent = 'Profile picture updated successfully!';
                             uploadMessage.style.color = 'green';
                             setTimeout(() => {
                                 uploadMessage.textContent = '';

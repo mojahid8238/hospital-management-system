@@ -17,61 +17,29 @@ if (!$patient_id) {
 }
 
 // Fetch patient details
-$stmt = $conn->prepare("SELECT p.id, p.name, p.date_of_birth, p.gender, p.address, p.phone, p.email, u.username, u.id as user_id FROM patients p JOIN users u ON p.user_id = u.id WHERE p.id = ?");
+$stmt = $conn->prepare("SELECT p.id, p.name, p.date_of_birth, p.gender, p.address, p.phone, p.email, u.username, u.id as user_id, p.profile_pic FROM patients p JOIN users u ON p.user_id = u.id WHERE p.id = ?");
 $stmt->bind_param("i", $patient_id);
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows === 1) {
     $patient = $result->fetch_assoc();
+    $_SESSION['profile_pic'] = $patient['profile_pic'] ?? 'assets/images/default-avatar.png';
 } else {
     $message = "<p style='color: red;'>Patient not found.</p>";
     $patient_id = null; // Invalidate patient_id if not found
 }
 $stmt->close();
 
-// Handle Update Patient
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $patient_id) {
-    $name = $_POST['name'] ?? '';
-    $date_of_birth = $_POST['date_of_birth'] ?? '';
-    $gender = $_POST['gender'] ?? '';
-    $address = $_POST['address'] ?? '';
-    $phone = $_POST['phone'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $username = $_POST['username'] ?? ''; // Allow updating username
-
-    if (empty($name) || empty($date_of_birth) || empty($gender) || empty($address) || empty($phone) || empty($email) || empty($username)) {
-        $message = "<p style='color: red;'>All fields are required.</p>";
-    } else {
-        $conn->begin_transaction();
-        try {
-            // Update patient details
-            $stmt_patient = $conn->prepare("UPDATE patients SET name = ?, date_of_birth = ?, gender = ?, address = ?, phone = ?, email = ?, username = ? WHERE id = ?");
-            $stmt_patient->bind_param("sssssssi", $name, $date_of_birth, $gender, $address, $phone, $email, $username, $patient_id);
-            $stmt_patient->execute();
-            $stmt_patient->close();
-
-            // Update associated user's username
-            $stmt_user = $conn->prepare("UPDATE users SET username = ? WHERE id = ?");
-            $stmt_user->bind_param("si", $username, $patient['user_id']);
-            $stmt_user->execute();
-            $stmt_user->close();
-
-            $conn->commit();
-            $message = "<p style='color: green;'>Patient updated successfully!</p>";
-            // Refresh patient data after update
-            $stmt = $conn->prepare("SELECT p.id, p.name, p.date_of_birth, p.gender, p.address, p.phone, p.email, u.username, u.id as user_id FROM patients p JOIN users u ON p.user_id = u.id WHERE p.id = ?");
-            $stmt->bind_param("i", $patient_id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $patient = $result->fetch_assoc();
-            $stmt->close();
-
-        } catch (mysqli_sql_exception $exception) {
-            $conn->rollback();
-            $message = "<p style='color: red;'>Error updating patient: " . $exception->getMessage() . "</p>";
-        }
-    }
-}
+// -------------------------------------------------------------------------
+// FIX 1: Clean the path stored in the database/session by 
+//        removing the leading '../' if it exists.
+// -------------------------------------------------------------------------
+// Use a default path that is relative to the project root (no ../)
+$rawProfilePic = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
+// Use ltrim to safely remove the leading "../" if it exists.
+$profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic); 
+// Now $profilePic contains: 'assets/images/profile_pics/patient_2.png' or 'assets/images/default-avatar.png'
+// -------------------------------------------------------------------------
 ?>
 
 <!DOCTYPE html>
@@ -90,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $patient_id) {
             <a href="#">Admin Panel</a>
         </div>
         <div class="nav-right">
-            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" class="user-icon" id="profileToggle">
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon user-profile-pic" id="profileToggle">
         </div>
     </header>
 
@@ -157,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $patient_id) {
 
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="<?php echo $profile_pic_path; ?>" alt="Profile Picture" id="profileImageDisplay">
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="user-profile-pic">
             <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data" style="display: none;">
                 <input type="file" name="profile_pic" id="profilePicInput" accept="image/*">
             </form>
@@ -172,6 +140,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $patient_id) {
         </div>
     </div>
 
+    <script>
+        const BASE_URL = '/';
+    </script>
     <script src="../assets/js/profile-overlay.js"></script>
     <script src="../assets/js/admin-dashboard.js"></script>
 </body>
