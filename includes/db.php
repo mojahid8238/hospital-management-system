@@ -1,5 +1,5 @@
 <?php
-$servername = "localhost";
+$servername = "db";
 $username = "root"; // Replace with your database username
 $password = "root";     // Replace with your database password
 $dbname = "hospital_db";

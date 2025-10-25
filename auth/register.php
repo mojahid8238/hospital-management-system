@@ -166,46 +166,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $stmt_check_doctor->close();
             } elseif ($role === 'patient') {
-                // Check for existing patient's email and phone
-                $stmt_check_patient = $conn->prepare("SELECT id FROM patients WHERE email = ? OR phone = ?");
-                $stmt_check_patient->bind_param("ss", $email, $phone);
-                $stmt_check_patient->execute();
-                $stmt_check_patient->store_result();
-
-                if ($stmt_check_patient->num_rows > 0) {
-                    $error_message = "A patient with this email or phone number already exists.";
-                } else {
-                    // All checks passed, now insert the user and then the patient details
-                    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                    $stmt_user = $conn->prepare("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)");
-                    $stmt_user->bind_param("ssss", $username, $hashed_password, $role, $fullname);
-
-                    if ($stmt_user->execute()) {
-                        $user_id = $conn->insert_id;
-                        $stmt_pat = $conn->prepare("INSERT INTO patients (user_id, name, date_of_birth, gender, address, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                        $stmt_pat->bind_param("issssss", $user_id, $fullname, $date_of_birth, $gender, $address, $phone, $email);
-
-                        if (!$stmt_pat->execute()) {
-                            $error_message = "Error inserting patient details: " . $stmt_pat->error;
-                            // Rollback user creation
-                            $conn->query("DELETE FROM users WHERE id = $user_id");
-                        } else {
-                            $_SESSION['user_id'] = $user_id;
-                            $_SESSION['username'] = $username;
-                            $_SESSION['role'] = $role;
-                            $_SESSION['name'] = $fullname; // Set the name for the session
-                            $_SESSION['profile_pic'] = 'assets/images/default-avatar.png'; // Set a default profile pic
-                            header("Location: ../includes/homepage.php");
-                            exit();
-                        }
-                        $stmt_pat->close();
+                // Validate date of birth
+                $dob_valid = true;
+                if (!empty($date_of_birth)) {
+                    $d = DateTime::createFromFormat('Y-m-d', $date_of_birth);
+                    if (!$d || $d->format('Y-m-d') !== $date_of_birth) {
+                        $dob_valid = false;
+                        $error_message = "Invalid date of birth format. Please use YYYY-MM-DD.";
                     } else {
-                        $error_message = "Error creating user: " . $stmt_user->error;
+                        $year = (int)$d->format('Y');
+                        if ($year < 1900 || $year > date('Y')) {
+                            $dob_valid = false;
+                            $error_message = "Please enter a valid year for the date of birth.";
+                        }
                     }
-                    $stmt_user->close();
                 }
-                $stmt_check_patient->close();
-            }
+
+                                $stmt_check_patient = null; // Initialize to null
+                                if ($dob_valid) {
+                                    // Check for existing patient's email and phone
+                                    $stmt_check_patient = $conn->prepare("SELECT id FROM patients WHERE email = ? OR phone = ?");
+                                    $stmt_check_patient->bind_param("ss", $email, $phone);
+                                    $stmt_check_patient->execute();
+                                    $stmt_check_patient->store_result();
+                
+                                    if ($stmt_check_patient->num_rows > 0) {
+                                        $error_message = "A patient with this email or phone number already exists.";
+                                    } else {
+                                        // All checks passed, now insert the user and then the patient details
+                                        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                                        $stmt_user = $conn->prepare("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)");
+                                        $stmt_user->bind_param("ssss", $username, $hashed_password, $role, $fullname);
+                
+                                        if ($stmt_user->execute()) {
+                                            $user_id = $conn->insert_id;
+                                            $stmt_pat = $conn->prepare("INSERT INTO patients (user_id, name, date_of_birth, gender, address, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                                            $stmt_pat->bind_param("issssss", $user_id, $fullname, $date_of_birth, $gender, $address, $phone, $email);
+                
+                                            try {
+                                                if (!$stmt_pat->execute()) {
+                                                    $error_message = "Error inserting patient details: " . $stmt_pat->error;
+                                                    // Rollback user creation
+                                                    $conn->query("DELETE FROM users WHERE id = $user_id");
+                                                } else {
+                                                    $_SESSION['user_id'] = $user_id;
+                                                    $_SESSION['username'] = $username;
+                                                    $_SESSION['role'] = $role;
+                                                    $_SESSION['name'] = $fullname; // Set the name for the session
+                                                    $_SESSION['profile_pic'] = 'assets/images/default-avatar.png'; // Set a default profile pic
+                                                    header("Location: ../includes/homepage.php");
+                                                    exit();
+                                                }
+                                            } catch (mysqli_sql_exception $e) {
+                                                $error_message = "Error inserting patient details: " . $e->getMessage();
+                                                $conn->query("DELETE FROM users WHERE id = $user_id");
+                                            }
+                                            $stmt_pat->close();
+                                        } else {
+                                            $error_message = "Error creating user: " . $stmt_user->error;
+                                        }
+                                        $stmt_user->close();
+                                    }
+                                }
+                                if ($stmt_check_patient) { // Only close if it was prepared
+                                    $stmt_check_patient->close();
+                                }            }
 
         }
     }

@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role ENUM('admin', 'doctor', 'patient') NOT NULL,
+    name VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -18,11 +19,18 @@ CREATE TABLE IF NOT EXISTS admin (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
     profile_pic VARCHAR(255) DEFAULT 'assets/images/default-avatar.png',
+    image VARCHAR(255),
     status ENUM('pending', 'approved') NOT NULL DEFAULT 'pending',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-ALTER TABLE `admin` ADD COLUMN IF NOT EXISTS `email` VARCHAR(100) UNIQUE;
+
+-- Create specializations table
+CREATE TABLE IF NOT EXISTS specializations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
 
 -- Doctors Table (linked to users)
 CREATE TABLE IF NOT EXISTS doctors (
@@ -31,7 +39,13 @@ CREATE TABLE IF NOT EXISTS doctors (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE,
     profile_pic VARCHAR(255) DEFAULT 'assets/images/default-avatar.png',
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    schedule TIME,
+    image VARCHAR(255),
+    phone VARCHAR(20),
+    specialization_id INT,
+    degrees VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (specialization_id) REFERENCES specializations(id)
 );
 
 -- Patients Table (linked to users)
@@ -44,6 +58,9 @@ CREATE TABLE IF NOT EXISTS patients (
     address VARCHAR(255),
     email VARCHAR(100) UNIQUE,
     profile_pic VARCHAR(255) DEFAULT 'assets/images/default-avatar.png',
+    image VARCHAR(255),
+    username VARCHAR(255),
+    phone VARCHAR(20),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -56,27 +73,10 @@ CREATE TABLE IF NOT EXISTS appointments (
     reason TEXT,
     status ENUM('Pending', 'Scheduled', 'Completed', 'Cancelled', 'Online', 'Offline') DEFAULT 'Pending',
     type VARCHAR(20) NOT NULL DEFAULT 'Scheduled',
+    image VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
     FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
-);
-
--- Schema Updates
-ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `schedule` TIME;
-ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `image` VARCHAR(255);
-ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `phone` VARCHAR(20);
-ALTER TABLE `patients` ADD COLUMN IF NOT EXISTS `image` VARCHAR(255);
-ALTER TABLE `patients` ADD COLUMN IF NOT EXISTS `username` VARCHAR(255);
-ALTER TABLE `patients` ADD COLUMN IF NOT EXISTS `phone` VARCHAR(20);
-ALTER TABLE `appointments` ADD COLUMN IF NOT EXISTS `image` VARCHAR(255);
-ALTER TABLE `appointments` DROP COLUMN IF EXISTS `time`;
-ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `name` VARCHAR(255);
-ALTER TABLE `admin` ADD COLUMN IF NOT EXISTS `image` VARCHAR(255);
-
--- Create specializations table
-CREATE TABLE IF NOT EXISTS specializations (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- Populate specializations table
@@ -85,12 +85,6 @@ INSERT IGNORE INTO specializations (name) VALUES
 ('Psychiatry'), ('Radiology'), ('Urology'), ('Gastroenterology'), ('Endocrinology'),
 ('Nephrology'), ('Pulmonology'), ('Rheumatology'), ('Ophthalmology'), ('Otolaryngology (ENT)'),
 ('Gynecology'), ('Orthopedics');
-
--- Modify doctors table
-ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `specialization_id` INT;
-ALTER TABLE `doctors` ADD FOREIGN KEY IF NOT EXISTS (`specialization_id`) REFERENCES `specializations`(`id`);
-ALTER TABLE `doctors` DROP COLUMN IF EXISTS `specialization`;
-ALTER TABLE `doctors` ADD COLUMN IF NOT EXISTS `degrees` VARCHAR(255);
 
 -- Messaging Tables
 CREATE TABLE IF NOT EXISTS messages (
