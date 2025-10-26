@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 $page_title = 'Manage Admins';
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
@@ -21,15 +24,30 @@ $rawProfilePic = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
 $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic); 
 // Now $profilePic contains: 'assets/images/profile_pics/patient_2.png' or 'assets/images/default-avatar.png'
 // -------------------------------------------------------------------------
-?>
 
-<!DOCTYPE html>
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approve_admin'])) {
-    $admin_id_to_approve = $_POST['admin_id'];
-    $stmt = $conn->prepare("UPDATE admin SET status = 'approved' WHERE id = ?");
-    $stmt->bind_param("i", $admin_id_to_approve);
-    $stmt->execute();
-    $stmt->close();
+    // Check if it's an AJAX request
+    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+        $admin_id_to_approve = $_POST['admin_id'];
+
+        $stmt = $conn->prepare("UPDATE admin SET status = 'approved' WHERE id = ?");
+        if ($stmt === false) {
+            echo json_encode(['success' => false, 'message' => 'Prepare failed: ' . $conn->error]);
+            exit();
+        }
+        $stmt->bind_param("i", $admin_id_to_approve);
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Admin approved successfully.']);
+            exit();
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Execute failed: ' . $stmt->error]);
+            exit();
+        }
+        $stmt->close();
+    } else {
+        // Handle non-AJAX POST request if necessary, or redirect
+        // For now, we'll just let it fall through to the regular page load
+    }
 }
 
 // Handle cancellation
