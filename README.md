@@ -28,10 +28,9 @@ Follow these steps to get your Hospital Management System up and running.
 First, clone the project repository to your local machine:
 
 ```bash
-git clone https://github.com/your-username/hospital-management-system.git
+git clone https://github.com/mojahid8238/hospital-management-system.git
 cd hospital-management-system
 ```
-*(Note: Replace `https://github.com/your-username/hospital-management-system.git` with the actual repository URL if different.)*
 
 ### Build and Run Docker Containers
 
