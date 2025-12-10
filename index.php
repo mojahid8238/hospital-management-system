@@ -21,7 +21,7 @@ if (is_logged_in()) {
   <title>Hospital Management System</title>
    <link rel="stylesheet" href="assets/css/landing.css">
   
-</head>-
+</head>
 <body>
   <div class="floating-bg">
     <div class="floating-element"></div>
@@ -45,7 +45,7 @@ if (is_logged_in()) {
     <div class="buttons">
       <a href="auth/login.php">Login</a>
       <a href="auth/register.php">Register</a>
-      <a href="about.php">Learn More</a>
+      <a href="#">Learn More</a>
     </div>
   </div>
 </body>
