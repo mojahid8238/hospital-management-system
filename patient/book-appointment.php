@@ -94,10 +94,7 @@ if ($result) {
                             <li class="doctor-item" data-name="<?php echo strtolower($escaped_name); ?>" data-spec="<?php echo strtolower($escaped_spec); ?>">
                                 <div class="doctor-avatar">
                                     <?php if ($doctor_img_path !== null): ?>
-                                        <img src="<?php echo $doctor_img_path; ?>?t=<?php echo time(); ?>" 
-                                             alt="Dr. <?php echo $escaped_name; ?> Profile"
-                                             onerror="this.onerror=null; this.src='<?php echo $default_img_path; ?>';" class="user-profile-pic">
-                                    <?php else:
+                                       <img src="/<?php echo htmlspecialchars($profile_pic ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Doctor Profile Picture" class="user-profile-pic">                                   <?php else:
                                         // Fallback to Font Awesome icon if no custom image is set 
                                     ?><i class="fas fa-user-md"></i>
                                     <?php endif; ?>
