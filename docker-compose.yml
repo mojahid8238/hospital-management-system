@@ -35,8 +35,53 @@ services:
     networks:
       - app-network
 
+  # Jitsi Video Calling Services
+  prosody:
+    image: jitsi/prosody:stable
+    restart: always
+    networks:
+      - app-network
+    env_file:
+      - .env
+
+  jicofo:
+    image: jitsi/jicofo:stable
+    restart: always
+    depends_on:
+      - prosody
+    networks:
+      - app-network
+    env_file:
+      - .env
+
+  jvb:
+    image: jitsi/jvb:stable
+    restart: always
+    depends_on:
+      - prosody
+    ports:
+      - "10000:10000/udp"
+    networks:
+      - app-network
+    env_file:
+      - .env
+
+  jitsi:
+    image: jitsi/web:stable
+    restart: always
+    depends_on:
+      - prosody
+      - jicofo
+    ports:
+      - "8443:443"
+    networks:
+      - app-network
+    env_file:
+      - .env
+
 volumes:
   db_data:
+
 
 networks:
   app-network:
