@@ -12,11 +12,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         // Close overlay when clicking directly on the overlay background
-        profileOverlay.addEventListener('click', function(event) {
+        profileOverlay.addEventListener('click', function (event) {
             if (event.target === profileOverlay) {
                 profileOverlay.classList.remove('open');
             }
         });
+
+        const closeBtn = document.getElementById('closeProfile');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                profileOverlay.classList.remove('open');
+            });
+        }
     }
 
     // Close overlay when clicking on the main content area (if it exists)
@@ -37,58 +44,59 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     if (profileImageDisplay && profilePicInput) {
-        profileImageDisplay.addEventListener('click', function() {
+        profileImageDisplay.addEventListener('click', function () {
             profilePicInput.click();
         });
     }
 
     if (profilePicInput && profilePicUploadForm) {
-        profilePicInput.addEventListener('change', function() {
+        profilePicInput.addEventListener('change', function () {
             if (this.files && this.files[0]) {
                 const formData = new FormData(profilePicUploadForm);
                 fetch(profilePicUploadForm.action, {
                     method: 'POST',
                     body: formData
                 })
-                .then(response => response.json())
-                .then(data => {
-                                                                    if (data.success) {
-                                                                        const newImagePath = base_url + data.profile_pic_path + '?t=' + new Date().getTime();
-                                            
-                                                                        if(profileImageDisplay) {
-                                                                            profileImageDisplay.src = newImagePath;
-                                                                        }
-                                                                        // Also update the small icon in the header
-                                                                        if(profileToggle) {
-                                                                            profileToggle.src = newImagePath;
-                                                                        }
-                                            
-                                                                        // Update all other profile picture instances with the class 'user-profile-pic'
-                                                                        const allProfilePics = document.querySelectorAll('.user-profile-pic');
-                                                                        allProfilePics.forEach(img => {
-                                                                            img.src = newImagePath;
-                                                                        });
-                                            
-                                                                        if(uploadMessage) {                            uploadMessage.textContent = 'Profile picture updated successfully!';
-                            uploadMessage.style.color = 'green';
-                            setTimeout(() => {
-                                uploadMessage.textContent = '';
-                            }, 3000);
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const newImagePath = base_url + data.profile_pic_path + '?t=' + new Date().getTime();
+
+                            if (profileImageDisplay) {
+                                profileImageDisplay.src = newImagePath;
+                            }
+                            // Also update the small icon in the header
+                            if (profileToggle) {
+                                profileToggle.src = newImagePath;
+                            }
+
+                            // Update all other profile picture instances with the class 'user-profile-pic'
+                            const allProfilePics = document.querySelectorAll('.user-profile-pic');
+                            allProfilePics.forEach(img => {
+                                img.src = newImagePath;
+                            });
+
+                            if (uploadMessage) {
+                                uploadMessage.textContent = 'Profile picture updated successfully!';
+                                uploadMessage.style.color = 'green';
+                                setTimeout(() => {
+                                    uploadMessage.textContent = '';
+                                }, 3000);
+                            }
+                        } else {
+                            if (uploadMessage) {
+                                uploadMessage.textContent = data.message || 'Error uploading profile picture.';
+                                uploadMessage.style.color = 'red';
+                            }
                         }
-                    } else {
-                        if(uploadMessage) {
-                            uploadMessage.textContent = data.message || 'Error uploading profile picture.';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        if (uploadMessage) {
+                            uploadMessage.textContent = 'An error occurred during upload.';
                             uploadMessage.style.color = 'red';
                         }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    if(uploadMessage) {
-                        uploadMessage.textContent = 'An error occurred during upload.';
-                        uploadMessage.style.color = 'red';
-                    }
-                });
+                    });
             }
         });
     }

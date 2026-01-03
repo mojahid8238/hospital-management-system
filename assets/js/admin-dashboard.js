@@ -5,9 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     sidebarLinks.forEach(link => {
         link.addEventListener('click', function (event) {
-            event.preventDefault();
             const targetPage = this.getAttribute('data-target');
-            
+
+            if (!targetPage) return; // Allow normal link navigation if no data-target
+
+            event.preventDefault();
             fetch(targetPage)
                 .then(response => {
                     if (!response.ok) {
@@ -19,8 +21,35 @@ document.addEventListener('DOMContentLoaded', function () {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
                     const newContent = doc.querySelector('.content-area');
+
                     if (newContent) {
+                        // Handle padding if specified
+                        if (this.getAttribute('data-no-padding') === 'true') {
+                            mainContent.style.padding = '0';
+                        } else {
+                            mainContent.style.padding = ''; // Reset to CSS default
+                        }
+
                         mainContent.innerHTML = newContent.innerHTML;
+
+                        // Execute scripts found in the new content
+                        const scripts = newContent.querySelectorAll('script');
+                        scripts.forEach(oldScript => {
+                            const newScript = document.createElement('script');
+                            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                            if (oldScript.src) {
+                                newScript.src = oldScript.src;
+                            } else {
+                                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                            }
+                            document.body.appendChild(newScript);
+                            // Remove after execution if it's external to prevent duplicates, 
+                            // though browser usually handles this. Inline stays in body.
+                        });
+
+                        // Re-initialize sidebar active states
+                        sidebarLinks.forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
                     } else {
                         // If the specific content area isn't found, maybe the whole page is the content
                         const bodyContent = doc.body.innerHTML;
@@ -39,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Handle AJAX form submissions for admin actions within mainContent
-    mainContent.addEventListener('click', function(event) {
+    mainContent.addEventListener('click', function (event) {
         const target = event.target;
 
         // Handle Approve Admin button click
@@ -56,31 +85,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 body: `approve_admin=true&admin_id=${adminId}`
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    // Remove the row from the table
-                    const row = target.closest('tr');
-                    if (row) {
-                        row.remove();
-                    }
-                    // If no more pending admins, display a message
-                    const tbody = row.closest('tbody');
-                    if (tbody && !tbody.children.length) {
-                        const tableResponsive = tbody.closest('.table-responsive');
-                        if (tableResponsive) {
-                            tableResponsive.innerHTML = '<p>No pending admin requests.</p>';
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        // Remove the row from the table
+                        const row = target.closest('tr');
+                        if (row) {
+                            row.remove();
                         }
+                        // If no more pending admins, display a message
+                        const tbody = row.closest('tbody');
+                        if (tbody && !tbody.children.length) {
+                            const tableResponsive = tbody.closest('.table-responsive');
+                            if (tableResponsive) {
+                                tableResponsive.innerHTML = '<p>No pending admin requests.</p>';
+                            }
+                        }
+                    } else {
+                        alert('Error: ' + data.message);
                     }
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error approving admin:', error);
-                alert('An error occurred while approving the admin.');
-            });
+                })
+                .catch(error => {
+                    console.error('Error approving admin:', error);
+                    alert('An error occurred while approving the admin.');
+                });
         }
 
         // Handle Cancel Admin button click (similar AJAX logic can be added here if needed)

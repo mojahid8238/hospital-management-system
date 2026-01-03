@@ -48,37 +48,58 @@ if ($doctor_id) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cancelled Appointments</title>
+    <title>Cancelled Appointments | Hospital Management</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="../assets/css/variables.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/shared-table-design.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/view-appointments.css">
 </head>
 <body>
     <header class="navbar">
         <div class="nav-left">
-            <button class="sidebar-toggle-btn" id="sidebarToggle">☰ Toggle Menu</button>
-            <a href="#">Doctor Panel</a>
+            <button class="sidebar-toggle-btn" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+                <span>Menu</span>
+            </button>
+            <a href="dashboard.php">HealthCare</a>
         </div>
         <div class="nav-right">
-            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon user-profile-pic" id="profileToggle">
+            <div class="user-info">
+                <span>Dr. <?php echo htmlspecialchars($doctor_name); ?></span>
+            </div>
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile" class="user-icon" id="profileToggle">
         </div>
     </header>
 
     <div class="main-wrapper">
         <aside class="sidebar" id="doctorSidebar">
-            <h3>Doctor Options</h3>
+            <h3>Medical Menu</h3>
             <ul>
-                <li><a href="dashboard.php">View Your Appointments</a></li>
-                <li><a href="cancelled-appointments.php">Cancelled Appointments</a></li>
-                <li><a href="../messaging/messaging.php">Messages</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-calendar-check"></i> My Appointments</a></li>
+                <li><a href="cancelled-appointments.php" class="active"><i class="fas fa-calendar-times"></i> Cancelled</a></li>
+                <li><a href="../messaging/messaging.php"><i class="fas fa-comment-medical"></i> Consultations</a></li>
+            </ul>
+            <h3 style="margin-top: 32px;">Account</h3>
+            <ul>
+                <li><a href="#"><i class="fas fa-user-md"></i> My Profile</a></li>
+                <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </aside>
 
         <main class="content-area" id="mainContent">
-            <div class="container panel-card">
-                <h2 class="card-title mb-3">Welcome, <strong>Dr. <?php echo htmlspecialchars($doctor_name); ?> </h2>
-                <p></strong>Here are your cancelled appointments:</p>
+            <div class="welcome-section">
+                <h2>Cancelled Appointments</h2>
+                <p>History of revoked or declined medical consultations.</p>
+            </div>
 
+            <div class="container panel-card">
                 <div class="search-filter-container">
                     <div class="search-bar">
                         <i class="fas fa-search"></i>
@@ -87,76 +108,77 @@ if ($doctor_id) {
                 </div>
 
                 <?php if (empty($appointments)): ?>
-                    <div class="alert alert-info mt-4">You have no cancelled appointments.</div>
+                    <div class="alert alert-info mt-4" style="padding: 24px; background: var(--bg-color); border-radius: var(--radius-md); text-align: center;">
+                        <i class="fas fa-info-circle"></i> You have no cancelled appointments.
+                    </div>
                 <?php else: ?>
-                    <ul class="doctor-list" id="appointmentList">
+                    <div class="doctor-list" id="appointmentList">
                         <?php 
-                        $serial = 1;
                         foreach ($appointments as $appointment): 
-                            $appointment_time = new DateTime($appointment['appointment_date']);
-                            $now = new DateTime();
-                            $interval = $now->diff($appointment_time);
-                            $remaining_time = $interval->format('%a Days %h Hours %i Minutes');
+                            $date = date('M d, Y', strtotime($appointment['appointment_date']));
+                            $time = date('H:i', strtotime($appointment['appointment_date']));
                         ?>
-                            <li class="doctor-item" 
+                            <div class="doctor-list-item" 
                                 data-name="<?php echo strtolower(htmlspecialchars($appointment['patient_name'])); ?>" 
-                                data-status="<?php echo strtolower(htmlspecialchars($appointment['status'])); ?>"
                                 id="appointment-<?php echo $appointment['id']; ?>">
                                 <div class="doctor-avatar">
                                     <img src="../<?php echo htmlspecialchars($appointment['patient_profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" 
-                                        alt="<?php echo htmlspecialchars($appointment['patient_name']); ?>" 
-                                        class="rounded-circle user-profile-pic">
+                                        alt="Patient">
                                 </div>
-                                <div class="doctor-info">
+                                <div class="doctor-details">
                                     <h4><?php echo htmlspecialchars($appointment['patient_name']); ?></h4>
-                                    <p>Appointment: <?php echo date('Y-m-d H:i', strtotime($appointment['appointment_date'])); ?></p>
-                                    <p>Original Remaining: <?php echo $remaining_time; ?></p>
+                                    <p><i class="fas fa-notes-medical"></i> <?php echo htmlspecialchars($appointment['reason']); ?></p>
                                 </div>
                                 <div class="doctor-info">
-                                    <p>Reason: <?php echo htmlspecialchars($appointment['reason']); ?></p>
-                                    <p>Status: <span class="badge bg-<?php echo strtolower(htmlspecialchars($appointment['status'])); ?>"><?php echo htmlspecialchars(ucfirst($appointment['status'])); ?></span></p>
+                                    <p><strong><i class="far fa-calendar-alt"></i></strong> <?php echo $date; ?></p>
+                                    <p><strong><i class="far fa-clock"></i></strong> <?php echo $time; ?></p>
                                 </div>
-                                <div class="doctor-info">
-                                    <button class="btn btn-sm btn-outline-danger remove-appointment-btn" data-appointment-id="<?php echo $appointment['id']; ?>">Remove</button>
+                                <div class="button-group">
+                                    <button class="btn btn-outline-danger btn-sm remove-appointment-btn" data-appointment-id="<?php echo $appointment['id']; ?>">
+                                        <i class="fas fa-trash-alt"></i> Remove
+                                    </button>
                                 </div>
-                            </li>
+                            </div>
                         <?php endforeach; ?>
-                    </ul>
+                    </div>
                 <?php endif; ?>
             </div>
         </main>
     </div>
 
-    <!-- Profile side overlay -->
+    <!-- Profile Overlay -->
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="user-profile-pic" style="position: relative; z-index: 10; cursor: pointer;">
-            <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
-                <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
-                <button type="submit" style="display: none;">Upload</button>
-            </form>
-            <div id="uploadMessage" style="margin-top: 10px; color: green;"></div>
-            <h3><?php echo htmlspecialchars($_SESSION['name']); ?></h3>
+            <div class="profile-pic-wrapper" style="position: relative;">
+                <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-profile-pic">
+            </div>
+            <h3>Dr. <?php echo htmlspecialchars($doctor_name); ?></h3>
+            <p>Medical Practitioner</p>
             <hr>
             <ul>
-                <li><a href="dashboard.php">Doctor Dashboard</a></li>
-                <li><a href="#">Settings</a></li>
-                <li><a href="../auth/logout.php">Logout</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-th-large" style="margin-right: 12px;"></i> Dashboard</a></li>
+                <li><a href="#"><i class="fas fa-user-cog" style="margin-right: 12px;"></i> Account Settings</a></li>
+                <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt" style="margin-right: 12px;"></i> Logout</a></li>
             </ul>
+            <button class="close-btn" id="closeProfile">Close Panel</button>
         </div>
     </div>
 
-    <script>
-        const BASE_URL = '/';
-    </script>
-    <script src="../assets/js/profile-overlay.js"></script>
+    <script src="../assets/js/ui-ux.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            function fetchAndRenderCancelledAppointments() {
-                // Re-fetch the entire page content or just the appointment list
-                // For simplicity, we'll just reload the page for now.
-                // A more advanced solution would involve fetching JSON and re-rendering the list.
-                window.location.reload(); 
+            // Search functionality
+            const searchInput = document.getElementById('searchPatient');
+            const items = document.querySelectorAll('.doctor-list-item');
+
+            if(searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.toLowerCase();
+                    items.forEach(item => {
+                        const name = item.dataset.name;
+                        item.style.display = name.includes(query) ? 'grid' : 'none';
+                    });
+                });
             }
 
             document.querySelectorAll('.remove-appointment-btn').forEach(button => {
@@ -171,8 +193,7 @@ if ($doctor_id) {
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                alert(data.message);
-                                fetchAndRenderCancelledAppointments(); // Refresh the list
+                                document.getElementById('appointment-' + appointmentId).remove();
                             } else {
                                 alert('Failed to remove appointment: ' + data.message);
                             }
@@ -183,5 +204,6 @@ if ($doctor_id) {
             });
         });
     </script>
+    <script src="../assets/js/profile-overlay.js"></script>
 </body>
 </html>

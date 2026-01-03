@@ -5,12 +5,15 @@ redirect_if_not_patient();
 
 // Fetch doctors
 $doctors = [];
-$result = $conn->query("SELECT d.id, d.name, d.profile_pic, s.name as specialization FROM doctors d JOIN specializations s ON d.specialization_id = s.id ORDER BY d.name ASC");
+$result = $conn->query("SELECT d.id, d.name, d.profile_pic, s.name as specialization FROM doctors d LEFT JOIN specializations s ON d.specialization_id = s.id ORDER BY d.name ASC");
 if ($result) {
     while ($row = $result->fetch_assoc()) {
         $doctors[] = $row;
     }
 }
+
+$rawProfilePic = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
+$profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
 ?>
 
 <!DOCTYPE html>
@@ -18,123 +21,131 @@ if ($result) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Appointment</title>
+    <title>Book Appointment | Hospital Management</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="../assets/css/variables.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/shared-table-design.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/view-appointments.css">
-
 </head>
 <body>
     <header class="navbar">
         <div class="nav-left">
-            <button class="sidebar-toggle-btn" id="sidebarToggle">☰ Toggle Menu</button>
-            <a href="#">Patient Panel</a>
+            <button class="sidebar-toggle-btn" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+                <span>Menu</span>
+            </button>
+            <a href="dashboard.php">HealthCare</a>
         </div>
         <div class="nav-right">
-            <img src="/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon user-profile-pic" id="profileToggle">
+            <div class="user-info">
+                <span><?php echo htmlspecialchars($_SESSION['name']); ?></span>
+            </div>
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile" class="user-icon" id="profileToggle">
         </div>
     </header>
 
     <div class="main-wrapper">
         <aside class="sidebar" id="patientSidebar">
-            <h3>Patient Options</h3>
+            <h3>Patient Menu</h3>
             <ul>
-                <li><a href="book-appointment.php">Book New Appointment</a></li>
-                <li><a href="dashboard.php">Your Appointments & History</a></li>
-                <li><a href="cancelled-appointments.php">Cancelled Appointments</a></li>
-                <li><a href="../messaging/messaging.php">Messages</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                <li><a href="book-appointment.php" class="active"><i class="fas fa-calendar-plus"></i> Book Appointment</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-file-medical"></i> Medical History</a></li>
+                <li><a href="cancelled-appointments.php"><i class="fas fa-calendar-times"></i> Cancelled</a></li>
+                <li><a href="../messaging/messaging.php"><i class="fas fa-comments"></i> Messages</a></li>
             </ul>
         </aside>
 
         <main class="content-area" id="mainContent">
+            <div class="welcome-section">
+                <h2>Book Appointment</h2>
+                <p>Find the best specialists and schedule your consultation today.</p>
+            </div>
+
             <div class="container panel-card">
-                <h2>Book a New Appointment</h2>
                 <div class="search-filter-container">
                     <div class="search-bar">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="searchDoctor" placeholder="Search Doctor by name...">
-                    </div>
-                    <div class="filter-bar">
-                        <i class="fas fa-filter"></i>
-                        <select id="specializationFilter">
-                            <option value="">All Specializations</option>
-                            <?php
-                            $specializations_filter = [];
-                            $result_spec = $conn->query("SELECT id, name FROM specializations ORDER BY name ASC");
-                            if ($result_spec) {
-                                while ($row_spec = $result_spec->fetch_assoc()) {
-                                    $specializations_filter[] = $row_spec;
-                                }
-                            }
-                            foreach ($specializations_filter as $spec) {
-                                echo "<option value=\"" . htmlspecialchars($spec['name']) . "\">" . htmlspecialchars($spec['name']) . "</option>";
-                            }
-                            ?>
-                        </select>
+                        <input type="text" id="searchDoctor" placeholder="Search Doctor by name or specialization...">
                     </div>
                 </div>
 
-                <ul class="doctor-list" id="doctorList">
+                <div class="doctor-list" id="doctorList">
                     <?php if (empty($doctors)): ?>
-                        <p>No doctors available for booking at the moment.</p>
+                        <div class="alert alert-info" style="padding: 24px; text-align: center;">
+                            <i class="fas fa-user-md"></i> No doctors available at the moment.
+                        </div>
                     <?php else: ?>
                         <?php foreach ($doctors as $doctor):
-                            $escaped_name = htmlspecialchars($doctor['name']);
-                            $escaped_spec = htmlspecialchars($doctor['specialization']);
-                            $base_img_dir = '../assets/images/profile_pics/';
-                            $default_img_path = $base_img_dir . 'default-doctor.png';
-                            $profile_pic_db = $doctor['profile_pic'] ?? '';
-                            if (!empty($profile_pic_db) && $profile_pic_db !== 'default-avatar.png') {
-                                $filename = basename($profile_pic_db);
-                                $doctor_img_path = $base_img_dir . htmlspecialchars($filename);
-                            } else {
-                                $doctor_img_path = null; 
-                            }
+                            $dPic = preg_replace('#^\\.\\./#', '', $doctor['profile_pic'] ?? 'assets/images/default-avatar.png');
                         ?>
-                            <li class="doctor-item" data-name="<?php echo strtolower($escaped_name); ?>" data-spec="<?php echo strtolower($escaped_spec); ?>">
+                            <div class="doctor-list-item" data-name="<?php echo strtolower(htmlspecialchars($doctor['name'])); ?>" data-spec="<?php echo strtolower(htmlspecialchars($doctor['specialization'] ?? 'General Specialist')); ?>">
                                 <div class="doctor-avatar">
-                                    <?php if ($doctor_img_path !== null): ?>
-                                       <img src="/<?php echo htmlspecialchars($profile_pic ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Doctor Profile Picture" class="user-profile-pic">                                   <?php else:
-                                        // Fallback to Font Awesome icon if no custom image is set 
-                                    ?><i class="fas fa-user-md"></i>
-                                    <?php endif; ?>
+                                    <img src="../<?php echo htmlspecialchars($dPic); ?>?t=<?php echo time(); ?>" alt="Doctor">
+                                </div>
+                                <div class="doctor-details">
+                                    <h4>Dr. <?php echo htmlspecialchars($doctor['name']); ?></h4>
+                                    <p><i class="fas fa-stethoscope"></i> <?php echo htmlspecialchars($doctor['specialization'] ?? 'General Practitioner'); ?></p>
                                 </div>
                                 <div class="doctor-info">
-                                    <h4>Dr. <?php echo $escaped_name; ?></h4>
-                                    <p><?php echo $escaped_spec; ?></p>
+                                    <p><i class="fas fa-info-circle"></i> Highly rated specialist</p>
                                 </div>
-                                <a href="doctor-profile.php?id=<?php echo $doctor['id']; ?>" class="book-btn">Book Now</a>
-                            </li>
+                                <div class="button-group">
+                                    <a href="doctor-profile.php?id=<?php echo $doctor['id']; ?>" class="btn btn-primary">
+                                        <i class="fas fa-calendar-alt"></i> Book Now
+                                    </a>
+                                </div>
+                            </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
-                </ul>
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- Profile side overlay -->
+    <!-- Profile Overlay -->
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="user-profile-pic">
-            <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
-                <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
-                <button type="submit" style="display: none;">Upload</button>
-            </form>
-            <div id="uploadMessage" style="margin-top: 10px; color: green;"></div>
+            <div class="profile-pic-wrapper" style="position: relative;">
+                <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="profile-overlay-pic">
+            </div>
             <h3><?php echo htmlspecialchars($_SESSION['name']); ?></h3>
+            <p>Member Since 2024</p>
             <hr>
             <ul>
-                <li><a href="dashboard.php">Patient Dashboard</a></li>
-                <li><a href="../includes/homepage.php">Patient Homepage</a></li>
-                <li><a href="#">Settings</a></li>
-                <li><a href="../auth/logout.php">Logout</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-th-large" style="margin-right: 12px;"></i> Dashboard</a></li>
+                <li><a href="../includes/homepage.php"><i class="fas fa-home" style="margin-right: 12px;"></i> Homepage</a></li>
+                <li><a href="#"><i class="fas fa-cog" style="margin-right: 12px;"></i> Settings</a></li>
+                <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt" style="margin-right: 12px;"></i> Logout</a></li>
             </ul>
+            <button class="close-btn" id="closeProfile">Close Panel</button>
         </div>
     </div>
 
-    <script>
-        const BASE_URL = '/';
-    </script>
+    <script src="../assets/js/ui-ux.js"></script>
     <script src="../assets/js/profile-overlay.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchDoctor');
+            const items = document.querySelectorAll('.doctor-list-item');
+
+            if(searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.toLowerCase();
+                    items.forEach(item => {
+                        const name = item.dataset.name;
+                        const spec = item.dataset.spec;
+                        item.style.display = (name.includes(query) || spec.includes(query)) ? 'grid' : 'none';
+                    });
+                });
+            }
+        });
+    </script>
 </body>
 </html>

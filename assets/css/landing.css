@@ -1,13 +1,12 @@
-/* ===============================
-   Landing Page Specific Styling
-   =============================== */
-body {
-  background: linear-gradient(80deg, #4ec8b3, #c7fb8f);
-  margin: 0;
-  padding: 0;
-  position: relative;
-}
+@import url('variables.css');
 
+body {
+  background: radial-gradient(circle at top left, var(--primary-color), var(--primary-dark));
+  min-height: 100vh;
+  margin: 0;
+  color: #fff;
+  overflow-x: hidden;
+}
 
 .landing-container {
   position: relative;
@@ -15,27 +14,31 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 120px 20px;
+  padding: 40px 20px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
 }
 
 .landing-container h1 {
-  font-size: 3.2rem;
+  font-size: clamp(2rem, 8vw, 4rem);
   font-weight: 800;
-  margin-bottom: 20px;
-  color: #0b3d91;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  animation: slideUp 1s ease-out;
+  margin-bottom: 24px;
+  color: #ffffff;
+  max-width: 900px;
+  line-height: 1.1;
+  animation: slideUp 0.8s ease-out;
 }
 
 .landing-container p {
-  font-size: 1.25rem;
-  max-width: 650px;
-  margin-bottom: 30px;
-  line-height: 1.7;
-  color: #003366;
-  animation: fadeIn 1.5s ease-in;
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  max-width: 700px;
+  margin-bottom: 48px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  animation: fadeIn 1.2s ease-in;
 }
 
 .landing-container .buttons {
@@ -43,105 +46,41 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   gap: 20px;
-  animation: fadeIn 2s ease-in;
-  margin-top: 8%;
-
+  animation: fadeIn 1.5s ease-in;
 }
 
 .landing-container .buttons a {
   display: inline-block;
-  padding: 14px 30px;
-  background: #ffffff;
-  color: #0b3d91;
+  padding: 16px 36px;
+  background: var(--secondary-color);
+  color: var(--primary-dark);
   text-decoration: none;
-  font-weight: 600;
-  border-radius: 30px;
-  border: 2px solid #0b3d91;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  font-weight: 700;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .landing-container .buttons a:hover {
-  background: #0b3d91;
+  background: #ffffff;
+  color: var(--primary-color);
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+.landing-container .buttons a.secondary {
+  background: transparent;
   color: #ffffff;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(11, 61, 145, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
-/* ===============================
-   Animations
-   =============================== */
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.landing-container .buttons a.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes floatUp {
-  0% {
-    bottom: -100px;
-    opacity: 0.3;
-    transform: translateX(0);
-  }
-  50% {
-    opacity: 0.8;
-    transform: translateX(20px);
-  }
-  100% {
-    bottom: 110%;
-    opacity: 0.3;
-    transform: translateX(-10px);
-  }
-}
-
-@keyframes spinShape {
-  0% {
-    transform: rotate(45deg) scale(1);
-  }
-  50% {
-    transform: rotate(225deg) scale(1.2);
-  }
-  100% {
-    transform: rotate(405deg) scale(1);
-  }
-}
-
-@keyframes floatParticle {
-  0% {
-    transform: translateY(0) scale(1);
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 1;
-    transform: translateY(-400px) scale(1.2);
-  }
-  100% {
-    transform: translateY(-800px) scale(1);
-    opacity: 0.3;
-  }
-}
-
-/* ===============================
-   Floating Background Elements
-   =============================== */
-
+/* Floating Background Elements (Glassmorphism) */
 .floating-bg {
   position: absolute;
   top: 0;
@@ -153,137 +92,89 @@ body {
   pointer-events: none;
 }
 
-/* Slight dark overlay for visibility */
-.floating-bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.02);
-  z-index: -1;
-}
-
-/* Floating circles */
 .floating-element {
   position: absolute;
-  width: 50px;
-  height: 50px;
-  background: rgba(0, 123, 255, 0.3); /* soft blue */
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 50%;
-  backdrop-filter: blur(2px);
-  box-shadow: 0 0 12px rgba(0, 123, 255, 0.2);
-  animation: floatUp 12s infinite ease-in-out;
+  animation: float 15s infinite linear;
 }
 
-/* Random positions and delays */
-.floating-element:nth-child(1) {
+.shape-1 {
+  width: 300px;
+  height: 300px;
+  top: -100px;
+  left: -100px;
+  animation-duration: 20s;
+}
+
+.shape-2 {
+  width: 200px;
+  height: 200px;
+  bottom: 10%;
+  right: -50px;
+  animation-duration: 25s;
+}
+
+.shape-3 {
+  width: 150px;
+  height: 150px;
+  top: 40%;
   left: 10%;
-  animation-delay: 0s;
-  animation-duration: 10s;
+  animation-duration: 18s;
 }
 
-.floating-element:nth-child(2) {
-  left: 25%;
-  width: 60px;
-  height: 60px;
-  animation-delay: 3s;
-  animation-duration: 14s;
+@keyframes float {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  33% {
+    transform: translate(30px, 50px) rotate(10deg);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) rotate(-15deg);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
 }
 
-.floating-element:nth-child(3) {
-  left: 45%;
-  width: 50px;
-  height: 50px;
-  animation-delay: 6s;
-  animation-duration: 11s;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.floating-element:nth-child(4) {
-  left: 65%;
-  width: 40px;
-  height: 40px;
-  animation-delay: 2s;
-  animation-duration: 13s;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 100%;
+  }
 }
 
-.floating-element:nth-child(5) {
-  left: 80%;
-  width: 70px;
-  height: 70px;
-  animation-delay: 4s;
-  animation-duration: 15s;
-}
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+  .landing-container {
+    padding: 60px 20px;
+    justify-content: flex-start;
+  }
 
-.floating-element:nth-child(6) {
-  left: 90%;
-  width: 40px;
-  height: 40px;
-  animation-delay: 1s;
-  animation-duration: 9s;
-}
-
-/* Geometric rotating shapes */
-.geometric-shape {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  background: rgba(40, 167, 69, 0.2); /* soft green */
-  border: 2px solid rgba(40, 167, 69, 0.4);
-  transform: rotate(45deg);
-  animation: spinShape 20s linear infinite;
-  box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
-}
-
-.geometric-shape:nth-child(7) {
-  top: 20%;
-  left: 15%;
-}
-
-.geometric-shape:nth-child(8) {
-  top: 50%;
-  left: 70%;
-  width: 60px;
-  height: 60px;
-}
-
-.geometric-shape:nth-child(9) {
-  top: 75%;
-  left: 40%;
-  width: 100px;
-  height: 100px;
-}
-
-/* Tiny particle dots */
-.particle {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-  animation: floatParticle 18s ease-in-out infinite;
-}
-
-.particle:nth-child(10) {
-  left: 20%;
-  top: 90%;
-  animation-delay: 2s;
-}
-
-.particle:nth-child(11) {
-  left: 55%;
-  top: 95%;
-  animation-delay: 6s;
-}
-
-.particle:nth-child(12) {
-  left: 75%;
-  top: 85%;
-  animation-delay: 4s;
-}
-
-.particle:nth-child(13) {
-  left: 30%;
-  top: 92%;
-  animation-delay: 1s;
+  .landing-container .buttons {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
 }

@@ -23,8 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $schedule = $_POST['schedule'] ?? '';
     $phone = $_POST['phone'] ?? '';
     $email = $_POST['email'] ?? '';
-    $user_id = $_POST['user_id'] ?? null; // For editing existing doctor linked to a user
-    $doctor_id = $_POST['doctor_id'] ?? null; // For editing existing doctor
+    $doctor_id = $_POST['doctor_id'] ?? null;
 
     // Get specialization_id from name
     $specialization_id = null;
@@ -38,44 +37,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($name) || empty($specialization_id) || empty($degrees) || empty($schedule) || empty($phone) || empty($email)) {
-        $message = "<p style='color: red;'>All fields are required.</p>";
+        $message = "<div class='alert alert-danger'>All fields are required.</div>";
     } else {
         if ($doctor_id) {
-            // Update existing doctor
             $stmt = $conn->prepare("UPDATE doctors SET name = ?, specialization_id = ?, degrees = ?, schedule = ?, phone = ?, email = ? WHERE id = ?");
             $stmt->bind_param("sissssi", $name, $specialization_id, $degrees, $schedule, $phone, $email, $doctor_id);
             if ($stmt->execute()) {
-                $message = "<p style='color: green;'>Doctor updated successfully!</p>";
+                $message = "<div class='alert alert-success'>Doctor updated successfully!</div>";
             } else {
-                $message = "<p style='color: red;'>Error updating doctor: " . $stmt->error . "</p>";
+                $message = "<div class='alert alert-danger'>Error updating doctor.</div>";
             }
             $stmt->close();
         } else {
-            // Add new doctor - first create a user account for the doctor
-            $username = strtolower(str_replace(' ', '', $name)) . rand(100, 999); // Generate unique username
-            $password = password_hash("password123", PASSWORD_DEFAULT); // Default password
+            // New Doctor Creation Logic (Simplified for brevity as current code has it)
+            // ... (keeping user and doctor creation logic)
+            $username = strtolower(str_replace(' ', '', $name)) . rand(100, 999);
+            $password = password_hash("password123", PASSWORD_DEFAULT);
             $role = 'doctor';
 
             $stmt_user = $conn->prepare("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)");
             $stmt_user->bind_param("ssss", $username, $password, $role, $name);
-
             if ($stmt_user->execute()) {
                 $new_user_id = $stmt_user->insert_id;
-                $stmt_user->close();
-
                 $stmt_doctor = $conn->prepare("INSERT INTO doctors (user_id, name, specialization_id, degrees, schedule, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)");
                 $stmt_doctor->bind_param("isissss", $new_user_id, $name, $specialization_id, $degrees, $schedule, $phone, $email);
-
                 if ($stmt_doctor->execute()) {
-                    $message = "<p style='color: green;'>Doctor added successfully with username: <strong>{$username}</strong> and default password: <strong>password123</strong></p>";
+                    $message = "<div class='alert alert-success'>Doctor added! Username: $username</div>";
                 } else {
-                    $message = "<p style='color: red;'>Error adding doctor: " . $stmt_doctor->error . "</p>";
-                    // Rollback user creation if doctor creation fails
-                    $conn->query("DELETE FROM users WHERE id = {$new_user_id}");
+                    $conn->query("DELETE FROM users WHERE id = $new_user_id");
+                    $message = "<div class='alert alert-danger'>Error adding doctor.</div>";
                 }
-                $stmt_doctor->close();
-            } else {
-                $message = "<p style='color: red;'>Error creating user for doctor: " . $stmt_user->error . "</p>";
             }
         }
     }
@@ -83,157 +74,166 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Handle Delete Doctor
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
-    $doctor_id_to_delete = $_GET['id'];
+    $doctor_id = $_GET['id'];
+    $stmt = $conn->prepare("SELECT user_id FROM doctors WHERE id = ?");
+    $stmt->bind_param("i", $doctor_id);
+    $stmt->execute();
+    $stmt->bind_result($user_id);
+    $stmt->fetch();
+    $stmt->close();
 
-    // Get user_id associated with the doctor to delete from users table as well
-    $stmt_get_user_id = $conn->prepare("SELECT user_id FROM doctors WHERE id = ?");
-    $stmt_get_user_id->bind_param("i", $doctor_id_to_delete);
-    $stmt_get_user_id->execute();
-    $stmt_get_user_id->bind_result($user_id_to_delete);
-    $stmt_get_user_id->fetch();
-    $stmt_get_user_id->close();
-
-    if ($user_id_to_delete) {
+    if ($user_id) {
         $conn->begin_transaction();
         try {
-            // Delete doctor
-            $stmt_doctor = $conn->prepare("DELETE FROM doctors WHERE id = ?");
-            $stmt_doctor->bind_param("i", $doctor_id_to_delete);
-            $stmt_doctor->execute();
-            $stmt_doctor->close();
-
-            // Delete associated user
-            $stmt_user = $conn->prepare("DELETE FROM users WHERE id = ?");
-            $stmt_user->bind_param("i", $user_id_to_delete);
-            $stmt_user->execute();
-            $stmt_user->close();
-
+            $conn->query("DELETE FROM doctors WHERE id = $doctor_id");
+            $conn->query("DELETE FROM users WHERE id = $user_id");
             $conn->commit();
-            $message = "<p style='color: green;'>Doctor and associated user deleted successfully!</p>";
-        } catch (mysqli_sql_exception $exception) {
+            $message = "<div class='alert alert-success'>Doctor deleted successfully!</div>";
+        } catch (Exception $e) {
             $conn->rollback();
-            $message = "<p style='color: red;'>Error deleting doctor: " . $exception->getMessage() . "</p>";
+            $message = "<div class='alert alert-danger'>Error deleting doctor.</div>";
         }
-    } else {
-        $message = "<p style='color: red;'>Doctor not found.</p>";
     }
 }
 
 // Fetch all doctors
 $doctors = [];
-$result = $conn->query("SELECT d.id, d.name, s.name as specialization, d.degrees, d.schedule, d.phone, d.email, u.username, d.profile_pic FROM doctors d JOIN users u ON d.user_id = u.id JOIN specializations s ON d.specialization_id = s.id");
+$result = $conn->query("SELECT d.*, s.name as spec_name, u.username FROM doctors d JOIN users u ON d.user_id = u.id JOIN specializations s ON d.specialization_id = s.id ORDER BY d.id DESC");
 if ($result) {
     while ($row = $result->fetch_assoc()) {
         $doctors[] = $row;
     }
 }
+
+$rawProfilePic = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
+$profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic); 
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="../assets/css/style.css"> 
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="../assets/css/variables.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/shared-table-design.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    
- <header class="navbar">
+    <header class="navbar">
         <div class="nav-left">
-        <button class="sidebar-toggle-btn" id="sidebarToggle">☰ Toggle Menu</button>
-
-        <a href="#">Admin Panel</a>          
+            <button class="sidebar-toggle-btn" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+                <span>Menu</span>
+            </button>
+            <a href="dashboard.php">HealthCare Admin</a>
         </div>
         <div class="nav-right">
-                            <img src="<?php echo $profile_pic_path; ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-icon user-profile-pic" id="profileToggle">        </div>
+            <div class="user-info">
+                <span><?php echo htmlspecialchars($_SESSION['name'] ?? 'Administrator'); ?></span>
+            </div>
+            <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile" class="user-icon" id="profileToggle">
+        </div>
     </header>
 
     <div class="main-wrapper">
         <aside class="sidebar" id="adminSidebar">
-            <h3>Admin Options</h3>
+            <h3>System Management</h3>
             <ul>
-                <li><a href="manage-admins.php" class="sidebar-link" data-target="manage-admins.php">Manage Admins</a></li>
-                <li><a href="manage-doctors.php" class="sidebar-link" data-target="manage-doctors.php">Manage Doctors</a></li>
-                <li><a href="manage-patients.php" class="sidebar-link" data-target="manage-patients.php">Manage Patients</a></li>
-                <li><a href="reports.php" class="sidebar-link" data-target="reports.php">View Reports</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="manage-admins.php" class="sidebar-link" data-target="manage-admins.php"><i class="fas fa-user-shield"></i> Admins</a></li>
+                <li><a href="manage-doctors.php" class="active sidebar-link" data-target="manage-doctors.php"><i class="fas fa-user-md"></i> Doctors</a></li>
+                <li><a href="manage-patients.php" class="sidebar-link" data-target="manage-patients.php"><i class="fas fa-user-injured"></i> Patients</a></li>
+                <li><a href="../messaging/messaging.php"><i class="fas fa-comment-medical"></i> Consultations</a></li>
             </ul>
         </aside>
 
         <main class="content-area" id="mainContent">
             <div class="container">
-                <h2>Manage Doctors</h2>
+                <div class="welcome-section">
+                    <h2>Manage Doctors</h2>
+                    <p>Register new medical professionals and manage active practitioners.</p>
+                </div>
+
                 <?php echo $message; ?>
 
-               
-
-                <h3>Existing Doctors</h3>
-                <?php if (empty($doctors)): ?>
-                    <p>No doctors found.</p>
-                <?php else: ?>
+                <div class="panel-card mt-4">
+                    <h3 class="section-title mb-4">Practitioner Directory</h3>
+                    
+                    <?php if (empty($doctors)): ?>
+                        <div class="alert alert-info">No doctors found in the database.</div>
+                    <?php else: ?>
                         <div class="table-responsive">
-                            <table>
+                            <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Picture</th>
-                                        <th>Name</th>
+                                        <th>Doctor</th>
                                         <th>Specialization</th>
-                                        <th>Degrees</th>
                                         <th>Schedule</th>
-                                        <th>Phone</th>
-                                        <th>Email</th>
-                                        <th>Username</th>
+                                        <th>Contact</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($doctors as $doctor): ?>
+                                    <?php foreach ($doctors as $doctor): 
+                                        $dPic = preg_replace('#^\\.\\./#', '', $doctor['profile_pic'] ?? 'assets/images/default-avatar.png');
+                                    ?>
                                         <tr>
-                                            <td><?php echo $doctor['id']; ?></td>
-                                            <td><img src="/<?php echo htmlspecialchars($doctor['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Pic" class="user-profile-pic" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"></td>
-                                            <td><?php echo $doctor['name']; ?></td>
-                                            <td><?php echo $doctor['specialization']; ?></td>
-                                            <td><?php echo $doctor['degrees']; ?></td>
-                                            <td><?php echo $doctor['schedule']; ?></td>
-                                            <td><?php echo $doctor['phone']; ?></td>
-                                            <td><?php echo $doctor['email']; ?></td>
-                                            <td><?php echo $doctor['username']; ?></td>
-                                            <td class="action-links">
-                                                <a href="edit-doctor.php?id=<?php echo $doctor['id']; ?>">Edit</a> |
-                                                <a href="manage-doctors.php?action=delete&id=<?php echo $doctor['id']; ?>" onclick="return confirm('Are you sure you want to delete this doctor and their associated user account?');">Delete</a>
+                                            <td>
+                                                <div style="display: flex; align-items: center; gap: 12px;">
+                                                    <img src="../<?php echo htmlspecialchars($dPic); ?>?t=<?php echo time(); ?>" alt="Doctor" class="user-icon">
+                                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                                         <strong style="color: var(--text-main);">Dr. <?php echo htmlspecialchars($doctor['name'] ?? ''); ?></strong>
+                                                        <small class="text-muted" style="font-weight: 600;"><?php echo htmlspecialchars($doctor['degrees'] ?? 'N/A'); ?></small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                 <span class="badge bg-primary"><?php echo htmlspecialchars($doctor['spec_name'] ?? 'General'); ?></span>
+                                            </td>
+                                            <td>
+                                                 <small><i class="far fa-clock"></i> <?php echo htmlspecialchars($doctor['schedule'] ?? 'Not set'); ?></small>
+                                            </td>
+                                            <td>
+                                                <small><?php echo htmlspecialchars($doctor['email'] ?? ''); ?></small><br>
+                                                <small><?php echo htmlspecialchars($doctor['phone'] ?? ''); ?></small>
+                                            </td>
+                                            <td>
+                                                <div class="button-group">
+                                                    <a href="edit-doctor.php?id=<?php echo $doctor['id']; ?>" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                                                    <a href="manage-doctors.php?action=delete&id=<?php echo $doctor['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this doctor?');"><i class="fas fa-trash"></i></a>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
-                        </div>                <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </main>
     </div>
 
+    <!-- Profile Overlay -->
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
-            <img src="<?php echo $profile_pic_path; ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="user-profile-pic">
-           
-            <!-- Hidden form and input for file selection -->
-            <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data" style="display: none;">
-                <input type="file" name="profile_pic" id="profilePicInput" accept="image/*">
-            </form>
-            <!-- Upload message container -->
-            <div id="uploadMessage" style="font-size: 0.95rem; text-align: center; margin-top: 5px;"></div>
-            
+            <div class="profile-pic-wrapper" style="position: relative;">
+                <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="profile-overlay-pic">
+            </div>
             <h3><?php echo htmlspecialchars($_SESSION['name'] ?? 'Admin'); ?></h3>
             <hr>
             <ul>
-                <li><a href="dashboard.php">Admin Dashboard</a></li>
-                <li><a href="#">Settings</a></li>
+                <li><a href="dashboard.php">Dashboard</a></li>
                 <li><a href="../auth/logout.php">Logout</a></li>
             </ul>
+            <button class="close-btn" id="closeProfile">Close Panel</button>
         </div>
     </div>
 
     <script src="../assets/js/profile-overlay.js"></script>
     <script src="../assets/js/admin-dashboard.js"></script>
+    <script src="../assets/js/ui-ux.js"></script>
 </body>
 </html>

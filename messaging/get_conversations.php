@@ -8,6 +8,7 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $user_id = $_SESSION['user_id'];
+    $user_role = $_SESSION['role'];
 
     $stmt = $conn->prepare("
         SELECT 
@@ -15,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             c.appointment_id, 
             other_user.id as other_participant_id,
             other_user.name as other_participant_name,
+            other_user.role as other_participant_role,
             CASE
                 WHEN other_user.role = 'admin' THEN admin.profile_pic
                 WHEN other_user.role = 'doctor' THEN doctor.profile_pic
@@ -40,6 +42,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     $conversations = [];
     while ($row = $result->fetch_assoc()) {
+        // If current user is NOT admin and other participant IS admin
+        // Only show conversation if admin has sent at least one message
+        if ($user_role !== 'admin' && $row['other_participant_role'] === 'admin') {
+            // Check if admin has sent any messages in this conversation
+            $check_stmt = $conn->prepare("
+                SELECT COUNT(*) as admin_message_count 
+                FROM messages 
+                WHERE conversation_id = ? AND sender_id = ?
+            ");
+            $check_stmt->bind_param("ii", $row['conversation_id'], $row['other_participant_id']);
+            $check_stmt->execute();
+            $check_result = $check_stmt->get_result();
+            $check_row = $check_result->fetch_assoc();
+            $check_stmt->close();
+            
+            // Skip this conversation if admin hasn't sent any messages
+            if ($check_row['admin_message_count'] == 0) {
+                continue;
+            }
+        }
+        
         $conversations[] = $row;
     }
 

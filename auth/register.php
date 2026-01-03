@@ -268,19 +268,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
   <div class="floating-bg">
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="geometric-shape"></div>
-    <div class="geometric-shape"></div>
-    <div class="geometric-shape"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
+    <div class="floating-element" style="width: 200px; height: 200px; top: -50px; left: -50px;"></div>
+    <div class="floating-element" style="width: 150px; height: 150px; bottom: 10%; right: -30px;"></div>
   </div>
 
   <div class="form-container">
