@@ -79,7 +79,7 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
               <a href="<?php echo $dashUrl; ?>" class="hub-card">
                   <div class="panel-card">
                       <div class="icon-holder bg-success-light">
-                          <i class="fas fa-th-large text-success" style="font-size: 2.25rem;"></i>
+                          <i class="fas fa-chart-line text-success" style="font-size: 2.25rem;"></i>
                       </div>
                       <h3 style="font-size: 1.5rem; margin-bottom: 12px; font-weight: 700;">Control Panel</h3>
                       <p class="text-muted" style="line-height: 1.6; margin-bottom: 24px;">Manage appointments, view detailed health metrics, and organize your medical profile.</p>
@@ -191,7 +191,7 @@ $role = $_SESSION['role'] ?? 'Guest'; // Derive role from session
       <hr style="margin: 24px 0;">
       <ul>
         <li><a href="../patient/profile.php" style="padding: 12px; border-radius: var(--radius-md);"><i class="fas fa-user-circle"></i> My Profile</a></li>        
-        <li><a href="<?php echo $dashUrl; ?>" style="padding: 12px; border-radius: var(--radius-md);"><i class="fas fa-th-large"></i> Dashboard</a></li>
+        <li><a href="<?php echo $dashUrl; ?>" style="padding: 12px; border-radius: var(--radius-md);"><i class="fas fa-chart-line"></i> Dashboard</a></li>
         <li><a href="../auth/logout.php" class="logout-btn" style="color: var(--error); padding: 12px; border-radius: var(--radius-md);"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
       </ul>
       <button class="close-btn" id="closeProfile">Close Panel</button>

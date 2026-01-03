@@ -97,11 +97,6 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
                 <li><a href="cancelled-appointments.php"><i class="fas fa-calendar-times"></i> Cancelled</a></li>
                 <li><a href="../messaging/messaging.php"><i class="fas fa-comment-medical"></i> Consultations</a></li>
             </ul>
-            <h3 style="margin-top: 32px;">Account</h3>
-            <ul>
-                <li><a href="#"><i class="fas fa-user-md"></i> My Profile</a></li>
-                <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
         </aside>
 
         <main class="content-area" id="mainContent">
@@ -184,7 +179,7 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
             
             <hr>
             <ul>
-                <li><a href="dashboard.php"><i class="fas fa-th-large" style="margin-right: 12px;"></i> Dashboard</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-chart-line" style="margin-right: 12px;"></i> Dashboard</a></li>
                 <li><a href="#"><i class="fas fa-user-cog" style="margin-right: 12px;"></i> Account Settings</a></li>
                 <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt" style="margin-right: 12px;"></i> Logout</a></li>
             </ul>

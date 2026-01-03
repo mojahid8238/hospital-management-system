@@ -69,9 +69,8 @@ if ($patient_id) {
         <aside class="sidebar" id="patientSidebar">
             <h3>Patient Menu</h3>
             <ul>
-                <li><a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                 <li><a href="book-appointment.php"><i class="fas fa-calendar-plus"></i> Book Appointment</a></li>
-                <li><a href="dashboard.php"><i class="fas fa-file-medical"></i> Medical History</a></li>
                 <li><a href="cancelled-appointments.php" class="active"><i class="fas fa-calendar-times"></i> Cancelled</a></li>
                 <li><a href="../messaging/messaging.php"><i class="fas fa-comments"></i> Messages</a></li>
             </ul>
@@ -134,13 +133,22 @@ if ($patient_id) {
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
             <div class="profile-pic-wrapper" style="position: relative;">
-                <img src="/<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-profile-pic">
+                <img src="../<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="profile-overlay-pic">
+                <label for="profilePicInput" style="position: absolute; bottom: 30px; right: 10px; background: var(--primary-color); color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid #fff;">
+                    <i class="fas fa-camera"></i>
+                </label>
             </div>
             <h3><?php echo htmlspecialchars($patient_name); ?></h3>
             <p>Member Since 2024</p>
+            
+            <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
+                <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
+            </form>
+            <div id="uploadMessage"></div>
+            
             <hr>
             <ul>
-                <li><a href="dashboard.php"><i class="fas fa-th-large" style="margin-right: 12px;"></i> Dashboard</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-chart-line" style="margin-right: 12px;"></i> Dashboard</a></li>
                 <li><a href="../includes/homepage.php"><i class="fas fa-home" style="margin-right: 12px;"></i> Homepage</a></li>
                 <li><a href="#"><i class="fas fa-cog" style="margin-right: 12px;"></i> Settings</a></li>
                 <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt" style="margin-right: 12px;"></i> Logout</a></li>

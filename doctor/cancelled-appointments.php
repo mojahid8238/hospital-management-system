@@ -81,15 +81,9 @@ if ($doctor_id) {
         <aside class="sidebar" id="doctorSidebar">
             <h3>Medical Menu</h3>
             <ul>
-                <li><a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a></li>
-                <li><a href="dashboard.php"><i class="fas fa-calendar-check"></i> My Appointments</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                 <li><a href="cancelled-appointments.php" class="active"><i class="fas fa-calendar-times"></i> Cancelled</a></li>
                 <li><a href="../messaging/messaging.php"><i class="fas fa-comment-medical"></i> Consultations</a></li>
-            </ul>
-            <h3 style="margin-top: 32px;">Account</h3>
-            <ul>
-                <li><a href="#"><i class="fas fa-user-md"></i> My Profile</a></li>
-                <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </aside>
 
@@ -150,13 +144,22 @@ if ($doctor_id) {
     <div class="profile-overlay" id="profileOverlay">
         <div class="profile-content">
             <div class="profile-pic-wrapper" style="position: relative;">
-                <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="user-profile-pic">
+                <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="profile-overlay-pic">
+                <label for="profilePicInput" style="position: absolute; bottom: 30px; right: 10px; background: var(--primary-color); color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid #fff;">
+                    <i class="fas fa-camera"></i>
+                </label>
             </div>
             <h3>Dr. <?php echo htmlspecialchars($doctor_name); ?></h3>
             <p>Medical Practitioner</p>
+            
+            <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
+                <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
+            </form>
+            <div id="uploadMessage"></div>
+            
             <hr>
             <ul>
-                <li><a href="dashboard.php"><i class="fas fa-th-large" style="margin-right: 12px;"></i> Dashboard</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-chart-line" style="margin-right: 12px;"></i> Dashboard</a></li>
                 <li><a href="#"><i class="fas fa-user-cog" style="margin-right: 12px;"></i> Account Settings</a></li>
                 <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt" style="margin-right: 12px;"></i> Logout</a></li>
             </ul>

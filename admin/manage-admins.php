@@ -131,10 +131,6 @@ $stmt->close();
                 <li><a href="manage-patients.php" class="sidebar-link" data-target="manage-patients.php"><i class="fas fa-user-injured"></i> Patients</a></li>
                 <li><a href="../messaging/messaging.php"><i class="fas fa-comment-medical"></i> Consultations</a></li>
             </ul>
-            <h3 style="margin-top: 32px;">Account</h3>
-            <ul>
-                <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
         </aside>
 
         <main class="content-area" id="mainContent">
@@ -215,7 +211,7 @@ $stmt->close();
             
             <hr>
             <ul>
-                <li><a href="dashboard.php"><i class="fas fa-th-large" style="margin-right: 12px;"></i> Dashboard</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-chart-line" style="margin-right: 12px;"></i> Dashboard</a></li>
                 <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt" style="margin-right: 12px;"></i> Logout</a></li>
             </ul>
             <button class="close-btn" id="closeProfile">Close Panel</button>

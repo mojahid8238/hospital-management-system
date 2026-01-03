@@ -134,7 +134,7 @@ $total_appointments = $conn->query("SELECT COUNT(*) FROM appointments")->fetch_r
             
             <hr>
             <ul>
-                <li><a href="dashboard.php"><i class="fas fa-th-large" style="margin-right: 12px;"></i> Dashboard</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-chart-line" style="margin-right: 12px;"></i> Dashboard</a></li>
                 <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt" style="margin-right: 12px;"></i> Logout</a></li>
             </ul>
             <button class="close-btn" id="closeProfile">Close Panel</button>

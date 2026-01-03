@@ -54,9 +54,8 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
         <aside class="sidebar" id="patientSidebar">
             <h3>Patient Menu</h3>
             <ul>
-                <li><a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                 <li><a href="book-appointment.php" class="active"><i class="fas fa-calendar-plus"></i> Book Appointment</a></li>
-                <li><a href="dashboard.php"><i class="fas fa-file-medical"></i> Medical History</a></li>
                 <li><a href="cancelled-appointments.php"><i class="fas fa-calendar-times"></i> Cancelled</a></li>
                 <li><a href="../messaging/messaging.php"><i class="fas fa-comments"></i> Messages</a></li>
             </ul>
@@ -119,7 +118,7 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
             <p>Member Since 2024</p>
             <hr>
             <ul>
-                <li><a href="dashboard.php"><i class="fas fa-th-large" style="margin-right: 12px;"></i> Dashboard</a></li>
+                <li><a href="dashboard.php"><i class="fas fa-chart-line" style="margin-right: 12px;"></i> Dashboard</a></li>
                 <li><a href="../includes/homepage.php"><i class="fas fa-home" style="margin-right: 12px;"></i> Homepage</a></li>
                 <li><a href="#"><i class="fas fa-cog" style="margin-right: 12px;"></i> Settings</a></li>
                 <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt" style="margin-right: 12px;"></i> Logout</a></li>

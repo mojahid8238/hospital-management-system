@@ -9,7 +9,6 @@ function initMessaging() {
     const imagePreviewContainer = document.getElementById('imagePreviewContainer');
     const imagePreview = document.getElementById('imagePreview');
     const clearImagePreviewBtn = document.getElementById('clearImagePreview');
-    const directoryToggle = document.getElementById('directoryToggle');
     const convSearch = document.getElementById('convSearch');
 
     if (!conversationsList) return; // Not on messaging page
@@ -17,58 +16,46 @@ function initMessaging() {
     let activeConversationId = null;
     let activeReceiverId = null;
     let activeReceiverProfilePic = null;
-    let viewMode = window.userRole === 'admin' ? 'directory' : 'conversations';
 
     const currentUserId = window.currentUserId;
     const otherParticipantUserId = window.otherParticipantUserId;
     const initialAppointmentId = window.initialAppointmentId;
 
-    // Handle Directory Toggle
-    if (directoryToggle) {
-        directoryToggle.addEventListener('click', () => {
-            if (viewMode === 'conversations') {
-                viewMode = 'directory';
-                directoryToggle.innerHTML = '<i class="fas fa-comments"></i> Chats';
-                convSearch.placeholder = 'Search users...';
-                fetchDirectory();
-            } else {
-                viewMode = 'conversations';
-                directoryToggle.innerHTML = '<i class="fas fa-address-book"></i> Directory';
-                convSearch.placeholder = 'Search conversations...';
-                fetchConversations();
-            }
-        });
+    if (otherParticipantUserId) {
+        activeReceiverId = otherParticipantUserId;
+        chatHeader.innerHTML = `<h3>Chat with ${window.otherParticipantName || 'User ID: ' + otherParticipantUserId}</h3>`;
+        chatMessages.innerHTML = '<div class="alert alert-info">Start a new conversation.</div>';
     }
 
     function fetchConversations(selectInitial = false) {
-        if (viewMode !== 'conversations') return;
-        fetch('../messaging/get_conversations.php')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    renderConversations(data.conversations, selectInitial);
-                }
-            });
+        // Admins see all users, others see only their conversations
+        if (window.userRole === 'admin') {
+            fetch('../messaging/get_all_users.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderAllUsers(data.users, selectInitial);
+                    }
+                });
+        } else {
+            fetch('../messaging/get_conversations.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderConversations(data.conversations, selectInitial);
+                    }
+                });
+        }
     }
 
-    function fetchDirectory() {
-        if (viewMode !== 'directory') return;
-        fetch('../messaging/get_all_users.php')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    renderDirectory(data.users);
-                }
-            });
-    }
-
-    function renderDirectory(users) {
+    function renderAllUsers(users, selectInitial) {
         conversationsList.innerHTML = '';
         users.forEach(user => {
             const div = document.createElement('div');
             div.className = 'conversation-item';
             div.dataset.userId = user.user_id;
 
+            const profilePic = user.profile_pic ? `../${user.profile_pic.replace(/^\//, '')}` : '../assets/images/default-avatar.png';
             const isAdmin = user.role === 'admin';
             const badgeHtml = isAdmin ? '<span style="background: var(--gradient-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 700; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Admin</span>' : '';
 
@@ -82,7 +69,7 @@ function initMessaging() {
 
             div.addEventListener('click', () => {
                 activeReceiverId = user.user_id;
-                activeConversationId = null; // Reset to check for existence or create new
+                activeConversationId = null;
 
                 chatHeader.innerHTML = `
                     <div class="active-chat-user">
@@ -280,7 +267,7 @@ function initMessaging() {
                         activeConversationId = data.conversation_id;
                     }
                     fetchMessages(activeConversationId);
-                    if (viewMode === 'conversations') fetchConversations();
+                    fetchConversations();
                 }
             });
     }
@@ -326,11 +313,7 @@ function initMessaging() {
         });
     }
 
-    if (viewMode === 'directory') {
-        fetchDirectory();
-    } else {
-        fetchConversations(true);
-    }
+    fetchConversations(true);
 
     const refreshInterval = setInterval(() => {
         if (!document.getElementById('conversationItems')) {
@@ -340,7 +323,7 @@ function initMessaging() {
         if (activeConversationId) {
             fetchMessages(activeConversationId);
         }
-        if (viewMode === 'conversations') fetchConversations();
+        fetchConversations();
     }, 5000);
 }
 

@@ -153,10 +153,6 @@ if ($role === 'doctor') {
                 </ul>
             <?php endif; ?>
             
-            <h3 style="margin-top: 32px;">Account</h3>
-            <ul>
-                <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
         </aside>
 
         <main class="content-area" style="padding: 0; flex: 1; height: calc(100vh - var(--header-height)); overflow: hidden; display: flex; flex-direction: column;">
@@ -164,17 +160,10 @@ if ($role === 'doctor') {
                 <div class="messaging-container" style="flex: 1; min-height: 0;">
                     <aside class="conversations-sidebar">
                         <div class="sidebar-header">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                                <h3 style="margin: 0;"><?php echo $role === 'admin' ? 'Messages' : 'Recent Chats'; ?></h3>
-                                <?php if ($role === 'admin'): ?>
-                                <button id="directoryToggle" class="btn btn-sm" style="background: var(--bg-hover); border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.8rem; font-weight: 600; padding: 6px 12px; display: flex; align-items: center; gap: 6px;">
-                                    <i class="fas fa-address-book"></i> Directory
-                                </button>
-                                <?php endif; ?>
-                            </div>
+                            <h3><?php echo $role === 'admin' ? 'All Users' : 'Recent Chats'; ?></h3>
                             <div class="search-box">
                                 <i class="fas fa-search"></i>
-                                <input type="text" id="convSearch" placeholder="Search conversations...">
+                                <input type="text" id="convSearch" placeholder="<?php echo $role === 'admin' ? 'Search users...' : 'Search conversations...'; ?>">
                             </div>
                         </div>
                         <div class="conversations-list" id="conversationItems">
@@ -251,7 +240,7 @@ if ($role === 'doctor') {
             <hr style="margin: 24px 0;">
             <ul>
                 <li><a href="../patient/profile.php" style="padding: 12px; border-radius: var(--radius-md);"><i class="fas fa-user-circle"></i> My Profile</a></li>        
-                <li><a href="<?php echo $dashboard_link; ?>" style="padding: 12px; border-radius: var(--radius-md);"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                <li><a href="<?php echo $dashboard_link; ?>" style="padding: 12px; border-radius: var(--radius-md);"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                 <li><a href="../auth/logout.php" class="logout-btn" style="color: var(--error); padding: 12px; border-radius: var(--radius-md);"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
             <button class="close-btn" id="closeProfile">Close Panel</button>

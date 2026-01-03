@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             // though browser usually handles this. Inline stays in body.
                         });
 
-                        // Re-initialize sidebar active states
-                        sidebarLinks.forEach(l => l.classList.remove('active'));
+                        // Re-initialize sidebar active states - remove from ALL links
+                        document.querySelectorAll('.sidebar a').forEach(l => l.classList.remove('active'));
                         this.classList.add('active');
                     } else {
                         // If the specific content area isn't found, maybe the whole page is the content
@@ -116,6 +116,22 @@ document.addEventListener('DOMContentLoaded', function () {
         if (target.tagName === 'BUTTON' && target.name === 'cancel_admin') {
             // For now, keep the default behavior with confirm dialog
             // If you want to convert this to AJAX, you'd add similar fetch logic here
+        }
+    });
+
+    // Set initial active state based on current page
+    const currentPage = window.location.pathname.split('/').pop();
+    const allSidebarLinks = document.querySelectorAll('.sidebar a');
+
+    allSidebarLinks.forEach(link => {
+        const linkHref = link.getAttribute('href');
+        const linkTarget = link.getAttribute('data-target');
+
+        // Check if this is the current page
+        if (linkHref === currentPage || linkTarget === currentPage) {
+            link.classList.add('active');
+        } else if (currentPage === 'dashboard.php' && linkHref === 'dashboard.php') {
+            link.classList.add('active');
         }
     });
 });
