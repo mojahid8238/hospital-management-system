@@ -181,7 +181,7 @@ $dPic = preg_replace('#^\\.\\./#', '', $profile_pic ?? 'assets/images/default-av
                 <div class="panel-card">
                     <div class="profile-summary">
                         <div class="large-avatar">
-                            <img src="../<?php echo htmlspecialchars($dPic); ?>?t=<?php echo time(); ?>" alt="Doctor Profile Picture">
+                            <img src="../<?php echo htmlspecialchars($dPic); ?>?t=<?php echo time(); ?>" alt="Doctor Profile">
                         </div>
                         <div class="profile-header">
                             <h3 class="mb-2">Dr. <?php echo htmlspecialchars($name); ?></h3>

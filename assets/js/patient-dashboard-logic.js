@@ -139,12 +139,39 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (activeRecordsCount) activeRecordsCount.innerText = activeRecords;
                 if (nextVisitDate) {
                     if (soonestVisit) {
-                        nextVisitDate.innerText = soonestVisit.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-                        nextVisitDate.style.fontSize = '2.5rem';
+                        const datePart = soonestVisit.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                        const timePart = soonestVisit.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false });
+                        nextVisitDate.innerText = `${datePart}, ${timePart}`;
+                        nextVisitDate.style.fontSize = '1.5rem'; // Keep consistent font size
                     } else {
                         nextVisitDate.innerText = 'No upcoming';
                         nextVisitDate.style.fontSize = '1.5rem';
                     }
+                }
+
+                // Show/hide sections based on data
+                const confirmedSection = document.getElementById('confirmedAppointmentsSection');
+                const pendingSection = document.getElementById('pendingAppointmentsSection');
+                const historySection = document.getElementById('medicalHistorySection');
+                const panelCard = document.querySelector('.container.panel-card');
+
+                const hasUpcoming = upcomingAppointmentList.children.length > 0;
+                const hasPending = pendingAppointmentList.children.length > 0;
+                const hasHistory = medicalHistoryTableBody.children.length > 0;
+
+                confirmedSection.style.display = hasUpcoming ? 'block' : 'none';
+                pendingSection.style.display = hasPending ? 'block' : 'none';
+                historySection.style.display = hasHistory ? 'block' : 'none';
+
+                // Check if any filters are active
+                const isFiltering = universalSearchInput.value !== '' || 
+                                    universalStatusFilter.value !== 'all' || 
+                                    universalSortBy.value !== 'appointment_date_asc';
+
+                if (!hasUpcoming && !hasPending && !hasHistory && !isFiltering) {
+                    panelCard.style.display = 'none';
+                } else {
+                    panelCard.style.display = 'block';
                 }
 
                 addEventListenersToButtons();

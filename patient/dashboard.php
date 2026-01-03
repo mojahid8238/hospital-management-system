@@ -119,8 +119,8 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
                 </div>
                 <div class="stat-card">
                     <h4>Next Appointment</h4>
-                    <div class="value" id="nextVisitDate" style="<?php echo $next_app_date ? 'font-size: 1.5rem;' : 'font-size: 1.2rem;'; ?> line-height: 1.2;">
-                        <?php echo $next_app_date ? date('M d, H:i', strtotime($next_app_date)) : 'No upcoming'; ?>
+                    <div class="value" id="nextVisitDate" style="font-size: 1.5rem; line-height: 1.2;">
+                        <?php echo $next_app_date ? date('M d, h:i A', strtotime($next_app_date)) : 'No upcoming'; ?>
                     </div>
                     <p style="font-size: 0.85rem; color: var(--primary-color); margin-top: 8px;"><i class="fas fa-calendar-day"></i> Stay prepared</p>
                 </div>
@@ -134,10 +134,7 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
                     </div>
                     <div class="filter-bar">
                         <select id="universalStatusFilter">
-                            <option value="all">All Statuses</option>
-                            <option value="pending">Pending</option>
-                            <option value="scheduled">Scheduled</option>
-                            <option value="completed">Completed</option>
+                            <option value="all">All Types</option>
                             <option value="online">Online</option>
                             <option value="offline">Offline</option>
                         </select>
@@ -149,17 +146,17 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
                     </div>
                 </div>
 
-                <div class="appointments-section mb-5" id="confirmedAppointmentsSection">
+                <div class="appointments-section mb-5" id="confirmedAppointmentsSection" style="display: none;">
                     <h4 class="section-title mb-4"><i class="fas fa-calendar-check text-primary"></i> Confirmed Appointments</h4>
                     <ul class="doctor-list" id="upcomingAppointmentList"></ul>
                 </div>
 
-                <div class="appointments-section mb-5" id="pendingAppointmentsSection">
+                <div class="appointments-section mb-5" id="pendingAppointmentsSection" style="display: none;">
                     <h4 class="section-title mb-4"><i class="fas fa-clock text-warning"></i> Pending Requests</h4>
                     <ul class="doctor-list" id="pendingAppointmentList"></ul>
                 </div>
 
-                <div class="medical-history-section" id="medicalHistorySection">
+                <div class="medical-history-section" id="medicalHistorySection" style="display: none;">
                     <h4 class="section-title mb-4"><i class="fas fa-history text-info"></i> Medical History</h4>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">

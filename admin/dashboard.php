@@ -65,7 +65,7 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
                 <li><a href="manage-admins.php" class="sidebar-link" data-target="manage-admins.php"><i class="fas fa-user-shield"></i> Admins</a></li>
                 <li><a href="manage-doctors.php" class="sidebar-link" data-target="manage-doctors.php"><i class="fas fa-user-md"></i> Doctors</a></li>
                 <li><a href="manage-patients.php" class="sidebar-link" data-target="manage-patients.php"><i class="fas fa-user-injured"></i> Patients</a></li>
-                <li><a href="../messaging/messaging.php"><i class="fas fa-comment-medical"></i> Consultations</a></li>
+                <li><a href="../messaging/messaging.php"><i class="fas fa-comments"></i> Messages</a></li>
             </ul>
         </aside>
 

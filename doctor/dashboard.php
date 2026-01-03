@@ -6,6 +6,7 @@ require_once '../includes/auth.php';
 redirect_if_not_doctor(); // Assumes this function checks for session and redirects if not a doctor
 
 $doctor_id = null;
+$next_app_date = null;
 $doctor_name = 'Doctor User'; // Default value
 
 // --- START: Added PHP Logic to initialize Doctor's name and profile pic ---
@@ -44,6 +45,14 @@ if (isset($_SESSION['user_id'])) {
         $stmt->bind_param("i", $doctor_id);
         $stmt->execute();
         $stmt->bind_result($completed_today);
+        $stmt->fetch();
+        $stmt->close();
+
+        // 4. Next Appointment
+        $stmt = $conn->prepare("SELECT appointment_date FROM appointments WHERE doctor_id = ? AND status = 'Scheduled' AND appointment_date > NOW() ORDER BY appointment_date ASC LIMIT 1");
+        $stmt->bind_param("i", $doctor_id);
+        $stmt->execute();
+        $stmt->bind_result($next_app_date);
         $stmt->fetch();
         $stmt->close();
     }
@@ -95,7 +104,7 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
             <ul>
                 <li><a href="dashboard.php" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                 <li><a href="cancelled-appointments.php"><i class="fas fa-calendar-times"></i> Cancelled</a></li>
-                <li><a href="../messaging/messaging.php"><i class="fas fa-comment-medical"></i> Consultations</a></li>
+                <li><a href="../messaging/messaging.php"><i class="fas fa-comments"></i> Messages</a></li>
             </ul>
         </aside>
 
@@ -121,6 +130,13 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
                     <div class="value" id="completedAppointmentsCount"><?php echo $completed_today ?? 0; ?></div>
                     <p style="font-size: 0.85rem; color: var(--info); margin-top: 8px;"><i class="fas fa-check-circle"></i> Good progress</p>
                 </div>
+                <div class="stat-card">
+                    <h4>Next Appointment</h4>
+                    <div class="value" id="nextVisitDate" style="<?php echo $next_app_date ? 'font-size: 1.5rem;' : 'font-size: 1.2rem;'; ?> line-height: 1.2;">
+                        <?php echo $next_app_date ? date('M d, H:i', strtotime($next_app_date)) : 'No upcoming'; ?>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--primary-color); margin-top: 8px;"><i class="fas fa-calendar-day"></i> Stay prepared</p>
+                </div>
             </div>
 
             <div class="container panel-card">
@@ -136,23 +152,21 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
                             <option value="Online">Online</option>
                             <option value="Offline">Offline</option>
                         </select>
-                        <select id="statusFilter">
-                            <option value="upcoming">Upcoming</option>
-                            <option value="pending">Pending</option>
-                            <option value="scheduled">Scheduled</option>
-                            <option value="completed">Completed</option>
-                            <option value="all">All Statuses</option>
+                        <select id="SortBy">
+                            <option value="appointment_date_asc">Date (Asc)</option>
+                            <option value="appointment_date_desc">Date (Desc)</option>
+                            <option value="patient_name_asc">Patient (A-Z)</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="appointments-section" id="appointmentsContainer">
-                    <div class="appointment-card-wrapper mb-5" id="pendingAppointmentsCard">
+                    <div class="appointment-card-wrapper mb-5" id="pendingAppointmentsCard" style="display: none;">
                         <h4 class="section-title mb-4"><i class="fas fa-clock text-warning"></i> Pending Requests</h4>
                         <div id="pendingAppointmentList"></div>
                     </div>
 
-                    <div class="appointment-card-wrapper" id="confirmedAppointmentsCard">
+                    <div class="appointment-card-wrapper" id="confirmedAppointmentsCard" style="display: none;">
                         <h4 class="section-title mb-4"><i class="fas fa-calendar-check text-primary"></i> Confirmed Schedule</h4>
                         <div id="confirmedAppointmentList"></div>
                     </div>

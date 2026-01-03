@@ -26,8 +26,7 @@ if ($doctor_id) {
     $order = isset($_GET['order']) && in_array(strtoupper($_GET['order']), ['ASC', 'DESC']) ? strtoupper($_GET['order']) : 'ASC';
 
     // Filtering parameters
-    $filter_status = isset($_GET['status']) ? $_GET['status'] : 'upcoming'; // 'upcoming' is a custom status for default view
-    $filter_type = isset($_GET['type']) ? $_GET['type'] : 'all';
+    $filter_type_value = isset($_GET['status']) ? $_GET['status'] : 'all'; // 'status' parameter from JS now controls type
     $search_term = isset($_GET['search']) ? $_GET['search'] : '';
 
     $sql = "SELECT a.id, p.id as patient_id, p.user_id as patient_user_id, p.name as patient_name, p.profile_pic as patient_profile_pic, a.appointment_date, a.reason, a.status, a.type FROM appointments a JOIN patients p ON a.patient_id = p.id WHERE a.doctor_id = ?";
@@ -35,20 +34,15 @@ if ($doctor_id) {
     $params = [$doctor_id];
     $types = "i";
 
-    if ($filter_status === 'upcoming') {
-        $sql .= " AND a.appointment_date > NOW() AND a.status != 'Cancelled'";
-    } elseif ($filter_status !== 'all') {
-        $sql .= " AND a.status = ?";
-        $params[] = $filter_status;
+    if ($filter_type_value !== 'all') {
+        $sql .= " AND a.type = ?"; // Filter by type (Online/Offline)
+        $params[] = $filter_type_value;
         $types .= "s";
     }
 
-    if ($filter_type !== 'all') {
-        $sql .= " AND a.type = ?";
-        $params[] = $filter_type;
-        $types .= "s";
-    }
-
+    // Default behavior: show all non-cancelled appointments
+    $sql .= " AND a.status != 'Cancelled'";
+    
     if (!empty($search_term)) {
         $sql .= " AND p.name LIKE ?";
         $params[] = "%".$search_term."%";

@@ -2,8 +2,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const pendingAppointmentList = document.getElementById('pendingAppointmentList');
     const confirmedAppointmentList = document.getElementById('confirmedAppointmentList');
     const searchPatientInput = document.getElementById('searchPatient');
-    const typeFilterSelect = document.getElementById('typeFilter');
-    const statusFilterSelect = document.getElementById('statusFilter');
+    const typeFilterSelect = document.getElementById('typeFilter'); // This is now the sole filter for type
+    const SortBy = document.getElementById('SortBy'); // New sort dropdown
 
     // Stats Elements
     const totalAppointmentsCount = document.getElementById('totalAppointmentsCount');
@@ -12,10 +12,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function fetchAndRenderAppointments() {
         const searchQuery = searchPatientInput ? searchPatientInput.value.toLowerCase() : '';
-        const typeFilter = typeFilterSelect ? typeFilterSelect.value : 'all';
-        const statusFilter = statusFilterSelect ? statusFilterSelect.value : 'upcoming';
+        // typeFilterSelect now provides the 'type' filter (all, Online, Offline)
+        const typeFilterValue = typeFilterSelect ? typeFilterSelect.value : 'all'; 
+        
+        // Handle sorting
+        const sortValue = SortBy ? SortBy.value : 'appointment_date_asc';
+        const lastIndex = sortValue.lastIndexOf('_');
+        const sortBy = sortValue.substring(0, lastIndex);
+        const order = sortValue.substring(lastIndex + 1);
 
-        fetch(`../doctor/get_appointments.php?search=${searchQuery}&type=${typeFilter}&status=${statusFilter}`)
+        fetch(`../doctor/get_appointments.php?search=${searchQuery}&status=${typeFilterValue}&sort_by=${sortBy}&order=${order}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -88,9 +94,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     `;
 
-                    if (appointment.status === 'Pending') {
+                    if (appointment.status.toLowerCase() === 'pending') {
                         pendingAppointmentList.appendChild(listItem);
-                    } else if (appointment.status === 'Scheduled') {
+                    } else if (appointment.status.toLowerCase() === 'scheduled') {
                         confirmedAppointmentList.appendChild(listItem);
                     }
                 });
@@ -99,6 +105,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (totalAppointmentsCount) totalAppointmentsCount.innerText = total;
                 if (pendingAppointmentsCount) pendingAppointmentsCount.innerText = pending;
                 if (completedAppointmentsCount) completedAppointmentsCount.innerText = completed;
+                // Show/hide sections based on data
+                const pendingCard = document.getElementById('pendingAppointmentsCard');
+                const confirmedCard = document.getElementById('confirmedAppointmentsCard');
+                const panelCard = document.querySelector('.container.panel-card');
+
+                const hasPending = pendingAppointmentList.children.length > 0;
+                const hasConfirmed = confirmedAppointmentList.children.length > 0;
+
+                pendingCard.style.display = hasPending ? 'block' : 'none';
+                confirmedCard.style.display = hasConfirmed ? 'block' : 'none';
+
+                // Check if any filters are active
+                const isFiltering = searchPatientInput.value !== '' || 
+                                    typeFilterSelect.value !== 'all' || // Now type filter
+                                    SortBy.value !== 'appointment_date_asc'; // New sort filter
+
+                if (!hasPending && !hasConfirmed && !isFiltering) {
+                    panelCard.style.display = 'none';
+                } else {
+                    panelCard.style.display = 'block';
+                }
 
                 addEventListenersToButtons();
             })
@@ -170,8 +197,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (searchPatientInput) searchPatientInput.addEventListener('input', fetchAndRenderAppointments);
-    if (typeFilterSelect) typeFilterSelect.addEventListener('change', fetchAndRenderAppointments);
-    if (statusFilterSelect) statusFilterSelect.addEventListener('change', fetchAndRenderAppointments);
+    if (typeFilterSelect) typeFilterSelect.addEventListener('change', fetchAndRenderAppointments); // Re-added typeFilterSelect event listener
+    if (SortBy) SortBy.addEventListener('change', fetchAndRenderAppointments); // New sort event listener
 
     fetchAndRenderAppointments();
     setInterval(fetchAndRenderAppointments, 10000); // Polling every 10s

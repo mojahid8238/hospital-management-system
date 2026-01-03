@@ -134,14 +134,14 @@ if ($role === 'doctor') {
                     <li><a href="../admin/manage-admins.php"><i class="fas fa-user-shield"></i> Admins</a></li>
                     <li><a href="../admin/manage-doctors.php"><i class="fas fa-user-md"></i> Doctors</a></li>
                     <li><a href="../admin/manage-patients.php"><i class="fas fa-user-injured"></i> Patients</a></li>
-                    <li><a href="messaging.php" class="active"><i class="fas fa-comment-medical"></i> Consultations</a></li>
+                    <li><a href="messaging.php" class="active"><i class="fas fa-comments"></i> Messages</a></li>
                 </ul>
             <?php elseif ($role === 'doctor'): ?>
                 <h3>Medical Menu</h3>
                 <ul>
                     <li><a href="../doctor/dashboard.php"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                     <li><a href="../doctor/cancelled-appointments.php"><i class="fas fa-calendar-times"></i> Cancelled</a></li>
-                    <li><a href="messaging.php" class="active"><i class="fas fa-comment-medical"></i> Consultations</a></li>
+                    <li><a href="messaging.php" class="active"><i class="fas fa-comments"></i> Messages</a></li>
                 </ul>
             <?php elseif ($role === 'patient'): ?>
                 <h3>Patient Menu</h3>
@@ -184,7 +184,7 @@ if ($role === 'doctor') {
                                 <div class="icon-circle">
                                     <i class="fas fa-comment-medical"></i>
                                 </div>
-                                <h2>Your Secure Consultations</h2>
+                                <h2>Your Secure Messages</h2>
                                 <p>End-to-end encrypted messaging with your medical specialists.</p>
                             </div>
                         </div>
