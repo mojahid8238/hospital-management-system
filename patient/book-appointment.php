@@ -56,6 +56,7 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
             <ul>
                 <li><a href="dashboard.php"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                 <li><a href="book-appointment.php" class="active"><i class="fas fa-calendar-plus"></i> Book Appointment</a></li>
+                <li><a href="prescriptions.php"><i class="fas fa-file-prescription"></i> Prescriptions</a></li>
                 <li><a href="cancelled-appointments.php"><i class="fas fa-calendar-times"></i> Cancelled</a></li>
                 <li><a href="../messaging/messaging.php"><i class="fas fa-comments"></i> Messages</a></li>
             </ul>

@@ -148,6 +148,7 @@ if ($role === 'doctor') {
                 <ul>
                     <li><a href="../patient/dashboard.php"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                     <li><a href="../patient/book-appointment.php"><i class="fas fa-calendar-plus"></i> Book Appointment</a></li>
+                    <li><a href="../patient/prescriptions.php"><i class="fas fa-file-prescription"></i> Prescriptions</a></li>
                     <li><a href="../patient/cancelled-appointments.php"><i class="fas fa-calendar-times"></i> Cancelled</a></li>
                     <li><a href="messaging.php" class="active"><i class="fas fa-comments"></i> Messages</a></li>
                 </ul>

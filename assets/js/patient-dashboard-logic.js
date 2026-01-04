@@ -164,9 +164,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 historySection.style.display = hasHistory ? 'block' : 'none';
 
                 // Check if any filters are active
-                const isFiltering = universalSearchInput.value !== '' || 
-                                    universalStatusFilter.value !== 'all' || 
-                                    universalSortBy.value !== 'appointment_date_asc';
+                const isFiltering = universalSearchInput.value !== '' ||
+                    universalStatusFilter.value !== 'all' ||
+                    universalSortBy.value !== 'appointment_date_asc';
 
                 if (!hasUpcoming && !hasPending && !hasHistory && !isFiltering) {
                     panelCard.style.display = 'none';
@@ -180,6 +180,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error fetching patient data:', error);
             });
     }
+
+
 
     function addEventListenersToButtons() {
         document.querySelectorAll('.cancel-btn').forEach(button => {
@@ -212,10 +214,75 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function checkActiveCall() {
+        fetch('../patient/check_active_call.php')
+            .then(response => response.json())
+            .then(data => {
+                const existingNotification = document.getElementById('video-call-notification');
+                if (data.active) {
+                    if (!existingNotification) {
+                        const notification = document.createElement('div');
+                        notification.id = 'video-call-notification';
+                        notification.style.cssText = `
+                            position: fixed;
+                            bottom: 20px;
+                            right: 20px;
+                            background: var(--primary-color);
+                            color: white;
+                            padding: 20px;
+                            border-radius: 12px;
+                            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                            z-index: 9999;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 10px;
+                            animation: slideIn 0.5s ease;
+                        `;
+                        notification.innerHTML = `
+                            <div style="font-weight: 700; font-size: 1.1rem;">
+                                <i class="fas fa-video"></i> Video Call Started
+                            </div>
+                            <div style="font-size: 0.9rem;">
+                                Dr. ${data.doctor_name} is waiting for you.
+                            </div>
+                            <button class="btn btn-light btn-sm" id="join-call-btn" style="background: white; color: var(--primary-color); border: none; font-weight: 600;">
+                                Join Now
+                            </button>
+                        `;
+                        document.body.appendChild(notification);
+
+                        document.getElementById('join-call-btn').addEventListener('click', () => {
+                            window.open(`../video_call.php?room=${data.room_name}&appointment_id=${data.appointment_id}`, '_blank');
+                            notification.remove();
+                        });
+                    }
+                } else {
+                    if (existingNotification) {
+                        existingNotification.remove();
+                    }
+                }
+            })
+            .catch(error => console.error('Error checking active call:', error));
+    }
+
+    // Add CSS for animation if not exists
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+
     if (universalSearchInput) universalSearchInput.addEventListener('input', fetchAndRenderPatientData);
     if (universalStatusFilter) universalStatusFilter.addEventListener('change', fetchAndRenderPatientData);
     if (universalSortBy) universalSortBy.addEventListener('change', fetchAndRenderPatientData);
 
     fetchAndRenderPatientData();
     setInterval(fetchAndRenderPatientData, 10000);
+
+    // Check for active calls every 5 seconds
+    checkActiveCall();
+    setInterval(checkActiveCall, 5000);
 });

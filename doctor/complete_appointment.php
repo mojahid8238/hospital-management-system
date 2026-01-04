@@ -60,15 +60,17 @@ if (!$doctor_id) {
     exit();
 }
 
-// Check if the appointment exists, belongs to the doctor, and is in 'Online' or 'Offline' status
+// Check if the appointment exists and belongs to the doctor
 $stmt = $conn->prepare("SELECT status FROM appointments WHERE id = ? AND doctor_id = ?");
 $stmt->bind_param("ii", $appointment_id, $doctor_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($row = $result->fetch_assoc()) {
-    if ($row['status'] !== 'Online' && $row['status'] !== 'Offline') {
-        $response['message'] = 'Only accepted appointments (Online/Offline) can be marked as completed.';
+    // Basic verification, we allow Scheduled, Online, or Offline to be marked as Completed
+    $allowed_statuses = ['Scheduled', 'Online', 'Offline'];
+    if (!in_array($row['status'], $allowed_statuses)) {
+        $response['message'] = 'Only scheduled or online/offline appointments can be marked as completed. Current status: ' . $row['status'];
         echo json_encode($response);
         exit();
     }
@@ -84,6 +86,12 @@ $stmt->bind_param("ii", $appointment_id, $doctor_id);
 
 if ($stmt->execute()) {
     if ($stmt->affected_rows > 0) {
+        // Also update any active video call for this appointment
+        $update_call = $conn->prepare("UPDATE video_calls SET status = 'completed', end_time = NOW() WHERE appointment_id = ? AND status = 'in_progress'");
+        $update_call->bind_param("i", $appointment_id);
+        $update_call->execute();
+        $update_call->close();
+
         $response['success'] = true;
         $response['message'] = 'Appointment marked as completed successfully.';
     } else {

@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function fetchAndRenderAppointments() {
         const searchQuery = searchPatientInput ? searchPatientInput.value.toLowerCase() : '';
         // typeFilterSelect now provides the 'type' filter (all, Online, Offline)
-        const typeFilterValue = typeFilterSelect ? typeFilterSelect.value : 'all'; 
-        
+        const typeFilterValue = typeFilterSelect ? typeFilterSelect.value : 'all';
+
         // Handle sorting
         const sortValue = SortBy ? SortBy.value : 'appointment_date_asc';
         const lastIndex = sortValue.lastIndexOf('_');
@@ -83,6 +83,9 @@ document.addEventListener('DOMContentLoaded', function () {
                             ` : ''}
                             ${appointment.status === 'Scheduled' ? `
                                 <button class="btn btn-success btn-sm complete-btn" data-appointment-id="${appointment.id}"><i class="fas fa-check-double"></i> Done</button>
+                                ${appointment.type === 'Online' ? `
+                                    <button class="btn btn-primary btn-sm start-call-btn" data-appointment-id="${appointment.id}"><i class="fas fa-video"></i> Start Call</button>
+                                ` : ''}
                             ` : ''}
                             <button class="btn btn-outline-primary btn-sm message-btn"
                                     data-patient-id="${appointment.patient_user_id}"
@@ -117,9 +120,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmedCard.style.display = hasConfirmed ? 'block' : 'none';
 
                 // Check if any filters are active
-                const isFiltering = searchPatientInput.value !== '' || 
-                                    typeFilterSelect.value !== 'all' || // Now type filter
-                                    SortBy.value !== 'appointment_date_asc'; // New sort filter
+                const isFiltering = searchPatientInput.value !== '' ||
+                    typeFilterSelect.value !== 'all' || // Now type filter
+                    SortBy.value !== 'appointment_date_asc'; // New sort filter
 
                 if (!hasPending && !hasConfirmed && !isFiltering) {
                     panelCard.style.display = 'none';
@@ -192,6 +195,34 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (data.success) fetchAndRenderAppointments();
                     })
                     .catch(error => console.error('Error completing appointment:', error));
+            });
+        });
+
+        document.querySelectorAll('.start-call-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const appointmentId = this.dataset.appointmentId;
+                fetch('../doctor/start_call.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ appointment_id: appointmentId })
+                })
+                    .then(response => response.text()) // Get as text first to handle non-JSON errors
+                    .then(text => {
+                        try {
+                            const data = JSON.parse(text);
+                            if (data.success) {
+                                window.open(`../video_call.php?room=${data.room_name}&appointment_id=${appointmentId}`, '_blank');
+                            } else {
+                                let msg = data.message || 'Error starting call';
+                                if (data.debug_output) msg += "\n\nDebug: " + data.debug_output;
+                                alert(msg);
+                            }
+                        } catch (e) {
+                            console.error('JSON Parse Error. Raw response:', text);
+                            alert('Server returned an invalid response. Check console for details.');
+                        }
+                    })
+                    .catch(error => console.error('Network Error:', error));
             });
         });
     }
