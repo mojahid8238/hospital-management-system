@@ -53,6 +53,16 @@ try {
         $result = $stmt->get_result();
         $prescriptions = [];
         while ($row = $result->fetch_assoc()) {
+            $prescription_id = $row['id'];
+            $items = [];
+            $stmt_items = $conn->prepare("SELECT medicine_name, dosage, frequency, duration FROM prescription_items WHERE prescription_id = ?");
+            $stmt_items->bind_param("i", $prescription_id);
+            $stmt_items->execute();
+            $res_items = $stmt_items->get_result();
+            while ($item = $res_items->fetch_assoc()) {
+                $items[] = $item;
+            }
+            $row['items'] = $items;
             $prescriptions[] = $row;
         }
         echo json_encode(['success' => true, 'prescriptions' => $prescriptions]);

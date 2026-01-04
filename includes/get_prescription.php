@@ -27,14 +27,31 @@ $user_id = $_SESSION['user_id'];
 // Actually logic: patient can only see their own, doctor theirs.
 // Let's just fetch by appointment_id.
 
-$stmt = $conn->prepare("SELECT content, created_at FROM prescriptions WHERE appointment_id = ?");
+$stmt = $conn->prepare("SELECT id, content, created_at FROM prescriptions WHERE appointment_id = ?");
 $stmt->bind_param("i", $appointment_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($row = $result->fetch_assoc()) {
-    echo json_encode(['success' => true, 'content' => $row['content'], 'created_at' => $row['created_at']]);
+    $prescription_id = $row['id'];
+    
+    // Fetch structured items
+    $items = [];
+    $stmt_items = $conn->prepare("SELECT medicine_name, dosage, frequency, duration FROM prescription_items WHERE prescription_id = ?");
+    $stmt_items->bind_param("i", $prescription_id);
+    $stmt_items->execute();
+    $res_items = $stmt_items->get_result();
+    while ($item = $res_items->fetch_assoc()) {
+        $items[] = $item;
+    }
+    
+    echo json_encode([
+        'success' => true, 
+        'content' => $row['content'], 
+        'created_at' => $row['created_at'],
+        'items' => $items
+    ]);
 } else {
-    echo json_encode(['success' => true, 'content' => null]);
+    echo json_encode(['success' => true, 'content' => null, 'items' => []]);
 }
 ?>

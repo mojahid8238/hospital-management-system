@@ -136,3 +136,31 @@ CREATE TABLE IF NOT EXISTS video_calls (
     FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL
 );
+
+-- Prescriptions Table
+CREATE TABLE IF NOT EXISTS prescriptions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    appointment_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    patient_id INT NOT NULL,
+    content TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    med_name VARCHAR(255),
+    med_dosage VARCHAR(100),
+    med_freq VARCHAR(100),
+    med_duration VARCHAR(100),
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
+);
+
+-- Prescription Items (for structured data)
+CREATE TABLE IF NOT EXISTS prescription_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    prescription_id INT NOT NULL,
+    medicine_name VARCHAR(255) NOT NULL,
+    dosage VARCHAR(100),
+    frequency VARCHAR(100),
+    duration VARCHAR(100),
+    FOREIGN KEY (prescription_id) REFERENCES prescriptions(id) ON DELETE CASCADE
+);

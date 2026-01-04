@@ -57,19 +57,59 @@ $stmt->bind_param("i", $appointment_id);
 $stmt->execute();
 $res = $stmt->get_result();
 
+$success = false;
+$prescription_id = null;
+
 if ($res->num_rows > 0) {
     // Update
-    $stmt = $conn->prepare("UPDATE prescriptions SET content = ?, created_at = NOW() WHERE appointment_id = ?");
-    $stmt->bind_param("si", $content, $appointment_id);
+    $prescription = $res->fetch_assoc();
+    $prescription_id = $prescription['id'];
+    $stmt = $conn->prepare("UPDATE prescriptions SET content = ?, created_at = NOW() WHERE id = ?");
+    $stmt->bind_param("si", $content, $prescription_id);
+    $success = $stmt->execute();
 } else {
     // Insert
     $stmt = $conn->prepare("INSERT INTO prescriptions (appointment_id, doctor_id, patient_id, content) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("iiis", $appointment_id, $doctor_id, $patient_id, $content);
+    $success = $stmt->execute();
+    $prescription_id = $conn->insert_id;
 }
 
-if ($stmt->execute()) {
+if ($success && $prescription_id) {
+    // Clear old items
+    $conn->query("DELETE FROM prescription_items WHERE prescription_id = $prescription_id");
+
+    // Parse content for structured items
+    $lines = explode("\n", $content);
+    $stmt_item = $conn->prepare("INSERT INTO prescription_items (prescription_id, medicine_name, dosage, frequency, duration) VALUES (?, ?, ?, ?, ?)");
+    
+    $first_med = null;
+    foreach ($lines as $line) {
+        if (strpos($line, '|') !== false) {
+            $parts = explode('|', $line);
+            $name = trim($parts[0] ?? '');
+            $dosage = trim($parts[1] ?? '');
+            $freq = trim($parts[2] ?? '');
+            $duration = trim($parts[3] ?? '');
+
+            if (!empty($name)) {
+                if (!$first_med) {
+                    $first_med = ['name' => $name, 'dosage' => $dosage, 'freq' => $freq, 'duration' => $duration];
+                }
+                $stmt_item->bind_param("issss", $prescription_id, $name, $dosage, $freq, $duration);
+                $stmt_item->execute();
+            }
+        }
+    }
+
+    // Update main prescription with first medicine for simple device access
+    if ($first_med) {
+        $stmt_main = $conn->prepare("UPDATE prescriptions SET med_name = ?, med_dosage = ?, med_freq = ?, med_duration = ? WHERE id = ?");
+        $stmt_main->bind_param("ssssi", $first_med['name'], $first_med['dosage'], $first_med['freq'], $first_med['duration'], $prescription_id);
+        $stmt_main->execute();
+    }
     echo json_encode(['success' => true]);
 } else {
-    echo json_encode(['success' => false, 'message' => $stmt->error]);
+    echo json_encode(['success' => false, 'message' => $conn->error]);
 }
 ?>

@@ -274,6 +274,28 @@ const prescriptionText = document.getElementById('prescription-text');
 const patientPrescriptionView = document.getElementById('patient-prescription-view');
 const prescriptionStatus = document.getElementById('prescription-status');
 const downloadPrescriptionBtn = document.getElementById('download-prescription-btn');
+const addMedBtn = document.getElementById('add-med-btn');
+
+if (addMedBtn) {
+    addMedBtn.addEventListener('click', () => {
+        const name = document.getElementById('med-name').value.trim();
+        const dosage = document.getElementById('med-dosage').value.trim();
+        const freq = document.getElementById('med-freq').value.trim();
+        const duration = document.getElementById('med-duration').value.trim();
+
+        if (name) {
+            const line = `${name} | ${dosage} | ${freq} | ${duration}\n`;
+            prescriptionText.value += line;
+
+            // Clear inputs
+            document.getElementById('med-name').value = '';
+            document.getElementById('med-dosage').value = '';
+            document.getElementById('med-freq').value = '';
+            document.getElementById('med-duration').value = '';
+            document.getElementById('med-name').focus();
+        }
+    });
+}
 
 if (prescriptionBtn) {
     prescriptionBtn.addEventListener('click', () => {
@@ -293,7 +315,26 @@ if (closePrescriptionBtn) {
 
 if (savePrescriptionBtn) {
     savePrescriptionBtn.addEventListener('click', async () => {
-        const content = prescriptionText.value;
+        let content = prescriptionText.value;
+
+        // Auto-add current medicine-adder fields if not empty
+        const nameInput = document.getElementById('med-name');
+        if (nameInput && nameInput.value.trim()) {
+            const name = nameInput.value.trim();
+            const dosage = document.getElementById('med-dosage').value.trim();
+            const freq = document.getElementById('med-freq').value.trim();
+            const duration = document.getElementById('med-duration').value.trim();
+            const line = `${name} | ${dosage} | ${freq} | ${duration}\n`;
+            content += line;
+            prescriptionText.value = content; // Update UI
+
+            // Clear inputs
+            nameInput.value = '';
+            document.getElementById('med-dosage').value = '';
+            document.getElementById('med-freq').value = '';
+            document.getElementById('med-duration').value = '';
+        }
+
         if (!content.trim()) return;
 
         savePrescriptionBtn.disabled = true;
@@ -315,17 +356,19 @@ if (savePrescriptionBtn) {
                 prescriptionStatus.style.color = "#22c55e";
 
                 // Notify via Socket
-                socket.emit('signal', {
-                    room: CONFIG.roomId,
-                    signal: { type: 'prescription-updated', content: content }
-                });
+                if (socket) {
+                    socket.emit('signal', {
+                        room: CONFIG.roomId,
+                        signal: { type: 'prescription-updated', content: content }
+                    });
+                }
             } else {
                 prescriptionStatus.innerText = "Error: " + data.message;
                 prescriptionStatus.style.color = "#ef4444";
             }
         } catch (err) {
             console.error(err);
-            prescriptionStatus.innerText = "Network Error";
+            prescriptionStatus.innerText = "Network Error (" + err.message + ")";
         } finally {
             savePrescriptionBtn.disabled = false;
             savePrescriptionBtn.innerText = "Send to Patient";

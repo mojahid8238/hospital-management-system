@@ -52,5 +52,64 @@ if ($check_table->num_rows == 0) {
     }
 }
 
+// 3. Ensure prescriptions table exists and has new columns
+$check_table = $conn->query("SHOW TABLES LIKE 'prescriptions'");
+if ($check_table->num_rows == 0) {
+    $create_table = "CREATE TABLE prescriptions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        appointment_id INT NOT NULL,
+        doctor_id INT NOT NULL,
+        patient_id INT NOT NULL,
+        content TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        med_name VARCHAR(255),
+        med_dosage VARCHAR(100),
+        med_freq VARCHAR(100),
+        med_duration VARCHAR(100),
+        FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE,
+        FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+        FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
+    )";
+    if ($conn->query($create_table)) {
+        echo "Created 'prescriptions' table.<br>";
+    } else {
+        echo "Error creating 'prescriptions' table: " . $conn->error . "<br>";
+    }
+} else {
+    // Check for new columns
+    $cols_to_add = [
+        'med_name' => "VARCHAR(255)",
+        'med_dosage' => "VARCHAR(100)",
+        'med_freq' => "VARCHAR(100)",
+        'med_duration' => "VARCHAR(100)"
+    ];
+    foreach ($cols_to_add as $col => $type) {
+        $check_col = $conn->query("SHOW COLUMNS FROM prescriptions LIKE '$col'");
+        if ($check_col->num_rows == 0) {
+            $conn->query("ALTER TABLE prescriptions ADD COLUMN $col $type");
+            echo "Added '$col' to 'prescriptions' table.<br>";
+        }
+    }
+}
+
+// 4. Ensure prescription_items table exists
+$check_table = $conn->query("SHOW TABLES LIKE 'prescription_items'");
+if ($check_table->num_rows == 0) {
+    $create_table = "CREATE TABLE prescription_items (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        prescription_id INT NOT NULL,
+        medicine_name VARCHAR(255) NOT NULL,
+        dosage VARCHAR(100),
+        frequency VARCHAR(100),
+        duration VARCHAR(100),
+        FOREIGN KEY (prescription_id) REFERENCES prescriptions(id) ON DELETE CASCADE
+    )";
+    if ($conn->query($create_table)) {
+        echo "Created 'prescription_items' table.<br>";
+    } else {
+        echo "Error creating 'prescription_items' table: " . $conn->error . "<br>";
+    }
+}
+
 echo "Migration finished.";
 ?>

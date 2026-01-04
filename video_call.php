@@ -252,56 +252,58 @@ ob_end_flush();
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 500px;
-            background: rgba(15, 23, 42, 0.95);
+            width: 95%;
+            max-width: 600px;
+            max-height: 90vh;
+            background: rgba(15, 23, 42, 0.98);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 16px;
-            z-index: 50;
+            z-index: 200; /* Increased z-index */
             display: flex;
             flex-direction: column;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             animation: fadeIn 0.3s ease;
+            overflow-y: auto; /* Enable scrolling if needed */
         }
-
-        .panel-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        
+        .panel-body { 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            overflow-y: auto; 
         }
-
-        .panel-header h3 { margin: 0; color: var(--primary-color); font-size: 1.2rem; }
-        .panel-header button { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem; }
-        .panel-header button:hover { color: white; }
-
-        .panel-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
 
         textarea {
             width: 100%;
-            height: 200px;
+            height: 150px;
             background: rgba(255,255,255,0.05);
             border: 1px solid var(--glass-border);
             border-radius: 8px;
             color: white;
             padding: 10px;
-            font-family: inherit;
-            resize: none;
-            box-sizing: border-box; /* Ensure padding doesn't overflow */
+            font-family: 'Courier New', monospace; /* Monospace for alignment */
+            resize: vertical;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
 
         .action-btn {
-            padding: 10px;
+            padding: 14px;
             background: var(--primary-color);
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: 500;
-            transition: background 0.2s;
+            font-weight: 600;
+            transition: background 0.2s, transform 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
         }
+        .action-btn:active { transform: scale(0.98); }
         .action-btn:hover { background: var(--secondary-color); }
         .action-btn.secondary { background: #334155; }
         .action-btn.secondary:hover { background: #475569; }
@@ -316,6 +318,47 @@ ob_end_flush();
         
         .placeholder-text { color: #64748b; font-style: italic; text-align: center; margin-top: 80px; }
 
+        .medicine-adder {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 8px;
+            margin-bottom: 12px;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+        .glass-input {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            padding: 8px 10px;
+            border-radius: 6px;
+            color: white;
+            font-family: inherit;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+        }
+        .glass-input.small { /* No specific overrides needed for grid */ }
+        .medicine-adder button {
+            padding: 8px 12px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .glass-input:focus { outline: none; border-color: var(--primary-color); background: rgba(255,255,255,0.1); }
+        .prescription-input-group { display: flex; flex-direction: column; }
+        
+        @media (max-width: 600px) {
+            .medicine-adder {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            #med-name { grid-column: 1 / -1; }
+            #add-med-btn { grid-column: 1 / -1; }
+        }
     </style>
 </head>
 <body>
@@ -366,7 +409,33 @@ ob_end_flush();
             </div>
             <div class="panel-body">
                 <?php if ($is_doctor): ?>
-                    <textarea id="prescription-text" placeholder="Write prescription here... (Medications, Dosage, Notes)"></textarea>
+                    <div class="prescription-input-group">
+                        <div class="medicine-adder">
+                            <input type="text" id="med-name" placeholder="Medicine" class="glass-input" list="medicine-list">
+                            <datalist id="medicine-list">
+                                <option value="Paracetamol">
+                                <option value="Amoxicillin">
+                                <option value="Ibuprofen">
+                                <option value="Metformin">
+                                <option value="Atorvastatin">
+                                <option value="Omeprazole">
+                                <option value="Aspirin">
+                                <option value="Cetirizine">
+                                <option value="Azithromycin">
+                                <option value="Pantoprazole">
+                                <option value="Vitamin D3">
+                                <option value="B Complex">
+                                <option value="Calcium Sandoz">
+                                <option value="Dolo 650">
+                                <option value="Cough Syrup">
+                            </datalist>
+                            <input type="text" id="med-dosage" placeholder="Dose (1-0-1)" class="glass-input small">
+                            <input type="text" id="med-freq" placeholder="Freq" class="glass-input small">
+                            <input type="text" id="med-duration" placeholder="Days" class="glass-input small">
+                            <button id="add-med-btn" class="action-btn secondary" title="Add to List"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <textarea id="prescription-text" placeholder="Or type freely... (Format: Medicine | Dosage | Freq | Duration)"></textarea>
+                    </div>
                     <button id="save-prescription-btn" class="action-btn">Send to Patient</button>
                 <?php else: ?>
                     <div id="patient-prescription-view">
