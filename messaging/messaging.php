@@ -119,7 +119,7 @@ if ($role === 'doctor') {
         </div>
         <div class="nav-right">
             <div class="user-info">
-                <span><?php echo htmlspecialchars($_SESSION['name']); ?></span>
+                <span><?php if($role=='doctor'){echo "Dr. " . htmlspecialchars($_SESSION['name']);}else{echo htmlspecialchars($_SESSION['name']);} ?></span>
             </div>
             <img src="../<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile" class="user-icon" id="profileToggle">
         </div>
@@ -235,14 +235,13 @@ if ($role === 'doctor') {
             <div class="profile-pic-wrapper" style="position: relative; margin-bottom: 24px;">
                 <img src="../<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="profile-overlay-pic" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary-light);">
             </div>
-            <h3 style="font-size: 1.5rem; font-weight: 700;"><?php echo htmlspecialchars($_SESSION['name']); ?></h3>
+            <h3 style="font-size: 1.5rem; font-weight: 700;"><?php if($role=='doctor'){echo "Dr. " . htmlspecialchars($_SESSION['name']); }else{echo htmlspecialchars($_SESSION['name']); }?></h3>
             <p class="text-muted" style="text-transform: capitalize;"><?php echo htmlspecialchars($role); ?> Account</p>
             
             <hr style="margin: 24px 0;">
             <ul>
-                <li><a href="../patient/profile.php" style="padding: 12px; border-radius: var(--radius-md);"><i class="fas fa-user-circle"></i> My Profile</a></li>        
-                <li><a href="<?php echo $dashboard_link; ?>" style="padding: 12px; border-radius: var(--radius-md);"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-                <li><a href="../auth/logout.php" class="logout-btn" style="color: var(--error); padding: 12px; border-radius: var(--radius-md);"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                <li><a href="<?php echo $dashboard_link; ?>"><i class="fas fa-chart-line" style="margin-right: 12px;"></i> Dashboard</a></li>
+                <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt" style="margin-right: 12px;"></i> Logout</a></li>
             </ul>
             <button class="close-btn" id="closeProfile">Close Panel</button>
         </div>

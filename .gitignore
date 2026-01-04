@@ -1,0 +1,5 @@
+assets/images/chat_images/*
+!assets/images/chat_images/.gitkeep
+
+assets/images/profile_pics/*
+!assets/images/profile_pics/.gitkeep

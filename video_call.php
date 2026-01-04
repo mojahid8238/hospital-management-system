@@ -267,6 +267,41 @@ ob_end_flush();
             overflow-y: auto; /* Enable scrolling if needed */
         }
         
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.05);
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .panel-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Spacing between icon and text */
+        }
+        .panel-header h3 i {
+            color: var(--primary-color);
+        }
+
+        .panel-header button {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .panel-header button:hover {
+            color: var(--primary-color);
+        }
+
         .panel-body { 
             padding: 20px; 
             display: flex; 
