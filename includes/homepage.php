@@ -47,7 +47,7 @@ if ($role === 'admin') {
     </div>
   </header>
 
-  <main class="content-area-landing" style="padding: 0 8%; max-width: var(--container-max-width); margin: 0 auto;">
+  <main class="content-area-landing" id="mainContent" style="padding: 0 8%; max-width: var(--container-max-width); margin: 0 auto;">
       <!-- Hero Section -->
       <section class="hero-section">
           <h1 class="hero-title">Your Health, <span style="color: var(--primary-color);">Our Commitment.</span></h1>
@@ -153,9 +153,9 @@ if ($role === 'admin') {
 
       <hr style="margin: 24px 0;">
       <ul>
-        <li><a href="<?php echo $dashUrl; ?>"><i class="fas fa-user-circle"></i> My Profile</a></li>        
-        <li><a href="<?php echo $dashUrl; ?>"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-        <li><a href="../auth/logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        <li><a href="<?php echo $dashUrl; ?>"><i class="fas fa-user-circle" style="margin-right: 12px;"></i> My Profile</a></li>        
+        <li><a href="<?php echo $dashUrl; ?>"><i class="fas fa-chart-line" style="margin-right: 12px;"></i> Dashboard</a></li>
+        <li><a href="../auth/logout.php" class="logout-btn"><i class="fas fa-sign-out-alt" style="margin-right: 12px;"></i> Logout</a></li>
       </ul>
       <button class="close-btn" id="closeProfile">Close Panel</button>
     </div>

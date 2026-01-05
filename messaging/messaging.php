@@ -156,7 +156,7 @@ if ($role === 'doctor') {
             
         </aside>
 
-        <main class="content-area" style="padding: 0; flex: 1; height: calc(100vh - var(--header-height)); overflow: hidden; display: flex; flex-direction: column;">
+        <main class="content-area" id="mainContent" style="padding: 0; flex: 1; height: calc(100vh - var(--header-height)); overflow: hidden; display: flex; flex-direction: column;">
             <div class="messaging-wrapper" style="padding: 24px; height: 100%; display: flex; flex-direction: column;">
                 <div class="messaging-container" style="flex: 1; min-height: 0;">
                     <aside class="conversations-sidebar">
