@@ -493,7 +493,7 @@ ob_end_flush();
             userId: "<?php echo $user_id; ?>",
             userName: "<?php echo addslashes($display_name); ?>",
             isDoctor: <?php echo $is_doctor ? 'true' : 'false'; ?>,
-            signalingUrl: "http://localhost:3000",
+            signalingUrl: window.location.origin,
             appointmentId: "<?php echo $appointment_id; ?>"
         };
     </script>

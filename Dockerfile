@@ -11,6 +11,7 @@ RUN groupadd -g 1000 mojahid && \
 ENV APACHE_RUN_USER mojahid
 ENV APACHE_RUN_GROUP mojahid
 
+
 RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
-RUN a2enmod rewrite
+RUN a2enmod rewrite proxy proxy_http proxy_wstunnel headers
 
