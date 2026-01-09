@@ -2,28 +2,50 @@ document.addEventListener('DOMContentLoaded', function () {
     // Sidebar Toggle Logic
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.querySelector('.sidebar');
+    const mobileBreakpoint = 1024;
+    let lastWidth = window.innerWidth;
+
+    // Initial check on load
+    if (sidebar) {
+        if (window.innerWidth <= mobileBreakpoint) {
+            sidebar.classList.add('closed');
+        }
+    }
+
+    // Handle Resize with boundary detection
+    window.addEventListener('resize', function () {
+        if (!sidebar) return;
+
+        const currentWidth = window.innerWidth;
+        const wasMobile = lastWidth <= mobileBreakpoint;
+        const isMobile = currentWidth <= mobileBreakpoint;
+
+        if (wasMobile !== isMobile) {
+            if (isMobile) {
+                // Desktop -> Mobile: Auto-close
+                sidebar.classList.add('closed');
+                sidebar.style.transform = '';
+            } else {
+                // Mobile -> Desktop: Auto-open
+                sidebar.classList.remove('closed');
+                sidebar.style.transform = '';
+            }
+        }
+        lastWidth = currentWidth;
+    });
 
     if (sidebarToggle && sidebar) {
         sidebarToggle.addEventListener('click', function () {
             sidebar.classList.toggle('closed');
-
-            // Adjust main content margin if necessary for mobile
-            if (window.innerWidth <= 1024) {
-                if (!sidebar.classList.contains('closed')) {
-                    sidebar.style.transform = 'translateX(0)';
-                } else {
-                    sidebar.style.transform = 'translateX(-100%)';
-                }
-            }
+            sidebar.style.transform = ''; // Ensure CSS classes take precedence
         });
     }
 
     // Close sidebar when clicking outside on mobile
     document.addEventListener('click', function (event) {
-        if (window.innerWidth <= 1024 && sidebar && !sidebar.classList.contains('closed')) {
+        if (window.innerWidth <= mobileBreakpoint && sidebar && !sidebar.classList.contains('closed')) {
             if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
                 sidebar.classList.add('closed');
-                sidebar.style.transform = 'translateX(-100%)';
             }
         }
     });

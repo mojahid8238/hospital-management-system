@@ -236,8 +236,6 @@ if ($role === 'doctor') {
                 <img src="../<?php echo htmlspecialchars($_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png'); ?>?t=<?php echo time(); ?>" alt="Profile Picture" id="profileImageDisplay" class="profile-overlay-pic" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary-light);">
             </div>
             <h3 style="font-size: 1.5rem; font-weight: 700;"><?php if($role=='doctor'){echo "Dr. " . htmlspecialchars($_SESSION['name']); }else{echo htmlspecialchars($_SESSION['name']); }?></h3>
-            <p class="text-muted" style="text-transform: capitalize;"><?php echo htmlspecialchars($role); ?> Account</p>
-            
             <hr style="margin: 24px 0;">
             <ul>
                 <li><a href="<?php echo $dashboard_link; ?>"><i class="fas fa-chart-line" style="margin-right: 12px;"></i> Dashboard</a></li>

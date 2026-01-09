@@ -116,7 +116,7 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
                 <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile Picture" class="profile-overlay-pic">
             </div>
             <h3><?php echo htmlspecialchars($_SESSION['name']); ?></h3>
-            <p>Member Since 2024</p>
+
             <hr>
             <ul>
                 <li><a href="dashboard.php"><i class="fas fa-chart-line" style="margin-right: 12px;"></i> Dashboard</a></li>

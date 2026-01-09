@@ -140,7 +140,7 @@ if ($patient_id) {
                 </label>
             </div>
             <h3><?php echo htmlspecialchars($patient_name); ?></h3>
-            <p>Member Since 2024</p>
+
             
             <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
                 <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">

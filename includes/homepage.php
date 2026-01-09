@@ -144,7 +144,7 @@ if ($role === 'admin') {
           </label>
       </div>
       <h3 style="font-size: 1.5rem; font-weight: 700;"><?php echo htmlspecialchars($username); ?></h3>
-      <p class="text-muted" style="text-transform: capitalize;"><?php echo htmlspecialchars($role); ?> Account</p>
+
       
       <form id="profilePicUploadForm" action="../auth/upload_profile_pic.php" method="POST" enctype="multipart/form-data">
         <input type="file" id="profilePicInput" name="profile_pic" accept="image/*" style="display: none;">
