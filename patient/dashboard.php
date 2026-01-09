@@ -200,7 +200,7 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
             <ul>
                 <li><a href="dashboard.php"><i class="fas fa-chart-line" style="margin-right: 12px;"></i> Dashboard</a></li>
                 <li><a href="../includes/homepage.php"><i class="fas fa-home" style="margin-right: 12px;"></i> Homepage</a></li>
-                <li><a href="#"><i class="fas fa-cog" style="margin-right: 12px;"></i> Settings</a></li>
+                <li><a href="settings.php"><i class="fas fa-user-cog" style="margin-right: 12px;"></i> Account Settings</a></li>
                 <li><a href="../auth/logout.php" style="color: var(--error);"><i class="fas fa-sign-out-alt" style="margin-right: 12px;"></i> Logout</a></li>
             </ul>
             <button class="close-btn" id="closeProfile">Close Panel</button>

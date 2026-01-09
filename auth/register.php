@@ -36,14 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Role-specific fields
     $specialization = htmlspecialchars(trim($_POST['specialization'] ?? ''));
     $phone = '';
-    if ($role === 'doctor') {
-        $phone = htmlspecialchars(trim($_POST['phone_doc'] ?? ''));
-    } elseif ($role === 'patient') {
-        $phone = htmlspecialchars(trim($_POST['phone_pat'] ?? ''));
-    }
-    $date_of_birth = $_POST['date_of_birth'] ?? null;  // YYYY-MM-DD or null
-    $gender = $_POST['gender'] ?? null;
-    $address = htmlspecialchars(trim($_POST['address'] ?? ''));
+    $date_of_birth = null;
+    $gender = null;
+    $address = '';
 
     // Basic validation
     if (empty($username) || empty($password) || empty($confirm_password) || empty($role) || empty($fullname) || empty($email)) {
@@ -126,14 +121,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt_spec->close();
                 }
 
-                // Check for existing doctor's email and phone
-                $stmt_check_doctor = $conn->prepare("SELECT id FROM doctors WHERE email = ? OR phone = ?");
-                $stmt_check_doctor->bind_param("ss", $email, $phone);
+                // Check for existing doctor's email
+                $stmt_check_doctor = $conn->prepare("SELECT id FROM doctors WHERE email = ?");
+                $stmt_check_doctor->bind_param("s", $email);
                 $stmt_check_doctor->execute();
                 $stmt_check_doctor->store_result();
 
                 if ($stmt_check_doctor->num_rows > 0) {
-                    $error_message = "A doctor with this email or phone number already exists.";
+                    $error_message = "A doctor with this email already exists.";
                 } else {
                     // All checks passed, now insert the user and then the doctor details
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
@@ -166,32 +161,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $stmt_check_doctor->close();
             } elseif ($role === 'patient') {
-                // Validate date of birth
-                $dob_valid = true;
-                if (!empty($date_of_birth)) {
-                    $d = DateTime::createFromFormat('Y-m-d', $date_of_birth);
-                    if (!$d || $d->format('Y-m-d') !== $date_of_birth) {
-                        $dob_valid = false;
-                        $error_message = "Invalid date of birth format. Please use YYYY-MM-DD.";
-                    } else {
-                        $year = (int)$d->format('Y');
-                        if ($year < 1900 || $year > date('Y')) {
-                            $dob_valid = false;
-                            $error_message = "Please enter a valid year for the date of birth.";
-                        }
-                    }
-                }
+                 // No DOB validation needed as we removed the field
 
                                 $stmt_check_patient = null; // Initialize to null
-                                if ($dob_valid) {
-                                    // Check for existing patient's email and phone
-                                    $stmt_check_patient = $conn->prepare("SELECT id FROM patients WHERE email = ? OR phone = ?");
-                                    $stmt_check_patient->bind_param("ss", $email, $phone);
+                                    // Check for existing patient's email
+                                    $stmt_check_patient = $conn->prepare("SELECT id FROM patients WHERE email = ?");
+                                    $stmt_check_patient->bind_param("s", $email);
                                     $stmt_check_patient->execute();
                                     $stmt_check_patient->store_result();
                 
                                     if ($stmt_check_patient->num_rows > 0) {
-                                        $error_message = "A patient with this email or phone number already exists.";
+                                        $error_message = "A patient with this email already exists.";
                                     } else {
                                         // All checks passed, now insert the user and then the patient details
                                         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
@@ -227,10 +207,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         }
                                         $stmt_user->close();
                                     }
-                                }
+                                
                                 if ($stmt_check_patient) { // Only close if it was prepared
                                     $stmt_check_patient->close();
-                                }            }
+                                }
+            }
 
         }
     }
@@ -254,8 +235,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       document.querySelectorAll('.role-fields').forEach(el => el.style.display = 'none');
       if (role === 'doctor') {
         document.getElementById('doctor-fields').style.display = 'block';
-      } else if (role === 'patient') {
-        document.getElementById('patient-fields').style.display = 'block';
       } else if (role === 'admin') {
         document.getElementById('admin-fields').style.display = 'block';
       }
@@ -336,36 +315,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endforeach; ?>
             </datalist>
           </div>
-          <div class="input-group">
-            <label for="phone_doc">Phone</label>
-            <input type="text" id="phone_doc" name="phone_doc" value="<?= htmlspecialchars($_POST['phone_doc'] ?? '') ?>" />
-          </div>
         </div>
 
-        <!-- Patient-specific -->
-        <div id="patient-fields" class="role-fields">
-          <div class="input-group">
-            <label for="date_of_birth">Date of Birth</label>
-            <input type="date" id="date_of_birth" name="date_of_birth" value="<?= htmlspecialchars($_POST['date_of_birth'] ?? '') ?>" />
-          </div>
-          <div class="input-group">
-            <label for="gender">Gender</label>
-            <select id="gender" name="gender">
-              <option value="">Select Gender</option>
-              <option value="Male" <?= (($_POST['gender'] ?? '') === 'Male') ? 'selected' : '' ?>>Male</option>
-              <option value="Female" <?= (($_POST['gender'] ?? '') === 'Female') ? 'selected' : '' ?>>Female</option>
-              <option value="Other" <?= (($_POST['gender'] ?? '') === 'Other') ? 'selected' : '' ?>>Other</option>
-            </select>
-          </div>
-          <div class="input-group">
-            <label for="address">Address</label>
-            <input type="text" id="address" name="address" value="<?= htmlspecialchars($_POST['address'] ?? '') ?>" />
-          </div>
-          <div class="input-group">
-            <label for="phone_pat">Phone</label>
-            <input type="text" id="phone_pat" name="phone_pat" value="<?= htmlspecialchars($_POST['phone_pat'] ?? '') ?>" />
-          </div>
-        </div>
+
 
 
 

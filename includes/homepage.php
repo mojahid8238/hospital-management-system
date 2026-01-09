@@ -118,11 +118,11 @@ if ($role === 'admin') {
                         <i class="fas fa-calendar-plus text-primary"></i>
                         <span>Book Now</span>
                     </a>
-                    <a href="<?php echo $dashUrl; ?>" class="action-btn">
+                    <a href="../patient/dashboard.php" class="action-btn">
                         <i class="fas fa-file-invoice text-info"></i>
                         <span>My Records</span>
                     </a>
-                    <a href="<?php echo $dashUrl; ?>" class="action-btn">
+                    <a href="../patient/settings.php" class="action-btn">
                         <i class="fas fa-user-cog text-warning"></i>
                         <span>Profile</span>
                     </a>
