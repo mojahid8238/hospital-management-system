@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS doctors (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE,
     profile_pic VARCHAR(255) DEFAULT 'assets/images/default-avatar.png',
-    schedule TIME,
+    schedule VARCHAR(255),
     image VARCHAR(255),
     phone VARCHAR(20),
     specialization_id INT,

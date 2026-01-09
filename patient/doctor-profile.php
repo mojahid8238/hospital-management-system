@@ -68,10 +68,10 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $doctor_id = $_GET['id'];
 
-$stmt = $conn->prepare("SELECT name, profile_pic FROM doctors WHERE id = ?");
+$stmt = $conn->prepare("SELECT d.name, d.profile_pic, d.schedule, d.degrees, s.name as specialization FROM doctors d LEFT JOIN specializations s ON d.specialization_id = s.id WHERE d.id = ?");
 $stmt->bind_param("i", $doctor_id);
 $stmt->execute();
-$stmt->bind_result($name, $profile_pic);
+$stmt->bind_result($name, $profile_pic, $schedule, $degrees, $specialization);
 $stmt->fetch();
 $stmt->close();
 
@@ -79,6 +79,46 @@ if (!$name) {
     echo "Doctor not found.";
     exit();
 }
+
+// Parse Schedule for availability
+// Expected format: "Mon, Wed: 09:00 AM - 05:00 PM"
+$available_days = []; 
+$start_ts = strtotime('09:00'); // Default 9 AM
+$end_ts = strtotime('17:00');   // Default 5 PM
+
+if (!empty($schedule)) {
+    $schedule = trim($schedule);
+    $schedule = str_replace('–', '-', $schedule); // Normalize En-dash
+
+    // Regex to find time range: HH:MM [AM|PM] - HH:MM [AM|PM]
+    // Supports 12hr and 24hr formats
+    $pattern = '/(\d{1,2}:\d{2}(?:\s*[AP]M)?)\s*-\s*(\d{1,2}:\d{2}(?:\s*[AP]M)?)/i';
+
+    if (preg_match($pattern, $schedule, $matches)) {
+        $start_str = trim($matches[1]);
+        $end_str = trim($matches[2]);
+
+        $s_temp = strtotime($start_str);
+        $e_temp = strtotime($end_str);
+        
+        // Validation
+        if ($s_temp !== false && $e_temp !== false && $e_temp > $s_temp) {
+            $start_ts = $s_temp;
+            $end_ts = $e_temp;
+        }
+
+        // Extract Days (everything before the time match)
+        $match_pos = strpos($schedule, $matches[0]);
+        if ($match_pos > 0) {
+            $prefix = substr($schedule, 0, $match_pos);
+            $prefix = trim(rtrim(trim($prefix), ':')); // Remove trailing colon
+            if (!empty($prefix)) {
+                $available_days = array_map('trim', explode(',', $prefix));
+            }
+        }
+    }
+}
+
 
 $rawProfilePic = $_SESSION['profile_pic'] ?? 'assets/images/default-avatar.png';
 $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
@@ -185,6 +225,10 @@ $dPic = preg_replace('#^\\.\\./#', '', $profile_pic ?? 'assets/images/default-av
                         </div>
                         <div class="profile-header">
                             <h3 class="mb-2">Dr. <?php echo htmlspecialchars($name); ?></h3>
+                            <p class="mb-2 text-primary" style="font-weight: 600;"><?php echo htmlspecialchars($specialization ?? 'Specialist'); ?></p>
+                            <?php if(!empty($degrees)): ?>
+                                <p class="mb-2 text-muted" style="font-size: 0.9rem;"><?php echo htmlspecialchars($degrees); ?></p>
+                            <?php endif; ?>
                             <div class="stars mb-3" style="color: #f1c40f;">
                                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
                                 <span style="color: var(--text-muted); font-size: 0.9rem;">(4.5/5)</span>
@@ -198,6 +242,12 @@ $dPic = preg_replace('#^\\.\\./#', '', $profile_pic ?? 'assets/images/default-av
                     <div class="mt-4">
                         <h4 class="section-title mb-3"><i class="fas fa-info-circle"></i> Biography</h4>
                         <p class="text-muted">Dr. <?php echo htmlspecialchars($name); ?> is a highly qualified specialist with years of clinical experience in providing compassionate care and advanced medical treatments.</p>
+                        <?php if(!empty($schedule)): ?>
+                            <div class="mt-3 p-3 bg-light rounded border">
+                                <strong><i class="fas fa-clock"></i> Regular Schedule:</strong><br>
+                                <?php echo htmlspecialchars($schedule); ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -210,10 +260,24 @@ $dPic = preg_replace('#^\\.\\./#', '', $profile_pic ?? 'assets/images/default-av
                                 <label for="appointment_date">Consultation Date</label>
                                 <select id="appointment_date" name="appointment_date" required>
                                     <?php
-                                        for ($i = 0; $i < 14; $i++) {
+                                        $dates_found = 0;
+                                        for ($i = 0; $i < 30; $i++) { // Look ahead 30 days
                                             $date = date('Y-m-d', strtotime("+" . $i . " days"));
+                                            $dayName = date('D', strtotime($date)); // Mon, Tue...
+                                            
+                                            // Filter by Available Days
+                                            if (!empty($available_days)) {
+                                                if (!in_array($dayName, $available_days)) {
+                                                    continue;
+                                                }
+                                            }
+
                                             $displayDate = date('D, M d', strtotime($date));
                                             echo "<option value='" . htmlspecialchars($date) . "'>" . htmlspecialchars($displayDate) . "</option>";
+                                            $dates_found++;
+                                        }
+                                        if ($dates_found === 0) {
+                                            echo "<option disabled>No available dates soon</option>";
                                         }
                                     ?>
                                 </select>
@@ -222,11 +286,12 @@ $dPic = preg_replace('#^\\.\\./#', '', $profile_pic ?? 'assets/images/default-av
                                 <label for="appointment_time">Available Slots</label>
                                 <select id="appointment_time" name="appointment_time" required>
                                     <?php
-                                        for ($h = 9; $h < 17; $h++) {
-                                            for ($m = 0; $m < 60; $m += 60) {
-                                                $time = sprintf('%02d:%02d', $h, $m);
-                                                echo "<option value='" . htmlspecialchars($time) . "'>" . htmlspecialchars($time) . " AM</option>";
-                                            }
+                                        // Loop 30 mins from start_ts to end_ts
+                                        // (Refactored logic uses $start_ts and $end_ts derived at the top)
+                                        for ($time_ts = $start_ts; $time_ts < $end_ts; $time_ts += 1800) { 
+                                            $time_val = date('H:i', $time_ts);
+                                            $time_display = date('h:i A', $time_ts);
+                                            echo "<option value='" . htmlspecialchars($time_val) . "'>" . htmlspecialchars($time_display) . "</option>";
                                         }
                                     ?>
                                 </select>

@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         LEFT JOIN doctors d ON u.id = d.user_id
         LEFT JOIN patients p ON u.id = p.user_id
         WHERE u.id != ?
+        GROUP BY u.id
         ORDER BY u.name ASC
     ");
     $stmt->bind_param("i", $current_user_id);

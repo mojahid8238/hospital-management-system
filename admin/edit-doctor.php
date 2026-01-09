@@ -12,8 +12,70 @@ if (!$doctor_id) {
     exit();
 }
 
+// Handle Form Submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $doctor_id = $_GET['id'] ?? null;
+    $name = $_POST['name'] ?? '';
+    $username = $_POST['username'] ?? '';
+    // $specialization_name = $_POST['specialization'] ?? ''; // We use ID or look it up
+    $specialization_name = $_POST['specialization'] ?? '';
+    $phone = $_POST['phone'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $degrees = $_POST['degrees'] ?? '';
+
+    // Process Schedule
+    $schedule = '';
+    if (isset($_POST['days']) && is_array($_POST['days']) && !empty($_POST['start_time']) && !empty($_POST['end_time'])) {
+        $days_str = implode(', ', $_POST['days']);
+        $start_fmt = date('h:i A', strtotime($_POST['start_time']));
+        $end_fmt = date('h:i A', strtotime($_POST['end_time']));
+        $schedule = "$days_str: $start_fmt - $end_fmt";
+    } else {
+         $schedule = $_POST['schedule_text'] ?? ''; // Fallback
+    }
+
+    // Get specialization_id
+    $specialization_id = null;
+    $stmt_spec = $conn->prepare("SELECT id FROM specializations WHERE name = ?");
+    $stmt_spec->bind_param("s", $specialization_name);
+    $stmt_spec->execute();
+    $stmt_spec->bind_result($specialization_id);
+    $stmt_spec->fetch();
+    $stmt_spec->close();
+
+    if ($doctor_id && $specialization_id) {
+        // Update Doctors Table
+        $stmt = $conn->prepare("UPDATE doctors SET name = ?, specialization_id = ?, phone = ?, email = ?, degrees = ?, schedule = ? WHERE id = ?");
+        $stmt->bind_param("sissssi", $name, $specialization_id, $phone, $email, $degrees, $schedule, $doctor_id);
+        
+        if ($stmt->execute()) {
+             // Also update Users table for username/name changes
+             // First fetch user_id
+             $stmt_u = $conn->prepare("SELECT user_id FROM doctors WHERE id = ?");
+             $stmt_u->bind_param("i", $doctor_id);
+             $stmt_u->execute();
+             $res_u = $stmt_u->get_result();
+             if($row_u = $res_u->fetch_assoc()){
+                 $u_id = $row_u['user_id'];
+                 $stmt_update_user = $conn->prepare("UPDATE users SET username = ?, name = ? WHERE id = ?");
+                 $stmt_update_user->bind_param("ssi", $username, $name, $u_id);
+                 $stmt_update_user->execute();
+                 $stmt_update_user->close();
+             }
+             $stmt_u->close();
+
+             $message = "<div class='alert alert-success'>Doctor updated successfully!</div>";
+        } else {
+             $message = "<div class='alert alert-danger'>Error updating doctor: " . $conn->error . "</div>";
+        }
+        $stmt->close();
+    } else {
+        $message = "<div class='alert alert-danger'>Invalid data provided. Specialization not found or ID missing.</div>";
+    }
+}
+
 // Fetch doctor details
-$stmt = $conn->prepare("SELECT d.id, d.name, d.specialization, d.phone, d.email, u.username, u.id as user_id, d.profile_pic FROM doctors d JOIN users u ON d.user_id = u.id WHERE d.id = ?");
+$stmt = $conn->prepare("SELECT d.id, d.name, s.name as specialization, d.phone, d.email, u.username, u.id as user_id, d.profile_pic, d.degrees, d.schedule FROM doctors d JOIN users u ON d.user_id = u.id LEFT JOIN specializations s ON d.specialization_id = s.id WHERE d.id = ?");
 $stmt->bind_param("i", $doctor_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -195,6 +257,60 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label for="degrees"><i class="fas fa-graduation-cap"></i> Degrees</label>
+                                    <input type="text" id="degrees" name="degrees" value="<?php echo htmlspecialchars($doctor['degrees'] ?? ''); ?>" placeholder="e.g. MBBS, MD" required>
+                                </div>
+                                
+                                <?php
+                                    // Parse Schedule
+                                    // Format: "Mon, Wed, Fri: 09:00 AM - 05:00 PM"
+                                    $sch_days = [];
+                                    $sch_start = '';
+                                    $sch_end = '';
+                                    
+                                    $raw_schedule = $doctor['schedule'] ?? '';
+                                    if(strpos($raw_schedule, ':') !== false) {
+                                        $parts = explode(':', $raw_schedule);
+                                        $day_part = trim($parts[0]); // "Mon, Wed, Fri"
+                                        $time_part = trim($parts[1]); // "09:00 AM - 05:00 PM"
+                                        
+                                        $sch_days = array_map('trim', explode(',', $day_part));
+                                        
+                                        if(strpos($time_part, '-') !== false) {
+                                            $times = explode('-', $time_part);
+                                            $sch_start = date('H:i', strtotime(trim($times[0])));
+                                            $sch_end = date('H:i', strtotime(trim($times[1])));
+                                        }
+                                    }
+                                ?>
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;"><i class="fas fa-clock"></i> Consultation Schedule</label>
+                                    <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;">
+                                        <?php 
+                                        $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                                        foreach($days as $day): 
+                                            $checked = in_array($day, $sch_days) ? 'checked' : '';
+                                        ?>
+                                            <label style="display: flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer;">
+                                                <input type="checkbox" name="days[]" value="<?php echo $day; ?>" <?php echo $checked; ?>> <?php echo $day; ?>
+                                            </label>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <div style="display: flex; gap: 16px;">
+                                        <div style="flex: 1;">
+                                            <small style="display: block; margin-bottom: 4px; color: var(--text-muted);">Start Time</small>
+                                            <input type="time" name="start_time" value="<?php echo $sch_start; ?>" required style="padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); width: 100%;">
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <small style="display: block; margin-bottom: 4px; color: var(--text-muted);">End Time</small>
+                                            <input type="time" name="end_time" value="<?php echo $sch_end; ?>" required style="padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); width: 100%;">
+                                        </div>
+                                    </div>
+                                    <!-- Hidden fallback to preserve old data if structure changes -->
+                                    <input type="hidden" name="schedule_text" value="<?php echo htmlspecialchars($raw_schedule); ?>">
+                                </div>
+
                                 <div class="form-group">
                                     <label for="phone"><i class="fas fa-phone"></i> Phone Number</label>
                                     <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($doctor['phone']); ?>" required>

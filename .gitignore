@@ -3,3 +3,6 @@ assets/images/chat_images/*
 
 assets/images/profile_pics/*
 !assets/images/profile_pics/.gitkeep
+
+assets/documents/*
+!assets/documents/.gitkeep

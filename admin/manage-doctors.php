@@ -20,10 +20,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'] ?? '';
     $specialization_name = $_POST['specialization'] ?? '';
     $degrees = $_POST['degrees'] ?? '';
-    $schedule = $_POST['schedule'] ?? '';
+    
+    // Process Schedule
+    $schedule = '';
+    if (isset($_POST['days']) && is_array($_POST['days']) && !empty($_POST['start_time']) && !empty($_POST['end_time'])) {
+        $days_str = implode(', ', $_POST['days']);
+        $start_fmt = date('h:i A', strtotime($_POST['start_time']));
+        $end_fmt = date('h:i A', strtotime($_POST['end_time']));
+        $schedule = "$days_str: $start_fmt - $end_fmt";
+    } else {
+            // Fallback if someone manually posts or old text logic (though we removed the old input)
+            $schedule = $_POST['schedule'] ?? 'Not set'; 
+    }
+
     $phone = $_POST['phone'] ?? '';
     $email = $_POST['email'] ?? '';
     $doctor_id = $_POST['doctor_id'] ?? null;
+
 
     // Get specialization_id from name
     $specialization_id = null;
@@ -49,23 +62,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $stmt->close();
         } else {
-            // New Doctor Creation Logic (Simplified for brevity as current code has it)
-            // ... (keeping user and doctor creation logic)
-            $username = strtolower(str_replace(' ', '', $name)) . rand(100, 999);
-            $password = password_hash("password123", PASSWORD_DEFAULT);
-            $role = 'doctor';
+            // New Doctor Creation Logic
+            // Check for duplicate email first
+            $stmt_check = $conn->prepare("SELECT id FROM doctors WHERE email = ?");
+            $stmt_check->bind_param("s", $email);
+            $stmt_check->execute();
+            $stmt_check->store_result();
+            if ($stmt_check->num_rows > 0) {
+                $message = "<div class='alert alert-danger'>Error: A doctor with this email already exists.</div><script>alert('Error: A doctor with this email already exists.');</script>";
+            } else {
+                $stmt_check->close();
 
-            $stmt_user = $conn->prepare("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)");
-            $stmt_user->bind_param("ssss", $username, $password, $role, $name);
-            if ($stmt_user->execute()) {
-                $new_user_id = $stmt_user->insert_id;
-                $stmt_doctor = $conn->prepare("INSERT INTO doctors (user_id, name, specialization_id, degrees, schedule, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                $stmt_doctor->bind_param("isissss", $new_user_id, $name, $specialization_id, $degrees, $schedule, $phone, $email);
-                if ($stmt_doctor->execute()) {
+                $username = strtolower(str_replace(' ', '', $name)) . rand(100, 999);
+                $password = password_hash("password123", PASSWORD_DEFAULT);
+                $role = 'doctor';
+
+                $conn->begin_transaction();
+                try {
+                    $stmt_user = $conn->prepare("INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)");
+                    $stmt_user->bind_param("ssss", $username, $password, $role, $name);
+                    $stmt_user->execute();
+                    $new_user_id = $stmt_user->insert_id;
+                    $stmt_user->close();
+
+                    $stmt_doctor = $conn->prepare("INSERT INTO doctors (user_id, name, specialization_id, degrees, schedule, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    $stmt_doctor->bind_param("isissss", $new_user_id, $name, $specialization_id, $degrees, $schedule, $phone, $email);
+                    $stmt_doctor->execute();
+                    $stmt_doctor->close();
+
+                    $conn->commit();
                     $message = "<div class='alert alert-success'>Doctor added! Username: $username</div>";
-                } else {
-                    $conn->query("DELETE FROM users WHERE id = $new_user_id");
-                    $message = "<div class='alert alert-danger'>Error adding doctor.</div>";
+                } catch (Exception $e) {
+                    $conn->rollback();
+                    // Check for duplicate entry error specifically if it slipped through (e.g. race condition)
+                    if ($conn->errno == 1062) {
+                         $message = "<div class='alert alert-danger'>Error: Duplicate entry detected.</div><script>alert('Error: Duplicate entry detected.');</script>";
+                    } else {
+                         $message = "<div class='alert alert-danger'>Error adding doctor: " . htmlspecialchars($e->getMessage()) . "</div>";
+                    }
                 }
             }
         }
@@ -151,12 +185,78 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
 
         <main class="content-area" id="mainContent">
             <div class="container">
-                <div class="welcome-section">
-                    <h2>Manage Doctors</h2>
-                    <p>Register new medical professionals and manage active practitioners.</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <div>
+                            <h2>Manage Doctors</h2>
+                            <p>Register new medical professionals and manage active practitioners.</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="window.location.href='#addDoctorForm'; document.getElementById('addDoctorForm').style.display='block';">
+                            <i class="fas fa-plus"></i> Register New Doctor
+                        </button>
+                    </div>
                 </div>
 
                 <?php echo $message; ?>
+
+                <!-- Add Doctor Form -->
+                <div class="panel-card mt-4 mb-5" id="addDoctorForm" style="display: none;">
+                    <h3 class="section-title mb-4"><i class="fas fa-user-plus"></i> Register New Practitioner</h3>
+                    <form action="manage-doctors.php" method="POST">
+                        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                            <div class="form-group">
+                                <label for="name" style="display: block; margin-bottom: 8px; font-weight: 600;">Full Name</label>
+                                <input type="text" id="name" name="name" class="form-control" placeholder="e.g. John Doe" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            </div>
+                            <div class="form-group">
+                                <label for="specialization" style="display: block; margin-bottom: 8px; font-weight: 600;">Specialization</label>
+                                <select id="specialization" name="specialization" class="form-control" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                                    <option value="">Select Specialization</option>
+                                    <?php foreach ($specializations as $spec): ?>
+                                        <option value="<?php echo htmlspecialchars($spec['name']); ?>"><?php echo htmlspecialchars($spec['name']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="degrees" style="display: block; margin-bottom: 8px; font-weight: 600;">Degrees</label>
+                                <input type="text" id="degrees" name="degrees" class="form-control" placeholder="e.g. MBBS, MD" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Consultation Schedule</label>
+                                <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;">
+                                    <?php 
+                                    $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                                    foreach($days as $day): ?>
+                                        <label style="display: flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer;">
+                                            <input type="checkbox" name="days[]" value="<?php echo $day; ?>"> <?php echo $day; ?>
+                                        </label>
+                                    <?php endforeach; ?>
+                                </div>
+                                <div style="display: flex; gap: 16px;">
+                                    <div style="flex: 1;">
+                                        <small style="display: block; margin-bottom: 4px; color: var(--text-muted);">Start Time</small>
+                                        <input type="time" name="start_time" class="form-control" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <small style="display: block; margin-bottom: 4px; color: var(--text-muted);">End Time</small>
+                                        <input type="time" name="end_time" class="form-control" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone" style="display: block; margin-bottom: 8px; font-weight: 600;">Phone Number</label>
+                                <input type="tel" id="phone" name="phone" class="form-control" placeholder="+1234567890" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            </div>
+                            <div class="form-group">
+                                <label for="email" style="display: block; margin-bottom: 8px; font-weight: 600;">Email Address</label>
+                                <input type="email" id="email" name="email" class="form-control" placeholder="doctor@hospital.com" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            </div>
+                        </div>
+                        <div class="form-actions mt-4" style="text-align: right;">
+                             <button type="button" class="btn btn-secondary" onclick="document.getElementById('addDoctorForm').style.display='none';" style="margin-right: 12px;">Cancel</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Create Profile</button>
+                        </div>
+                    </form>
+                </div>
 
                 <div class="panel-card mt-4">
                     <h3 class="section-title mb-4">Practitioner Directory</h3>
