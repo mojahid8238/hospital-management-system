@@ -1,9 +1,4 @@
-/**
- * Video Call Logic
- * Handles WebRTC peer connections and socket signaling
- */
-
-// DOM Elements
+import { printPrescription } from "./patient-prescriptions.js";
 const localVideo = document.getElementById('local-video');
 const remoteVideo = document.getElementById('remote-video');
 const statusOverlay = document.getElementById('status-overlay');
@@ -426,44 +421,25 @@ async function fetchPrescription() {
 if (downloadPrescriptionBtn) {
     downloadPrescriptionBtn.addEventListener('click', () => {
         const content = CONFIG.isDoctor ? prescriptionText.value : patientPrescriptionView.innerText;
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>Prescription</title>
-                    <style>
-                        body { font-family: sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
-                        .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px; }
-                        .meta { margin-bottom: 30px; display: flex; justify-content: space-between; }
-                        .content { white-space: pre-wrap; line-height: 1.6; font-size: 14pt; }
-                        .footer { margin-top: 50px; font-size: 0.9em; color: #666; text-align: center; border-top: 1px solid #ccc; padding-top: 20px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>Medical Prescription</h1>
-                        <h2>Hospital Management System</h2>
-                    </div>
-                    <div class="meta">
-                        <div>
-                            <strong>Doctor:</strong> ${CONFIG.isDoctor ? CONFIG.userName : 'Dr. ' + document.querySelector('.user-label span').innerText}<br>
-                            <strong>Patient:</strong> ${CONFIG.isDoctor ? document.querySelector('.user-label span').innerText : CONFIG.userName}
-                        </div>
-                        <div>
-                            <strong>Date:</strong> ${new Date().toLocaleDateString()}
-                        </div>
-                    </div>
-                    <div class="content">${content}</div>
-                    <div class="footer">
-                        This is a computer-generated prescription.
-                    </div>
-                    <script>
-                        window.print();
-                        window.onafterprint = function() { window.close(); }
-                    </script>
-                </body>
-            </html>
-        `);
-        printWindow.document.close();
+        
+        // Get doctor and patient names
+        const doctorName = CONFIG.isDoctor ? CONFIG.userName : document.querySelector('.user-label span').innerText;
+        const patientName = CONFIG.isDoctor ? document.querySelector('.user-label span').innerText : CONFIG.userName;
+        
+        const prescriptionData = {
+            content: content,
+            doctor_name: doctorName,
+            // We don't have a real specialization here, so we'll add a default
+            specialization: 'General Specialist',
+            // Patient name is needed for the print layout
+            patient_name: patientName,
+        };
+
+        const date = new Date().toLocaleDateString(undefined, {
+            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+        });
+
+        printPrescription(prescriptionData, date);
     });
 }
+

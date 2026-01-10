@@ -104,7 +104,7 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
     </div>
 
     <script src="../assets/js/ui-ux.js"></script>
-    <script src="../assets/js/patient-prescriptions.js"></script>
+    <script src="../assets/js/patient-prescriptions.js" type="module"></script>
     <script src="../assets/js/profile-overlay.js"></script>
 </body>
 </html>

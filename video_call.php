@@ -500,6 +500,7 @@ ob_end_flush();
 
     <!-- Dependencies -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="assets/js/video-call.js"></script>
+    <script src="assets/js/patient-prescriptions.js" type="module"></script>
+    <script src="assets/js/video-call.js" type="module"></script>
 </body>
 </html>
