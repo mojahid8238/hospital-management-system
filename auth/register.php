@@ -223,7 +223,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sign Up</title>
+  <title>Sign Up | Health Care</title>
+  <link rel="icon" type="image/x-icon" href="../assets/images/logo.ico">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../assets/css/login-signup.css" />
   <style>
@@ -253,6 +254,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <div class="form-container">
     <div class="form-box signup-box">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img src="../assets/images/logo.png" alt="Logo" style="height: 60px; border-radius: 10px; margin-bottom: 10px;">
+        <h1 style="font-weight: 800; font-size: 1.5rem; color: var(--primary-color);">Health Care</h1>
+      </div>
       <h2>Sign Up</h2>
 
       

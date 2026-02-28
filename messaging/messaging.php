@@ -94,7 +94,8 @@ if ($role === 'doctor') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Messages | HealthCare</title>
+    <title>Messages | Health Care</title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/logo.ico">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -112,9 +113,9 @@ if ($role === 'doctor') {
                 <i class="fas fa-bars"></i>
                 <span>Menu</span>
             </button>
-            <a href="<?php echo $dashboard_link; ?>" style="font-size: 1.4rem; font-weight: 800; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-heartbeat" style="color: var(--primary-color);"></i>
-                <?php echo $role === 'admin' ? 'HealthCare Admin' : 'HealthCare Chat'; ?>
+            <a href="<?php echo $dashboard_link; ?>" style="font-size: 1.4rem; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 10px; color: inherit;">
+                <img src="../assets/images/logo.png" alt="Logo" style="height: 35px; border-radius: 5px;">
+                <?php echo $role === 'admin' ? 'Health Care Admin' : 'Health Care Chat'; ?>
             </a>
         </div>
         <div class="nav-right">

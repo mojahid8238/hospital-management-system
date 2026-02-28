@@ -93,7 +93,8 @@ $stmt->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Admins | HealthCare Admin</title>
+    <title>Manage Admins | Health Care Admin</title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/logo.ico">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -111,7 +112,10 @@ $stmt->close();
                 <i class="fas fa-bars"></i>
                 <span>Menu</span>
             </button>
-            <a href="dashboard.php">HealthCare Admin</a>
+            <a href="dashboard.php" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; font-weight: 800; font-size: 1.25rem;">
+                <img src="../assets/images/logo.png" alt="Logo" style="height: 35px; border-radius: 5px;">
+                Health Care Admin
+            </a>
         </div>
         <div class="nav-right">
             <div class="user-info">

@@ -1,6 +1,6 @@
 <?php
 /**
- * Healthcare Video Call Interface (WebRTC)
+ * Health Care Video Call Interface (WebRTC)
  * Premium, Glassmorphism Design
  */
 ob_start();
@@ -55,7 +55,8 @@ ob_end_flush();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Consult | HealthCare</title>
+    <title>Video Consult | Health Care</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/logo.ico">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

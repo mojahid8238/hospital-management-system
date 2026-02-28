@@ -130,7 +130,8 @@ $dPic = preg_replace('#^\\.\\./#', '', $profile_pic ?? 'assets/images/default-av
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doctor Profile | Hospital Management</title>
+    <title>Doctor Profile | Health Care</title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/logo.ico">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -193,7 +194,10 @@ $dPic = preg_replace('#^\\.\\./#', '', $profile_pic ?? 'assets/images/default-av
                 <i class="fas fa-bars"></i>
                 <span>Menu</span>
             </button>
-            <a href="dashboard.php">HealthCare</a>
+            <a href="dashboard.php" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; font-weight: 800; font-size: 1.25rem;">
+                <img src="../assets/images/logo.png" alt="Logo" style="height: 35px; border-radius: 5px;">
+                Health Care
+            </a>
         </div>
             <img src="../<?php echo htmlspecialchars($profilePic); ?>?t=<?php echo time(); ?>" alt="Profile" class="user-icon" id="profileToggle">
         </div>

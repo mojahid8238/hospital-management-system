@@ -48,7 +48,8 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Patients | Admin</title>
+    <title>Manage Patients | Health Care Admin</title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/logo.ico">
     <link rel="stylesheet" href="../assets/css/variables.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/shared-table-design.css">
@@ -58,7 +59,10 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
     <header class="navbar">
         <div class="nav-left">
             <button class="sidebar-toggle-btn" id="sidebarToggle"><i class="fas fa-bars"></i> <span>Menu</span></button>
-            <a href="dashboard.php">HealthCare Admin</a>
+            <a href="dashboard.php" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; font-weight: 800; font-size: 1.25rem;">
+                <img src="../assets/images/logo.png" alt="Logo" style="height: 35px; border-radius: 5px;">
+                Health Care Admin
+            </a>
         </div>
         <div class="nav-right">
             <div class="user-info">

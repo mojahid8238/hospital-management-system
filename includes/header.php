@@ -6,7 +6,8 @@ require_once 'auth.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hospital Management System</title>
+    <title>Health Care</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/logo.ico">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/style.css">
@@ -15,7 +16,10 @@ require_once 'auth.php';
     <header>
         <nav>
             <div class="logo">
-                <a href="/index.php">Hospital HMS</a>
+                <a href="/index.php" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
+                    <img src="/assets/images/logo.png" alt="Health Care Logo" style="height: 40px; margin-right: 10px; border-radius: 5px;">
+                    Health Care
+                </a>
             </div>
             <ul class="nav-links">
                 <?php if (is_logged_in()): ?>

@@ -24,7 +24,8 @@ if ($role === 'admin') {
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>HealthCare Portal - Home</title>
+    <title>Health Care Portal - Home</title>
+    <link rel="icon" type="image/x-icon" href="../assets/images/logo.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
@@ -35,8 +36,8 @@ if ($role === 'admin') {
   <header class="navbar">
     <div class="nav-left">
         <a href="homepage.php" style="font-size: 1.6rem; font-weight: 800; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-heartbeat" style="color: var(--primary-color);"></i>
-            HealthCare
+            <img src="../assets/images/logo.png" alt="Logo" style="height: 40px; border-radius: 8px;">
+            Health Care
         </a>
     </div>
     <div class="nav-right">

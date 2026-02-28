@@ -18,7 +18,8 @@ if (is_logged_in()) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Hospital Management System | Modern Care</title>
+    <title>Health Care | Modern Medical Solutions</title>
+    <link rel="icon" type="image/x-icon" href="assets/images/logo.ico">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,8 +37,9 @@ if (is_logged_in()) {
 
     <header class="landing-navbar">
         <div class="container">
-            <a href="#" class="logo">
-                <i class="fas fa-heartbeat"></i> HealthCare
+            <a href="#" class="logo" style="display: flex; align-items: center; gap: 10px;">
+                <img src="assets/images/logo.png" alt="Health Care Logo" style="height: 40px; border-radius: 8px;">
+                Health Care
             </a>
             <nav class="nav-links">
                 <a href="#features">Features</a>
@@ -60,7 +62,7 @@ if (is_logged_in()) {
                     <p>Experience the future of hospital management. Streamlined operations, secure patient records, and seamless communication—all in one place.</p>
                     <div class="hero-buttons">
                         <a href="auth/register.php" class="btn btn-xl btn-primary">Start Your Journey <i class="fas fa-arrow-right"></i></a>
-                        <a href="auth/login.php" class="btn btn-xl btn-secondary">Patient Login</a>
+                        <a href="auth/login.php" class="btn btn-xl btn-secondary">Login</a>
                     </div>
                 </div>
                 <div class="hero-visual">
@@ -136,7 +138,10 @@ if (is_logged_in()) {
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <h3><i class="fas fa-heartbeat"></i> HealthCare</h3>
+                    <h3 style="display: flex; align-items: center; gap: 10px;">
+                        <img src="assets/images/logo.png" alt="Logo" style="height: 30px; border-radius: 5px;"> 
+                        Health Care
+                    </h3>
                     <p>Innovating healthcare management for a better patient experience.</p>
                 </div>
                 <div class="footer-links">
@@ -146,7 +151,7 @@ if (is_logged_in()) {
                 </div>
             </div>
             <div class="footer-bottom">
-                &copy; <?php echo date('Y'); ?> HealthCare System. All rights reserved.
+                &copy; <?php echo date('Y'); ?> Health Care System. All rights reserved.
             </div>
         </div>
     </footer>
