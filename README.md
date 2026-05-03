@@ -1,5 +1,7 @@
 # Hospital Management System
 
+![Hospital Management System Demo](assets/images/demo.png)
+
 This project is a Hospital Management System built with PHP, MySQL, and Apache, containerized using Docker.
 
 ## Table of Contents
