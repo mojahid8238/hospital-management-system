@@ -1,13 +1,14 @@
 <?php
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
+require_once '../includes/change_password.php';
 redirect_if_not_doctor();
 
 $user_id = $_SESSION['user_id'];
 $message = '';
 
 // Handle Form Submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') !== 'change_password') {
     $name = $_POST['name'] ?? '';
     $username = $_POST['username'] ?? '';
     $phone = $_POST['phone'] ?? '';
@@ -183,6 +184,7 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
                 <li><a href="dashboard.php"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                 <li><a href="cancelled-appointments.php"><i class="fas fa-calendar-times"></i> Cancelled</a></li>
                 <li><a href="../messaging/messaging.php"><i class="fas fa-comments"></i> Messages</a></li>
+                <li><a href="settings.php"><i class="fas fa-user-cog"></i> Account Settings</a></li>
             </ul>
         </aside>
 
@@ -281,6 +283,8 @@ $profilePic = preg_replace('#^\\.\\./#', '', $rawProfilePic);
                         </div>
                     </form>
                 </div>
+
+                <?php render_change_password_form($change_password_message); ?>
             </div>
         </main>
     </div>

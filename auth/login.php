@@ -142,7 +142,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div class="input-group">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter your password" required>
+          <div class="password-wrapper" style="position: relative;">
+            <input type="password" id="password" name="password" placeholder="Enter your password" required style="box-sizing: border-box; padding-right: 64px;">
+            <button type="button" class="password-toggle" aria-label="Show password" style="position: absolute; top: 50%; right: 12px; transform: translateY(-50%); border: none; background: none; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--primary-color);">Show</button>
+          </div>
         </div>
         <button type="submit" class="form-btn">Log In</button>
         <p>Don't have an account? <a href="
@@ -150,6 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </form>
     </div>
   </div>
+  <script src="../assets/js/password-toggle.js"></script>
 </body>
 </html>
 <?php $conn->close(); ?>

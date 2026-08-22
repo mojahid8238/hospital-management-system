@@ -301,12 +301,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="input-group">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" required />
+          <div class="password-wrapper" style="position: relative;">
+            <input type="password" id="password" name="password" required style="box-sizing: border-box; padding-right: 64px;" />
+            <button type="button" class="password-toggle" aria-label="Show password" style="position: absolute; top: 50%; right: 12px; transform: translateY(-50%); border: none; background: none; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--primary-color);">Show</button>
+          </div>
         </div>
 
         <div class="input-group">
           <label for="confirm-password">Confirm Password</label>
-          <input type="password" id="confirm-password" name="confirm_password" required />
+          <div class="password-wrapper" style="position: relative;">
+            <input type="password" id="confirm-password" name="confirm_password" required style="box-sizing: border-box; padding-right: 64px;" />
+            <button type="button" class="password-toggle" aria-label="Show password" style="position: absolute; top: 50%; right: 12px; transform: translateY(-50%); border: none; background: none; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--primary-color);">Show</button>
+          </div>
         </div>
 
         <!-- Doctor-specific -->
@@ -331,6 +337,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </form>
     </div>
   </div>
+  <script src="../assets/js/password-toggle.js"></script>
 </body>
 </html>
 
